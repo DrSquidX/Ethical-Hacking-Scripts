@@ -7,3 +7,6 @@ Do not use these scripts for malicious intent. I will not be responsible for any
 Do not copy these scripts and say they are yours. I am not ok with that.
 
 If you plan to modify these scripts, please credit me as I would appreciate that.
+
+Happy Hacking,
+DrSquid
