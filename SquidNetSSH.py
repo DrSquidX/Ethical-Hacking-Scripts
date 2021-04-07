@@ -1,4 +1,5 @@
 import paramiko, socket, threading, sys, os
+from optparse import OptionParser
 class SSH_Botnet:
     def __init__(self, passw_txt, capture_output):
         self.pass_list = passw_txt
