@@ -6,9 +6,7 @@ Do not use these scripts for malicious intent. I will not be responsible for any
 
 Only use these scripts if you have permission from the people whom you are attacking, and only for ethical purposes.
 
-Do not copy these scripts and say they are yours. I am not ok with that.
-
-If you plan to modify these scripts, please credit me as I would appreciate that.
+Do not copy these scripts and say they are yours. I am not ok with that. If you plan to modify these scripts, please credit me as I would appreciate that.
 
 Happy Hacking,
 
