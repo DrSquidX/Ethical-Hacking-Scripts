@@ -8,6 +8,8 @@ Only use these scripts if you have permission from the people whom you are attac
 
 Do not copy these scripts and say they are yours. I am not ok with that. If you plan to modify these scripts, please credit me as I would appreciate that.
 
+A quick note that SquidNet is my most powerful script.
+
 Happy Hacking,
 
 DrSquid
