@@ -10,6 +10,8 @@ Do not copy these scripts and say they are yours. I am not ok with that. If you 
 
 A quick note that SquidNet is my most powerful script. I may make a separate repository for it as it uses client scripts for bot connections, admin connections, as well as the server itself.
 
+SquidNet Repository: https://github.com/DrSquidX/SquidNet
+
 Happy Hacking,
 
 DrSquid
