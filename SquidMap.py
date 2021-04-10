@@ -16,6 +16,8 @@ class Port_Scanner:
         self.ports = range(ports)
         self.ports_scanned = 0
         self.open_ports = []
+        self.checked_hosts = 0
+        self.banners = []
         if self.isnetwork:
             print("[+] Sending ICMP Packets to Network to check for online IP's.\n[+] Please wait.....\n")
             self.networkscan()
@@ -50,7 +52,6 @@ class Port_Scanner:
         for host in self.hosts:
             check_host = threading.Thread(target=self.ping_host, args=(host,))
             check_host.start()
-        self.checked_hosts = 0
         while True:
             if self.checked_hosts >= len(self.hosts):
                 print(f"[+] Hosts Scan done.\n[+] Online Hosts: {self.uphosts}")
@@ -64,14 +65,14 @@ class Port_Scanner:
         return recv[0][0][1].hwsrc
     def logo(self):
         print("""
-  _____             _     _ __  __                    ___    ___  
- / ____|           (_)   | |  \/  |                  |__ \  / _ \ 
-| (___   __ _ _   _ _  __| | \  / | __ _ _ __   __   __ ) || | | |
- \___ \ / _` | | | | |/ _` | |\/| |/ _` | '_ \  \ \ / // / | | | |
- ____) | (_| | |_| | | (_| | |  | | (_| | |_) |  \ V // /_ | |_| |
+  _____             _     _ __  __                    ____   ___  
+ / ____|           (_)   | |  \/  |                  |___ \ / _ \ 
+| (___   __ _ _   _ _  __| | \  / | __ _ _ __   __   ____) | | | |
+ \___ \ / _` | | | | |/ _` | |\/| |/ _` | '_ \  \ \ / /__ <| | | |
+ ____) | (_| | |_| | | (_| | |  | | (_| | |_) |  \ V /___) | |_| |
 |_____/ \__, |\__,_|_|\__,_|_|  |_|\__,_| .__/    \_/|____(_)___/ 
            | |                          | |                       
-           |_|                          |_|                                         
+           |_|                          |_|                                                          
 Vulnerability-Scanner By DrSquid""")
     def port_scan(self, ip):
         print(f"[+] Beginning Port Scan On {ip}.")
@@ -85,7 +86,8 @@ Vulnerability-Scanner By DrSquid""")
         while True:
             if self.ports_scanned >= self.max_port:
                 open_ports = []
-                print(f"[+] Port Scan on {ip} Completed.")
+                print(f"[+] Port Scan on {ip} Completed.\n")
+                print(f"[+] Obtained Banners For {ip}.")
                 for port in self.open_ports:
                     if ip+" " in port:
                         port_split = port.split()
@@ -94,6 +96,17 @@ Vulnerability-Scanner By DrSquid""")
                     print(f"[+] There are no Ports Open on {ip}.")
                 else:
                     print(f"[+] Open Ports on {ip}: {open_ports}")
+                    for port in open_ports:
+                        for banner in self.banners:
+                            split_banner = banner.split()
+                            if ip in split_banner[0] and port in split_banner[1]:
+                                result = ""
+                                del split_banner[0]
+                                del split_banner[0]
+                                for item in split_banner:
+                                    result = result + " " + item
+                                result = result.strip()
+                                print(f"[+] {ip} Port {port} Banner: {result}")
                 break
     def scan(self, ip, port):
         try:
@@ -101,7 +114,14 @@ Vulnerability-Scanner By DrSquid""")
             s.settimeout(1)
             s.connect((ip, port))
             self.open_ports.append(f"{ip} {port}")
+            s.settimeout(10)
             print(f"[(OPENPORT)] Discovered Open Port on {ip}: {port}")
+            try:
+                banner = s.recv(65500).decode().strip("\n").strip("\r")
+                self.banners.append(f"{ip} {port} {banner}")
+            except Exception as e:
+                self.banners.append(f"{ip} {port} None")
+            s.close()
         except:
             pass
         self.ports_scanned += 1
@@ -136,6 +156,7 @@ class OptionParse:
         args, opt =self.opts.parse_args()
         if args.info is not None:
             self.usage()
+            sys.exit()
         else:
             pass
         if args.ip is None:
