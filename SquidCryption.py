@@ -1,4 +1,5 @@
 import random
+
 class SquidCrypt:
     class SquidCryptError:
         class InvalidKeyException(Exception):
