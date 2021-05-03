@@ -1,4 +1,4 @@
-# Hacking-Scripts
+# Ethical-Hacking-Scripts
 More Advanced and Powerful Scripts made for pen-testing developped by me.
 I might add dev notes to my scripts if I get bored.
 
