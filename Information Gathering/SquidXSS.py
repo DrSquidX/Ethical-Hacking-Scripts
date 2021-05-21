@@ -5,7 +5,7 @@ class XSSPayloadChecker:
     def __init__(self, website, payloadfile):
         self.website = website
         try:
-            self.payloadfile = open(payloadfile, "r")
+            self.payloadfile = open(payloadfile, "rb")
         except:
             print("[+] The file provided is invalid!")
             sys.exit()
@@ -17,6 +17,10 @@ class XSSPayloadChecker:
     def check_payloads(self):
         for i in self.payloadfile.read().splitlines():
             try:
+                try:
+                    i = i.decode()
+                except:
+                    i = str(i)
                 payload = self.website + i
                 req = urllib.request.Request(url=payload)
                 linkopen = urllib.request.urlopen(req)
