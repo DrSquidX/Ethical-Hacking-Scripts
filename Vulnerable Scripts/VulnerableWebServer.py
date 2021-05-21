@@ -5,13 +5,14 @@ class WebServer:
         self.valid = False
         try:
             self.ip = sys.argv[1]
-            self.port = int(sys.argv)[2]
+            self.port = int(sys.argv[2])
             try:
                 self.externalip = sys.argv[3]
             except:
                 self.externalip = self.ip
             self.valid = True
-        except:
+        except Exception as e:
+            print(e)
             print("[+] Invalid Arguments!\n[+] Usage: python3 VulnerableServer.py <ip> <port> <externalip>\n[+] Note: The External IP argument is optional.")
         if self.valid:
             try:
