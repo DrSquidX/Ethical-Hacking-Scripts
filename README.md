@@ -20,6 +20,4 @@ A quick note that SquidNet is my most powerful script. I may make a separate rep
 
 SquidNet Repository: https://github.com/DrSquidX/SquidNet
 
-Happy Hacking,
-
-DrSquid
+# Happy Hacking, DrSquid
