@@ -12,7 +12,6 @@ class WebServer:
                 self.externalip = self.ip
             self.valid = True
         except Exception as e:
-            print(e)
             print("[+] Invalid Arguments!\n[+] Usage: python3 VulnerableServer.py <ip> <port> <externalip>\n[+] Note: The External IP argument is optional.")
         if self.valid:
             try:
