@@ -7,6 +7,9 @@ Do not use these scripts for malicious intent. I will not be responsible for any
 
 Only use these scripts if you have permission from the people whom you are attacking, and only for ethical purposes.
 
+# Warnings
+SquidWare and RansomSquid are very dangerous scripts. RansomSquid will encrypt all of your files, and will only decrypt them if you have the correct key(The key is displayed as a precaution if you somehow run it). SquidWare is very dangerous as well, it deletes all of your files as well as ruining your Operating system. ONLY RUN THESE IF YOU ARE ON A VIRTUAL MACHINE OR HAVE PERMISSION FROM ANOTHER USER!
+
 # Updates
 I recently reformatted my scripts into folders. The repository is a lot more organised now.
 
