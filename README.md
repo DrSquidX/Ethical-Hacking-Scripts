@@ -17,7 +17,7 @@ The Scripts in this repository include:
 * BotNets                - Botnets that can control and perform unauthorized actions to remote computers.
 * Keyloggers             - Log the keystrokes of another person, to possibly extract their password from the keylog.
 * Hash Crackers          - Brute force a Hash of a password with these scripts.
-* SQL-Injections(coming soon)
+* SQL-Injections(coming soon) - Run SQL Commands on a vulnerable server to force it to leak database info including usernames and passwords.
 
 There is more to be added.
 
