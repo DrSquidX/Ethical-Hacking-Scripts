@@ -16,7 +16,9 @@ The Scripts in this repository include:
 * Malware                - Malware that can destroy files on the computer, and can also make it unbootable.
 * BotNets                - Botnets that can control and perform unauthorized actions to remote computers.
 * Keyloggers             - Log the keystrokes of another person, to possibly extract their password from the keylog.
-# There is more to be added.
+* Hash Crackers          - Brute force a Hash of a password with these scripts.
+
+There is more to be added.
 
 # Warnings
 SquidWare and RansomSquid are very dangerous scripts. RansomSquid will encrypt all of your files, and will only decrypt them if you have the correct key. SquidWare is very dangerous as well, it deletes all of your files as well as ruining your Operating system(makes it unbootable). ONLY RUN THESE IF YOU ARE ON A VIRTUAL MACHINE OR HAVE PERMISSION FROM ANOTHER USER! Unauthorized usage of these scripts on other people is also Illegal.
