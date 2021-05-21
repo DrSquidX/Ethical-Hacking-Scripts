@@ -40,7 +40,7 @@ This is an anonoymous Chat Site.
 The Server is also made to be vulnerable to Cross site scripting attacks.
         
 <form action="http://{self.ip}:{self.port}">
-    <input type="text" placeholder="Enter your blog message!" name="msg"> 
+    <input type="text" placeholder="Enter your message!" name="msg"> 
     <input type="submit" value="Submit Message to blog">
 </form>
 """
