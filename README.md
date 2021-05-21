@@ -16,7 +16,7 @@ I recently reformatted my scripts into folders. The repository is a lot more org
 # Other Info
 Do not copy these scripts and say they are yours. I am not ok with that. If you plan to modify these scripts, please credit me as I would appreciate that.
 
-A quick note that SquidNet is my most powerful script. I may make a separate repository for it as it uses client scripts for bot connections, admin connections, as well as the server itself.
+A quick note that SquidNet is my most powerful script(It does not reflect on my socket programming skills, as DatCord does). I may make a separate repository for it as it uses client scripts for bot connections, admin connections, as well as the server itself.
 
 SquidNet Repository: https://github.com/DrSquidX/SquidNet
 
