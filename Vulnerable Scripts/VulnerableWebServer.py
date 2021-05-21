@@ -41,7 +41,7 @@ The Server is also made to be vulnerable to Cross site scripting attacks.
         
 <form action="http://{self.ip}:{self.port}">
     <input type="text" placeholder="Enter your message!" name="msg"> 
-    <input type="submit" value="Submit Message to blog">
+    <input type="submit" value="Send Message">
 </form>
 """
         for i in self.msgs:
