@@ -67,10 +67,9 @@ The Server is also made to be vulnerable to Cross site scripting attacks.
                     item += 1
                 if ipaddr == "":
                     ipaddr = ip[0]
-                print(f"[+] {ipaddr} has connected.")
-                handler = threading.Thread(target=self.handler, args=(conn, msg))
+                handler = threading.Thread(target=self.handler, args=(conn, msg, ipaddr))
                 handler.start()
-    def handler(self, conn, msg):
+    def handler(self, conn, msg, ip):
         try:
             conn.send('HTTP/1.0 200 OK\n'.encode())
             conn.send('Content-Type: text/html\n'.encode())
@@ -82,6 +81,7 @@ The Server is also made to be vulnerable to Cross site scripting attacks.
                         "%20", " ").replace("%3F", "?").replace("%5C","\\").replace("%7B", "{").replace("%7D","}").replace(
                         "%24", "$").replace("%0D", "\n").replace("%0A", "   ").replace("%40","@")
                     if main_msg.strip() != "":
+                        print(f"[+] {ip}: {main_msg}")
                         self.msgs.append(main_msg)
                         self.packet = self.gen_packet()
                 except:
