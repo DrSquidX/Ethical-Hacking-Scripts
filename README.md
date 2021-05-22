@@ -19,6 +19,7 @@ The Scripts in this repository include:
 * Hash Crackers          - Brute force a Hash of a password with these scripts.
 * IP Utilities           - Can get information about a specified IP address or host for future attacks.
 * Vulnerability Scanners - Scan For online IP Addresses, open ports, and scan for MAC Addreses on a home network.
+* Vulnerable Server Scripts - Weak servers that allow you to 'legally' test out Cross site scripting and SQL Injections(if you have nobody's permission).
 
 There is more to be added.
 
