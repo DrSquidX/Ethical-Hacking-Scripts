@@ -20,6 +20,7 @@ The Scripts in this repository include:
 * IP Utilities           - Can get information about a specified IP address or host for future attacks.
 * Vulnerability Scanners - Scan For online IP Addresses, open ports, and scan for MAC Addreses on a home network.
 * Vulnerable Server Scripts - Weak servers that allow you to 'legally' test out Cross site scripting and SQL Injections(if you have nobody's permission).
+* Phishing Scripts       - Scripts designed to pose as another site's login page, to extract login information from another user.
 
 There is more to be added.
 
