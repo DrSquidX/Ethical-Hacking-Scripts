@@ -30,7 +30,9 @@ SquidWare and RansomSquid are very dangerous scripts. RansomSquid will encrypt a
 I recently reformatted my scripts into folders. The repository is a lot more organised now. I added a few more scripts as well, which include Malware and Vulnerable scripts made for pen-testing.
 
 # Other Info
-Do not copy these scripts and say they are yours. I am not ok with that. If you plan to modify these scripts, please credit me as I would appreciate that.
+Do not copy these scripts and say they are yours. I am not ok with that. If you plan to modify these scripts, please credit me as I would appreciate that. 
+
+Another thing is that My Vulnmerable server scripts were intended to be horrible and very weak against attacks(so please don't bully me about the vulnerability of these web servers). 
 
 A quick note that SquidNet is my most powerful script(It does not reflect on my socket programming skills, as DatCord does). I may make a separate repository for it as it uses client scripts for bot connections, admin connections, as well as the server itself.
 
