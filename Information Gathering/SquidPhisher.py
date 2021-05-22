@@ -620,7 +620,7 @@ class Phishing_Server:
         "+").replace("%3A", ":").replace("%28", "(").replace("%29", ")").replace("%2C", ","
         ).replace("%3B", ";").replace("%20", " ").replace("%3F", "?").replace("%5C", "\\"
         ).replace("%7B", "{").replace("%7D", "}").replace("%24", "$").replace("%0D", "\n"
-        ).replace("%0A", "   ")
+        ).replace("%0A", "   ").replace("%40","@")
     def handler(self, c, msg, ip):
         try:
             already_requested = False
