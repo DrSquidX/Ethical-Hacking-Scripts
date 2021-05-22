@@ -8,13 +8,12 @@ class IPTools:
 [+] Option-Parsing Help:
 
 [+] Optional Arguements:
-[+] --i, --info     - Shows this message.
+[+] --i, --info         - Shows this message.
 [+] --ip, --ipaddr      - Specify an IP Address/Hostname
 [+] --ri, --resolveip   - Attempts to resolve the Host into an IP Address.
 [+] --ti, --trackip     - Attempts to obtain the geolocation info of the IP Address.
 [+] --rd, --reversedns  - Attempts to resolve the IP Address into a hostname.
 [+] --la, --latlng      - Attempts to obtain the approximate latlng coordinates of the IP.
-[+] Note: These optional arguements have defaults, so you are able to leave them.
 
 [+] Usage:
 [+] python3 SquidIPUtils.py --ip <ipaddr/host> --ri --ti --rd --la
