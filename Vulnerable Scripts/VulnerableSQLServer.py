@@ -23,7 +23,7 @@ class WebServer:
             except:
                 pass
             cursor.execute("insert into users values('admin','adminpassword123456')")
-            print("[+] Try to break into the 'admin' account(the password is 'adminpassword123456' if you give up)!")
+            print("\n[+] Try to break into the 'admin' account(the password is 'adminpassword123456' if you give up)!")
             try:
                 self.externalip = sys.argv[3]
             except Exception as e:
@@ -52,8 +52,7 @@ __      __    _                      _     _       _____  ____  _         _____ 
   \ \/ / | | | | '_ \ / _ \ '__/ _` | '_ \| |/ _ \ ___ \| |  | | |       \___ \ / _ \ '__\ \ / / _ \ '__| \ \ / / || | | |
    \  /| |_| | | | | |  __/ | | (_| | |_) | |  __/____) | |__| | |____   ____) |  __/ |   \ V /  __/ |     \ V /| || |_| |
     \/  \__,_|_|_| |_|\___|_|  \__,_|_.__/|_|\___|_____/ \___\_\______| |_____/ \___|_|    \_/ \___|_|      \_/ |_(_)___/ 
-Vulnerable Web Server made for Testing SQL Injections by DrSquid                                                                                                            
-        """)
+Vulnerable Web Server made for Testing SQL Injections by DrSquid""")
     def gen_packet(self, sqlquery="", script=""):
         packet = f"""
 <title>Vulnerable SQL Web Server</title>
@@ -71,13 +70,24 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
         return packet
     def listen(self):
         if self.valid:
-            print("[+] Server is listening For Connections.....")
+            print("[+] Server is listening For Connections.....\n")
             while True:
+                ipaddr = ""
                 self.server.listen()
                 conn, ip = self.server.accept()
                 self.packet = self.gen_packet()
                 msg = conn.recv(1024).decode()
-                handler = threading.Thread(target=self.handler, args=(conn, msg, ip))
+                item = 0
+                msg_split = msg.split()
+                for i in msg_split:
+                    if 'x-forwarded-for' in i.lower():
+                        ipaddr = msg_split[item + 1]
+                        break
+                    item += 1
+                if ipaddr == "":
+                    ipaddr = ip[0]
+                print(f"[+] {ipaddr} has connected.")
+                handler = threading.Thread(target=self.handler, args=(conn, msg, ipaddr))
                 handler.start()
     def simplify_str(self, item):
         return item.replace("+", " ").replace("%3C", "<").replace("%3E", ">").replace(
