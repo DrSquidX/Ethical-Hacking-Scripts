@@ -35,6 +35,7 @@ Vulnerable Web-Server Made for Pen-Testing By DrSquid
 """)
     def gen_packet(self):
         packet = f"""
+<title>Vulnerable Web Server</title>
 <h1>Horrific Looking Chat Server</h1>
 This is an anonoymous Chat Site.
 The Server is also made to be vulnerable to Cross site scripting attacks.
