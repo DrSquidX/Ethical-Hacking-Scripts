@@ -17,6 +17,7 @@ The Scripts in this repository include:
 * BotNets                - Botnets that can control and perform unauthorized actions to remote computers.
 * Keyloggers             - Log the keystrokes of another person, to possibly extract their password from the keylog.
 * Hash Crackers          - Brute force a Hash of a password with these scripts.
+* IP Utilities           - Can get information about a specified IP address or host for future attacks.
 
 There is more to be added.
 
