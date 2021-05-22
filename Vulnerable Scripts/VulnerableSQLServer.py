@@ -114,6 +114,7 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
                 except Exception as e:
                     print(f"[+] Error: {e}")
                     packet = self.gen_packet(sqlquery=query, script=script)
+                    conn.send(packet.encode())
             else:
                 conn.send(self.packet.encode())
             conn.close()
