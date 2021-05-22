@@ -19,18 +19,18 @@ class WebServer:
                 self.server.bind((self.ip, self.port))
                 self.msgs = []
                 self.packet = self.gen_packet()
-                print(f"[+] Vulnerable Server Started on: {self.ip}:{self.port}")
+                print(f"[+] Vulnerable Web Server Started on: {self.ip}:{self.port}")
             except Exception as e:
                 print(f"[+] Server Cannot be started due to Error: {e}")
                 self.valid = False
     def logo(self=None):
         print("""
-__          __        _     __          __  _        _____                                 __   ___  
-\ \        / /       | |    \ \        / / | |      / ____|                               /_ | / _ \ 
- \ \  /\  / /__  __ _| | __  \ \  /\  / /__| |__   | (___   ___ _ ____   _____ _ __  __   _| || | | |
-  \ \/  \/ / _ \/ _` | |/ /   \ \/  \/ / _ \ '_ \   \___ \ / _ \ '__\ \ / / _ \ '__| \ \ / / || | | |
-   \  /\  /  __/ (_| |   <     \  /\  /  __/ |_) |  ____) |  __/ |   \ V /  __/ |     \ V /| || |_| |
-    \/  \/ \___|\__,_|_|\_\     \/  \/ \___|_.__/  |_____/ \___|_|    \_/ \___|_|      \_/ |_(_)___/                                                                                      
+__   __ _____ _____    __      __    _                      _     _       _____                        __   _____ 
+\ \ / // ____/ ____|   \ \    / /   | |                    | |   | |     / ____|                      /_ | | ____|
+ \ V /| (___| (___ _____\ \  / /   _| |_ __   ___ _ __ __ _| |__ | | ___| (___   ___ _ ____   __ __   _| | | |__  
+  > <  \___ \ ___ \______\ \/ / | | | | '_ \ / _ \ '__/ _` | '_ \| |/ _ \ ___ \ / _ \ '__\ \ / / \ \ / / | |___ \ 
+ / . \ ____) |___) |      \  /| |_| | | | | |  __/ | | (_| | |_) | |  __/____) |  __/ |   \ V /   \ V /| |_ ___) |
+/_/ \_\_____/_____/        \/  \__,_|_|_| |_|\___|_|  \__,_|_.__/|_|\___|_____/ \___|_|    \_/     \_/ |_(_)____/                                                                                                                                                                                     
 Vulnerable Web-Server Made for Pen-Testing By DrSquid
 """)
     def gen_packet(self):
@@ -39,8 +39,9 @@ Vulnerable Web-Server Made for Pen-Testing By DrSquid
 This is an anonoymous Chat Site.
 The Server is also made to be vulnerable to Cross site scripting attacks.
         
-<form action="http://{self.ip}:{self.port}">
-    <input type="text" placeholder="Enter your message!" name="msg"> 
+<form action="http://{self.externalip}:{self.port}">
+   <textarea name="msg" cols="50" rows="10" placeholder="Enter your message here."></textarea>
+   <h1></h1>
     <input type="submit" value="Send Message">
 </form>
 """
@@ -66,7 +67,8 @@ The Server is also made to be vulnerable to Cross site scripting attacks.
                     main_msg = str(msg).split()[1].split("=")[1].replace("+", " ").replace("%3C", "<").replace("%3E",">").replace(
                         "%2F", "/").replace("%22", '"').replace("%27", "'").replace("%3D", "=").replace("%2B","+").replace(
                         "%3A", ":").replace("%28", "(").replace("%29", ")").replace("%2C", ",").replace("%3B",";").replace(
-                        "%20", " ")
+                        "%20", " ").replace("%3F", "?").replace("%5C","\\").replace("%7B", "{").replace("%7D","}").replace(
+                        "%24", "$").replace("%0D", "\n").replace("%0A", "   ")
                     if main_msg.strip() != "":
                         self.msgs.append(main_msg)
                         self.packet = self.gen_packet()
