@@ -69,7 +69,7 @@ The Server is also made to be vulnerable to Cross site scripting attacks.
                         "%2F", "/").replace("%22", '"').replace("%27", "'").replace("%3D", "=").replace("%2B","+").replace(
                         "%3A", ":").replace("%28", "(").replace("%29", ")").replace("%2C", ",").replace("%3B",";").replace(
                         "%20", " ").replace("%3F", "?").replace("%5C","\\").replace("%7B", "{").replace("%7D","}").replace(
-                        "%24", "$").replace("%0D", "\n").replace("%0A", "   ")
+                        "%24", "$").replace("%0D", "\n").replace("%0A", "   ").replace("%40","@")
                     if main_msg.strip() != "":
                         self.msgs.append(main_msg)
                         self.packet = self.gen_packet()
