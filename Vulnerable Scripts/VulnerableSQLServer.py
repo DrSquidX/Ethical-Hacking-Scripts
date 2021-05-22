@@ -23,6 +23,7 @@ class WebServer:
             except:
                 pass
             cursor.execute("insert into users values('admin','adminpassword123456')")
+            print("[+] Try to break into the 'admin' account(the password is 'adminpassword123456' if you give up)!")
             try:
                 self.externalip = sys.argv[3]
             except:
