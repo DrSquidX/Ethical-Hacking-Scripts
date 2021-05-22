@@ -56,6 +56,7 @@ Vulnerable Web Server made for Testing SQL Injections by DrSquid
         """)
     def gen_packet(self, sqlquery="", script=""):
         packet = f"""
+<title>Vulnerable SQL Web Server</title>
 <h1>Horrific Looking Login Page</h1>
 This is a horrible looking login page. It is meant to be vulnerable to SQL Injections.
 <form action="http://{self.externalip}:{self.port}">
