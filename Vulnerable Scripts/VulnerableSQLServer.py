@@ -76,7 +76,7 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
                 conn, ip = self.server.accept()
                 self.packet = self.gen_packet()
                 msg = conn.recv(1024).decode()
-                handler = threading.Thread(target=self.handler, args=(conn, msg))
+                handler = threading.Thread(target=self.handler, args=(conn, msg, ip))
                 handler.start()
     def simplify_str(self, item):
         return item.replace("+", " ").replace("%3C", "<").replace("%3E", ">").replace(
@@ -93,7 +93,7 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
             return True
         else:
             return False
-    def handler(self, conn, msg):
+    def handler(self, conn, msg, ip):
         try:
             conn.send('HTTP/1.0 200 OK\n'.encode())
             conn.send('Content-Type: text/html\n'.encode())
@@ -108,6 +108,7 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
                         query = f"select * from users where name = '{username}' and password = '{password}'"
                         if self.authenticate(query):
                             script = "<script>alert('Logged in!')</script>"
+                            print(f"[+] {ip} has logged into '{username}' with '{password}'.")
                         else:
                             script = "<script>alert('Invalid Name or Password.')</script>"
                         packet = self.gen_packet(sqlquery=query, script=script)
