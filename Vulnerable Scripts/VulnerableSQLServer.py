@@ -26,7 +26,7 @@ class WebServer:
             print("[+] Try to break into the 'admin' account(the password is 'adminpassword123456' if you give up)!")
             try:
                 self.externalip = sys.argv[3]
-            except:
+            except Exception as e:
                 self.externalip = self.ip
             self.valid = True
             db.commit()
@@ -85,7 +85,7 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
         "+").replace("%3A", ":").replace("%28", "(").replace("%29", ")").replace("%2C", ","
         ).replace("%3B", ";").replace("%20", " ").replace("%3F", "?").replace("%5C", "\\"
         ).replace("%7B", "{").replace("%7D", "}").replace("%24", "$").replace("%0D", "\n"
-        ).replace("%0A", "   ")
+        ).replace("%0A", "   ").replace("%40","@")
     def authenticate(self, query):
         db = sqlite3.connect(self.dbfile)
         cursor = db.cursor()
