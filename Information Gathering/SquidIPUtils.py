@@ -6,8 +6,6 @@ class IPTools:
     def usage(self):
         print("""
 [+] Option-Parsing Help:
-
-[+] Optional Arguements:
 [+] --i, --info         - Shows this message.
 [+] --ip, --ipaddr      - Specify an IP Address/Hostname
 [+] --ri, --resolveip   - Attempts to resolve the Host into an IP Address.
