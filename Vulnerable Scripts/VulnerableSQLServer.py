@@ -1,4 +1,4 @@
-import sqlite3, socket, threading
+import sqlite3, socket, threading, sys
 
 class WebServer:
     def __init__(self):
@@ -33,6 +33,7 @@ class WebServer:
             cursor.close()
             db.close()
         except Exception as e:
+            print(e)
             print("[+] Invalid Arguments!\n[+] Usage: python3 VulnerableServer.py <ip> <port> <externalip>\n[+] Note: The External IP argument is optional.")
         if self.valid:
             try:
