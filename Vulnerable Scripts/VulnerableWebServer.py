@@ -53,10 +53,21 @@ The Server is also made to be vulnerable to Cross site scripting attacks.
         if self.valid:
             print("[+] Server is listening For Connections.....")
             while True:
+                ipaddr = ""
                 self.server.listen()
                 conn, ip = self.server.accept()
                 self.packet = self.gen_packet()
                 msg = conn.recv(1024).decode()
+                item = 0
+                msg_split = msg.split()
+                for i in msg_split:
+                    if 'x-forwarded-for' in i.lower():
+                        ipaddr = msg_split[item + 1]
+                        break
+                    item += 1
+                if ipaddr == "":
+                    ipaddr = ip[0]
+                print(f"[+] {ipaddr} has connected.")
                 handler = threading.Thread(target=self.handler, args=(conn, msg))
                 handler.start()
     def handler(self, conn, msg):
