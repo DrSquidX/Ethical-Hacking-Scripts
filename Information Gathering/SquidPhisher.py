@@ -695,8 +695,6 @@ Phishing Server Script By DrSquid  """)
     def usage(self):
         print("""
 [+] Option-Parsing Help:
-
-[+] Optional Arguements:
 [+] --i,  --info         - Shows this message.
 [+] --ip, --ipaddr       - Specify an IP Address to host the server on.
 [+] --p,  --port         - Specify the Port to host the server on.
