@@ -61,7 +61,7 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
 <form action="http://{self.externalip}:{self.port}">
    <input type="text" placeholder="Username" name="name">
    <h1></h1>
-   <input type="text" placeholder="Password" name="password">
+   <input type="password" placeholder="Password" name="password">
     <input type="submit" value="Log in">
     <h4>Sql Query: {sqlquery}</h4>
 </form>
