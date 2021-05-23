@@ -30,6 +30,18 @@ SquidWare and RansomSquid are very dangerous scripts. RansomSquid will encrypt a
 # Updates
 I recently reformatted my scripts into folders. The repository is a lot more organised now. I added a few more scripts as well, which include Malware and Vulnerable scripts made for pen-testing.
 
+# Brief Overview of My Scripts(to show that these are actually mine and are not borrowed):
+
+* SquidNet - Read my SquidNet repository(there is a lot of description there).
+* SquidNetSSH - An SSH botnet made for taking control of bots in which they have port 22(SSH Protocol) open for connections. If the Bot-Master has a user and password of one of a device, they could potentially log in with those credentials where they could be able to control the device via SSH. There is also an SSH worm inside of the script, made for if someone wanted to spread the botnet automatically. However the brute forcing on this botnet is very slow, so using an external tool such as Hydra would be useful for that.
+* SquidWorm - This worm first generates the payload for which it is used to infect other machines. This is so that it could configure the password file for brute forcing as well as the config for better way of SFTP when a bot has been successfully infected(Different OS's with their different directories can mess things up). It first starts out doing a host scan to get a list of all of the IP addresses in that network. It does so by doing 'arp -a' in terminal and using the information from that to build the IP list(may modify and add the ping scan instead later). I didn't really mention the way the config file worked, so what it does is you need to have the IP, operating system, as well as the username of that IP in a line(for ex. '192.168.0.230 larry windows'). Anyways, after successfully brute forcing and infecting one of the victims, it needs to clone itself in order to spread even more. The worm copies and sends the password list file, config file, as well as the script itself. Once sending it to the victim, it executes the files remotely and the process starts over. To prevent a victim from being infected multiple times, a server is binded at 0.0.0.0:42069(yes, the port is that). Before the brute forcing, the worm sends a request to that server, and if it gets the correct reply, it will not brute force that victim. If it does not send a reply it will brute force.
+* HashSquid - HashSquid is a script that was made for hash cracking. (more info coming soon)
+
+
+
+
+
+
 # Other Info
 Do not copy these scripts and say they are yours. I am not ok with that. If you plan to modify these scripts, please credit me as I would appreciate that. 
 
