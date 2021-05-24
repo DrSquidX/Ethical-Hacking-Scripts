@@ -24,7 +24,7 @@ class Port_Scanner:
         if self.isonehost:
             self.port_scan(self.ip)
     def ping_host(self, host):
-        result = os.popen(f"ping {host}")
+        result = os.popen(f"ping {host} -t 1")
         if "unreachable" in result.read() or "100% loss" in result.read():
             print(f"[+] {host} is unreachable!")
         else:
