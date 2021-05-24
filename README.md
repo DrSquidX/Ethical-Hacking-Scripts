@@ -30,7 +30,7 @@ SquidWare and RansomSquid are very dangerous scripts. RansomSquid will encrypt a
 # Updates
 I recently reformatted my scripts into folders. The repository is a lot more organised now. I added a few more scripts as well, which include Malware and Vulnerable scripts made for pen-testing.
 
-# Brief Overview of My Scripts(to show that these are actually mine and are not borrowed):
+# Brief Overview of My Scripts(to show that these are actually mine and are not borrowed/copied from other people):
 
 * SquidNet - Read my SquidNet repository(there is a lot of description there). Repo for your info: https://github.com/DrSquidX/SquidNet
 * SquidNetSSH - An SSH botnet made for taking control of bots in which they have port 22(SSH Protocol) open for connections. If the Bot-Master has a user and password of one of a device, they could potentially log in with those credentials where they could be able to control the device via SSH. There is also an SSH worm inside of the script, made for if someone wanted to spread the botnet automatically. However the brute forcing on this botnet is very slow, so using an external tool such as Hydra would be useful for that.
