@@ -76,25 +76,31 @@ This is a horrible looking login page. It is meant to be vulnerable to SQL Injec
         return packet
     def listen(self):
         if self.valid:
-            print("[+] Server is listening For Connections.....\n")
-            while True:
-                ipaddr = ""
-                self.server.listen()
-                conn, ip = self.server.accept()
-                self.packet = self.gen_packet()
-                msg = conn.recv(1024).decode()
-                item = 0
-                msg_split = msg.split()
-                for i in msg_split:
-                    if 'x-forwarded-for' in i.lower():
-                        ipaddr = msg_split[item + 1]
-                        break
-                    item += 1
-                if ipaddr == "":
-                    ipaddr = ip[0]
-                print(f"[+] {ipaddr} has connected.")
-                handler = threading.Thread(target=self.handler, args=(conn, msg, ipaddr))
-                handler.start()
+            try:
+                print("[+] Server is listening For Connections.....")
+                if self.externalip != self.ip:
+                    print(f"[+] Also listening on(for external connections): {self.externalip}:{self.port}")
+                print("")
+                while True:
+                    ipaddr = ""
+                    self.server.listen()
+                    conn, ip = self.server.accept()
+                    self.packet = self.gen_packet()
+                    msg = conn.recv(1024).decode()
+                    item = 0
+                    msg_split = msg.split()
+                    for i in msg_split:
+                        if 'x-forwarded-for' in i.lower():
+                            ipaddr = msg_split[item + 1]
+                            break
+                        item += 1
+                    if ipaddr == "":
+                        ipaddr = ip[0]
+                    print(f"[+] {ipaddr} has connected.")
+                    handler = threading.Thread(target=self.handler, args=(conn, msg, ipaddr))
+                    handler.start()
+            except:
+                pass
     def simplify_str(self, item):
         return item.replace("+", " ").replace("%3C", "<").replace("%3E", ">").replace(
         "%2F", "/").replace("%22", '"').replace("%27", "'").replace("%3D", "=").replace("%2B",
