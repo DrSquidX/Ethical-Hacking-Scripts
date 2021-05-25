@@ -26,10 +26,12 @@ class Port_Scanner:
     def ping_host(self, host):
         if sys.platform == "win32":
             result = os.popen(f"ping {host} -n 1")
+            result2 = result.read()
         else:
             result = os.popen(f"ping {host} -c 1")
-        if "unreachable" in result.read() or "100% loss" in result.read() or "100.0% packet loss" in result.read():
-            print(f"[+] {host} is unreachable!")
+            result2 = result.read()
+        if "unreachable" in result2 or "100% loss" in result2 or "100.0% packet loss" in result2:
+            pass
         else:
             print(f"[+] {host} is up!")
             self.uphosts.append(str(host))
@@ -114,7 +116,7 @@ Vulnerability-Scanner By DrSquid""")
     def scan(self, ip, port):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(1)
+            s.settimeout(5)
             s.connect((ip, port))
             self.open_ports.append(f"{ip} {port}")
             s.settimeout(10)
@@ -125,7 +127,7 @@ Vulnerability-Scanner By DrSquid""")
             except Exception as e:
                 self.banners.append(f"{ip} {port} None")
             s.close()
-        except:
+        except Exception as e:
             pass
         self.ports_scanned += 1
 class OptionParse:
