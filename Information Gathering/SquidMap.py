@@ -24,8 +24,11 @@ class Port_Scanner:
         if self.isonehost:
             self.port_scan(self.ip)
     def ping_host(self, host):
-        result = os.popen(f"ping {host} -t 1")
-        if "unreachable" in result.read() or "100% loss" in result.read():
+        if sys.platform == "win32":
+            result = os.popen(f"ping {host} -n 1")
+        else:
+            result = os.popen(f"ping {host} -c 1")
+        if "unreachable" in result.read() or "100% loss" in result.read() or "100.0% packet loss" in result.read():
             print(f"[+] {host} is unreachable!")
         else:
             print(f"[+] {host} is up!")
@@ -137,10 +140,8 @@ class OptionParse:
 [+] Option-Parsing Help:
 [+] --ip, --ipaddr - Specifies an IP Address to Scan(can be a network).
 [+] --p,  --ports  - Specifies the amount of ports to Scan.
-
 [+] Optional Arguements:
 [+] --i,  --info   - Shows this message.
-
 [+] Usage:""")
         if sys.argv[0].endswith(".py"):
             print("[+] python3 Squidmap.py --ip <ipaddr> --p <ports>")
