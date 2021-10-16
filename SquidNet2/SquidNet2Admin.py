@@ -1,5 +1,5 @@
 import socket, threading, os, sys, urllib.request, sqlite3, time
-os.chdir("C:/Users/pfang/Desktop/SquidNet2/")
+
 class Admin:
     def logo(self):
         logo = """
