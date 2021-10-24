@@ -1,4 +1,5 @@
 import socket, threading, hashlib, os, datetime, time, sqlite3, shutil
+
 class BotNet:
     """Main Class for the BotNet. Every single line of server code, payload code is inside of this class.
     There are many functions inside of the class, where they have many different uses. They vary in usefullness
