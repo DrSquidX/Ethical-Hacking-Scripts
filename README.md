@@ -54,8 +54,10 @@ Do not copy these scripts and say they are yours. I am not ok with that. If you 
 
 Another thing is that My Vulnerable server scripts were intended to be horrible and very weak against attacks(so please don't bully me about the vulnerability of these web servers). 
 
-A quick note that SquidNet is my most powerful script(It does not reflect on my socket programming skills, as DatCord does). I may make a separate repository for it as it uses client scripts for bot connections, admin connections, as well as the server itself.
+A quick note that SquidNet2 is my most powerful script(It does not reflect on my socket programming skills, as DatCord does). Both versions of SquidNet are linked below, as they have their own repositories. SquidNet2 is the superior version of SquidNet, and should be used rather than SquidNet.
 
 SquidNet Repository: https://github.com/DrSquidX/SquidNet
+
+SquidNet2 Repository: https://github.com/DrSquidX/SquidNet2
 
 # Happy (Ethical for legal purposes)Hacking, DrSquid
