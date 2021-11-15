@@ -1,9 +1,12 @@
-import socket, threading, sys, ipaddress
+import socket, threading, sys, ipaddress, time, os
 from optparse import OptionParser
 from scapy.all import *
 class Port_Scanner:
     def __init__(self, ip, ports):
         self.ip = str(ip)
+        self.logfile = "squidmap.txt"
+        file = open(self.logfile,"w")
+        file.close()
         self.isnetwork = False
         self.isonehost = True
         if "/24" in self.ip:
@@ -11,7 +14,9 @@ class Port_Scanner:
             self.uphosts = []
             self.isnetwork = True
             self.isonehost = False
-        self.logo()
+        print(self.logo())
+        self.log_output(self.logo())
+        print(f"[+] Output will be saved in file: {os.path.join(os.getcwd(),self.logfile)}")
         self.max_port = ports
         self.ports = range(ports)
         self.ports_scanned = 0
@@ -28,8 +33,11 @@ class Port_Scanner:
             result = os.popen(f"ping {host} -n 1")
             result2 = result.read()
         else:
-            result = os.popen(f"ping {host} -c 1")
-            result2 = result.read()
+            try:
+                result = os.popen(f"ping {host} -c 1")
+                result2 = result.read()
+            except:
+                result2 = ""
         if "unreachable" in result2 or "100% loss" in result2 or "100.0% packet loss" in result2:
             pass
         else:
@@ -68,39 +76,54 @@ class Port_Scanner:
         arp = Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(op=1, pdst=ip)
         recv = srp(arp, timeout=2, verbose=False)
         return recv[0][0][1].hwsrc
+    def log_output(self,msg):
+        time.sleep(1)
+        file = open(self.logfile,"r")
+        content = file.read()
+        file.close()
+        file = open(self.logfile,"w")
+        file.write(content+"\n")
+        file.write(msg)
+        file.close()
     def logo(self):
-        print("""
-  _____             _     _ __  __                    ____   ___  
- / ____|           (_)   | |  \/  |                  |___ \ / _ \ 
-| (___   __ _ _   _ _  __| | \  / | __ _ _ __   __   ____) | | | |
- \___ \ / _` | | | | |/ _` | |\/| |/ _` | '_ \  \ \ / /__ <| | | |
- ____) | (_| | |_| | | (_| | |  | | (_| | |_) |  \ V /___) | |_| |
-|_____/ \__, |\__,_|_|\__,_|_|  |_|\__,_| .__/    \_/|____(_)___/ 
-           | |                          | |                       
-           |_|                          |_|                                                          
-Vulnerability-Scanner By DrSquid""")
+        return """
+  _________            .__    .___ _____                          _____    _______   
+ /   _____/ ________ __|__| __| _//     \ _____  ______   ___  __/  |  |   \   _  \  
+ \_____  \ / ____/  |  \  |/ __ |/  \ /  \\\__  \ \____ \  \  \/ /   |  |_  /  /_\  \ 
+ /        < <_|  |  |  /  / /_/ /    Y    \/ __ \|  |_> >  \   /    ^   /  \  \_/   \\
+/_______  /\__   |____/|__\____ \____|__  (____  /   __/    \_/\____   | /\ \_____  /
+        \/    |__|             \/       \/     \/|__|               |__| \/       \/                              
+Vulnerability-Scanner By DrSquid"""
     def port_scan(self, ip):
         print(f"[+] Beginning Port Scan On {ip}.")
+        mac = "Unknown"
+        reversedns = "Unknown"
         try:
-            print(f"[+] {ip}'s MAC Address: {self.get_mac(ip)}")
+            mac = self.get_mac(ip)
+            print(f"[+] {ip}'s MAC Address: {mac}")
         except:
             print(f"[+] Unable to obtain MAC Address from: {ip}")
+        try:
+            reversedns = socket.gethostbyaddr(ip)
+            print(f"[+] Reverse DNS of {ip}: {reversedns}")
+        except:
+            print(f"[+] Unable to get Reverse DNS of {ip}.")
         for port in self.ports:
             scanning = threading.Thread(target=self.scan,args=(ip, port))
             scanning.start()
         while True:
             if self.ports_scanned >= self.max_port:
                 open_ports = []
-                print(f"[+] Port Scan on {ip} Completed.\n")
-                print(f"[+] Obtained Banners For {ip}.")
+                appendmsg = ""
+                msg=f"[+] Port Scan on {ip} Completed.\n[+] Obtained Banners For {ip}."
                 for port in self.open_ports:
                     if ip+" " in port:
                         port_split = port.split()
                         open_ports.append(port_split[1])
                 if len(open_ports) == 0:
-                    print(f"[+] There are no Ports Open on {ip}.")
+                    appendmsg=f"\n[+] There are no Ports Open on {ip}."
                 else:
-                    print(f"[+] Open Ports on {ip}: {open_ports}")
+                    appendmsg=f"\n[+] Open Ports on {ip}: {open_ports}"
                     for port in open_ports:
                         for banner in self.banners:
                             split_banner = banner.split()
@@ -111,7 +134,11 @@ Vulnerability-Scanner By DrSquid""")
                                 for item in split_banner:
                                     result = result + " " + item
                                 result = result.strip()
-                                print(f"[+] {ip} Port {port} Banner: {result}")
+                                appendmsg += f"\n[+] {ip} Port {port} Banner: {result}"
+                msg += appendmsg
+                print(msg)
+                logmsg = "\n"+msg+f"\n[+] {ip}'s MAC Address: {mac}\n[+] Reverse DNS of {ip}: {reversedns}"
+                self.log_output(logmsg)
                 break
     def scan(self, ip, port):
         try:
@@ -120,7 +147,7 @@ Vulnerability-Scanner By DrSquid""")
             s.connect((ip, port))
             self.open_ports.append(f"{ip} {port}")
             s.settimeout(10)
-            print(f"[(OPENPORT)] Discovered Open Port on {ip}: {port}")
+            print(f"[!] Discovered Open Port on {ip}: {port}")
             try:
                 banner = s.recv(65500).decode().strip("\n").strip("\r")
                 self.banners.append(f"{ip} {port} {banner}")
@@ -137,7 +164,7 @@ class OptionParse:
         else:
             self.get_args()
     def usage(self):
-        Port_Scanner.logo(None)
+        print(Port_Scanner.logo(None))
         print("""
 [+] Option-Parsing Help:
 [+] --ip, --ipaddr - Specifies an IP Address to Scan(can be a network).
