@@ -28,7 +28,7 @@ There is more to be added.
 SquidWare and RansomSquid are very dangerous scripts. RansomSquid will encrypt all of your files, and will only decrypt them if you have the correct key. SquidWare is very dangerous as well, it deletes all of your files as well as ruining your Operating system(makes it unbootable). ONLY RUN THESE IF YOU ARE ON A VIRTUAL MACHINE OR HAVE PERMISSION FROM ANOTHER USER! Unauthorized usage of these scripts on other people is also Illegal.
 
 # Updates
-I recently reformatted my scripts into folders. The repository is a lot more organised now. I added a few more scripts as well, which include Malware and Vulnerable scripts made for pen-testing.
+I might consider making more optimised versions of the scripts, perhaps with more functionality.
 
 # Brief Overview of My Scripts(to show that these are actually mine and are not borrowed/copied from other people):
 
