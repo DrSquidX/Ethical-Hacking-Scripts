@@ -137,7 +137,7 @@ Vulnerability-Scanner By DrSquid"""
                                 appendmsg += f"\n[+] {ip} Port {port} Banner: {result}"
                 msg += appendmsg
                 print(msg)
-                logmsg = "\n"+msg+f"\n[+] {ip}'s MAC Address: {mac}\n[+] Reverse DNS of {ip}: {reversedns}"
+                logmsg = "\n"+msg+f"\n[+] {ip}'s MAC Address: {mac}\n[+] Reverse DNS of {ip}: {reversedns[0]}"
                 self.log_output(logmsg)
                 break
     def scan(self, ip, port):
