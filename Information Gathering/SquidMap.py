@@ -105,7 +105,7 @@ Vulnerability-Scanner By DrSquid"""
             print(f"[+] Unable to obtain MAC Address from: {ip}")
         try:
             reversedns = socket.gethostbyaddr(ip)
-            print(f"[+] Reverse DNS of {ip}: {reversedns}")
+            print(f"[+] Reverse DNS of {ip}: {reversedns[0]}")
         except:
             print(f"[+] Unable to get Reverse DNS of {ip}.")
         for port in self.ports:
