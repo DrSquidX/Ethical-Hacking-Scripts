@@ -28,10 +28,10 @@ class Admin:
                                || || ||
   _________            .__    .||_||_||__          __  ________      _____       .___      .__               ________     _______   
  /   _____/ ________ __|__| __| _/\      \   _____/  |_\_____  \    /  _  \    __| _/_____ |__| ____   ___  _\_____  \    \   _  \  
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/   /  /_\  \  / __ |/     \|  |/    \  \  \/ //  ____/    /  /_\  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \  /    |    \/ /_/ |  Y Y  \  |   |  \  \   //       \    \  \_/   \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \ \____|__  /\____ |__|_|  /__|___|  /   \_/ \_______ \ /\ \_____  /
-        \/    |__|             || || ||  \/     \/             \/         \/      \/     \/        \/                \/ \/       \/ 
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/   /  /_\  \  / __ |/     \|  |/    \  \  \/ / _(__  <    /  /_\  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \  /    |    \/ /_/ |  Y Y  \  |   |  \  \   / /       \   \  \_/   \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \ \____|__  /\____ |__|_|  /__|___|  /   \_/ /______  / /\ \_____  /
+        \/    |__|             || || ||  \/     \/             \/         \/      \/     \/        \/               \/  \/       \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -53,6 +53,8 @@ Admin Script For SquidNet by DrSquid
         self.first_msg_sent = False
         self.downloading_file = False
         self.download_file = None
+        self.filesize = 0
+        self.bytesrecv = 0
         print(self.logo())
         self.conf_db_file()
     def get_filename(self, msg):
@@ -157,27 +159,28 @@ Admin Script For SquidNet by DrSquid
         while True:
             try:
                 msg = self.client.recv(10240)
+                try:
+                    dec_msg = msg.decode()
+                except:
+                    dec_msg = str(msg)
                 if not self.downloading_file:
                     if msg.decode().strip() != "":
                         print(msg.decode())
                 else:
                     try:
-                        try:
-                            if not self.first_msg_sent:
-                                if msg.decode().startswith("\n[(SERVER)]: The file specified does not exist!") or msg.decode().startswith("\n[(SERVER)]: Invalid Input!"):
-                                    self.downloading_file = False
-                                    self.download_file.close()
-                                    os.remove(self.download_file.name)
-                                print(msg.decode())
+                        if not self.first_msg_sent:
+                            if dec_msg.startswith("!filesize"):
+                                self.filesize = int(msg.split()[1])
+                                self.bytesrecv = 0
                                 self.first_msg_sent = True
                             else:
-                                if msg.decode().strip().startswith("!stopsave"):
-                                    self.download_file.close()
-                                    self.downloading_file = False
-                                else:
-                                    self.download_file.write(msg)
-                        except Exception as e:
+                                print(dec_msg)
+                        else:
+                            self.bytesrecv += len(msg)
                             self.download_file.write(msg)
+                            if self.bytesrecv >= self.filesize:
+                                self.download_file.close()
+                                self.downloading_file = False
                     except Exception as e:
                         print(e)
             except Exception as e:
