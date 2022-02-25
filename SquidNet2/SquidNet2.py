@@ -1154,7 +1154,7 @@ class SquidNet:
                     self.log(f"[({datetime.today()})][(WEB)]: Kicked the admin connection via the web interface.")
             conn.send("HTTP/1.0 200 OK\n".encode())
             conn.send("Content-Type: text/html\n\n".encode())
-            conn.send(self.web_packet)
+            conn.send(self.web_packet.encode())
             conn.close()
         except Exception as e:
             pass
@@ -1250,7 +1250,7 @@ class SquidNet:
 <h1 style="font-size:50px;">SquidNet2 Web Interface</h1>
 <h2>The much better and more sophisticated version of SquidNet's original web interface.</h2>
 <h1>Server Configuration</h1>
-    <table id="roundedCorners" class="_div">
+    <table id="roundedCorners" class="_div" style="width:65%;">
         <tr>
             <th>
                 Server Settings and Information
